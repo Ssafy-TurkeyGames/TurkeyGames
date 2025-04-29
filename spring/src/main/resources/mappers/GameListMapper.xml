@@ -19,4 +19,15 @@
             game_list
     </select>
 
+    <select id="findGameListByGameId" resultMap="GameListEntityResultMap">
+        SELECT
+            game_id,
+            title,
+            description
+        FROM
+            game_list
+        WHERE
+            game_id = #{gameId}
+    </select>
+
 </mapper>

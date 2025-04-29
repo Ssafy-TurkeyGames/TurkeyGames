@@ -17,4 +17,14 @@
             game_profile
     </select>
 
+    <select id="findGameProfileByGameId" resultMap="GameProfileEntityResultMap">
+        SELECT
+            game_id,
+            game_profile_path
+        FROM
+            game_profile
+        WHERE
+            game_id = #{gameId}
+    </select>
+
 </mapper>

@@ -19,4 +19,31 @@
             game_detail
     </select>
 
+    <select id="findGameDetailByGameId" resultMap="GameDetailEntityResultMap">
+        SELECT
+            game_id,
+            people,
+            level
+        FROM
+            game_detail
+        WHERE
+            game_id = #{gameId}
+    </select>
+
+    <select id="findGameIdByFilteredPeopleAndLevel" resultType="Integer">
+        SELECT
+            game_id
+        FROM
+            game_detail
+        WHERE
+            people @>
+            <foreach collection="people" item="person" open="ARRAY[" close="]" separator=",">
+                #{person}
+            </foreach>
+            AND level IN
+            <foreach collection="level" item="lvl" open="(" close=")" separator=",">
+                #{lvl}
+            </foreach>
+    </select>
+
 </mapper>
