@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.spring.mapper.GameRuleMapper">
+
+    <resultMap id="GameProfileEntityResultMap" type="com.ssafy.spring.entity.GameRuleEntity">
+        <id column="game_id" property="gameId"/>
+        <result column="description" property="description"/>
+        <result column="image_path" property="imagePath"/>
+        <result column="description_video_path" property="descriptionVideoPath"/>
+    </resultMap>
+
+</mapper>
