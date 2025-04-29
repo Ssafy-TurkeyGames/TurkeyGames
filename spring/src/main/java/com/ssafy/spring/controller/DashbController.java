@@ -4,6 +4,7 @@ import com.ssafy.spring.common.response.ResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetFilteredGameListResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetGameDetailRuleResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetGameListResponseDto;
+import com.ssafy.spring.dto.dashb.response.GetSearchedGameListResponseDto;
 import com.ssafy.spring.service.DashbService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class DashbController {
 
     private final DashbService dashbService;
 
-    @GetMapping("/list")
+    @GetMapping("")
     public ResponseEntity<? super ResponseDto<List<GetGameListResponseDto>>> getGameList() {
         ResponseEntity<? super ResponseDto<List<GetGameListResponseDto>>> response = dashbService.getGameList();
         return response;
@@ -38,6 +39,14 @@ public class DashbController {
             @PathVariable(name = "gameId") int gameId
     ) {
         ResponseEntity<? super ResponseDto<GetGameDetailRuleResponseDto>> response = dashbService.getGameDetailRule(gameId);
+        return response;
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<? super ResponseDto<List<GetSearchedGameListResponseDto>>> getSearchedGameList(
+            @RequestParam(name = "title") String title
+    ) {
+        ResponseEntity<? super ResponseDto<List<GetSearchedGameListResponseDto>>> response = dashbService.getSearchedGameList(title);
         return response;
     }
 }

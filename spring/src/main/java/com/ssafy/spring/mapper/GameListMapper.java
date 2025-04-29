@@ -10,4 +10,5 @@ import java.util.List;
 public interface GameListMapper {
     public List<GameListEntity> getGameList();
     public GameListEntity findGameListByGameId(@Param("gameId") int gameId);
+    public List<Integer> findGameIdByTitle(@Param("title") String title);
 }

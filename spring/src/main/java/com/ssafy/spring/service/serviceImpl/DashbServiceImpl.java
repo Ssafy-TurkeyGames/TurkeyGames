@@ -4,6 +4,7 @@ import com.ssafy.spring.common.response.ResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetFilteredGameListResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetGameDetailRuleResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetGameListResponseDto;
+import com.ssafy.spring.dto.dashb.response.GetSearchedGameListResponseDto;
 import com.ssafy.spring.entity.GameDetailEntity;
 import com.ssafy.spring.entity.GameListEntity;
 import com.ssafy.spring.entity.GameProfileEntity;
@@ -97,6 +98,34 @@ public class DashbServiceImpl implements DashbService {
                     gameRuleEntity.getImagePath(),
                     gameRuleEntity.getDescriptionVideoPath()
             );
+            return ResponseDto.success(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.fail();
+        }
+    }
+
+    @Override
+    public ResponseEntity<? super ResponseDto<List<GetSearchedGameListResponseDto>>> getSearchedGameList(String title) {
+        try {
+            List<Integer> searchedGameIds = gameListMapper.findGameIdByTitle(title);
+            List<GetSearchedGameListResponseDto> response = new ArrayList<>();
+            for(int i = 0; i < searchedGameIds.size(); i++) {
+                GameListEntity gameListEntity = gameListMapper.findGameListByGameId(searchedGameIds.get(i));
+                GameProfileEntity gameProfileEntity = gameProfileMapper.findGameProfileByGameId(searchedGameIds.get(i));
+                GameDetailEntity gameDetailEntity = gameDetailMapper.findGameDetailByGameId(searchedGameIds.get(i));
+                response.add(new GetSearchedGameListResponseDto(
+                        gameListEntity.getGameId(),
+                        gameListEntity.getTitle(),
+                        gameListEntity.getDescription(),
+                        gameProfileEntity.getGameProfilePath(),
+                        gameDetailEntity.getPeople(),
+                        gameDetailEntity.getLevel()
+                ));
+            }
+            if(response.isEmpty()) {
+                return ResponseDto.successNoData();
+            }
             return ResponseDto.success(response);
         } catch (Exception e) {
             e.printStackTrace();

@@ -30,4 +30,13 @@
             game_id = #{gameId}
     </select>
 
+    <select id="findGameIdByTitle" resultType="integer">
+        SELECT
+            game_id
+        FROM
+            game_list
+        where
+            title LIKE CONCAT('%', #{title}, '%')
+    </select>
+
 </mapper>
