@@ -8,34 +8,45 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class IntArrayTypeHandler extends BaseTypeHandler<int[]> {
 
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, int[] parameter, JdbcType jdbcType) throws SQLException {
         if (parameter != null) {
-            ps.setString(i, Arrays.toString(parameter).replace("[", "").replace("]", ""));
+            String arrayString = "{" + Arrays.stream(parameter)
+                    .mapToObj(String::valueOf)
+                    .collect(Collectors.joining(",")) + "}";
+            ps.setString(i, arrayString);
         } else {
             ps.setNull(i, jdbcType.TYPE_CODE);
         }
     }
 
+    private int[] parseArray(String result) {
+        if (result == null || result.isEmpty()) return null;
+
+        result = result.replaceAll("[{}\\s]", "");
+        if (result.isEmpty()) return new int[0];
+
+        return Arrays.stream(result.split(","))
+                .mapToInt(Integer::parseInt)
+                .toArray();
+    }
+
     @Override
     public int[] getNullableResult(ResultSet rs, String columnName) throws SQLException {
-        String result = rs.getString(columnName);
-        return result != null ? Arrays.stream(result.split(",")).mapToInt(Integer::parseInt).toArray() : null;
+        return parseArray(rs.getString(columnName));
     }
 
     @Override
     public int[] getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
-        String result = rs.getString(columnIndex);
-        return result != null ? Arrays.stream(result.split(",")).mapToInt(Integer::parseInt).toArray() : null;
+        return parseArray(rs.getString(columnIndex));
     }
 
     @Override
     public int[] getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
-        String result = cs.getString(columnIndex);
-        return result != null ? Arrays.stream(result.split(",")).mapToInt(Integer::parseInt).toArray() : null;
+        return parseArray(cs.getString(columnIndex));
     }
 }
-

@@ -10,4 +10,13 @@
         <result column="description" property="description"/>
     </resultMap>
 
+    <select id="getGameList" resultMap="GameListEntityResultMap">
+        SELECT
+            game_id,
+            title,
+            description
+        FROM
+            game_list
+    </select>
+
 </mapper>

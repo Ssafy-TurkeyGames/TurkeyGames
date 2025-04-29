@@ -9,4 +9,12 @@
         <result column="game_profile_path" property="gameProfilePath"/>
     </resultMap>
 
+    <select id="getGameProfileList" resultMap="GameProfileEntityResultMap">
+        SELECT
+            game_id,
+            game_profile_path
+        FROM
+            game_profile
+    </select>
+
 </mapper>
