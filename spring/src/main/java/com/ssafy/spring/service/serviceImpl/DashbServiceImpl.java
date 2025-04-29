@@ -2,10 +2,12 @@ package com.ssafy.spring.service.serviceImpl;
 
 import com.ssafy.spring.common.response.ResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetFilteredGameListResponseDto;
+import com.ssafy.spring.dto.dashb.response.GetGameDetailRuleResponseDto;
 import com.ssafy.spring.dto.dashb.response.GetGameListResponseDto;
 import com.ssafy.spring.entity.GameDetailEntity;
 import com.ssafy.spring.entity.GameListEntity;
 import com.ssafy.spring.entity.GameProfileEntity;
+import com.ssafy.spring.entity.GameRuleEntity;
 import com.ssafy.spring.mapper.GameDetailMapper;
 import com.ssafy.spring.mapper.GameListMapper;
 import com.ssafy.spring.mapper.GameProfileMapper;
@@ -76,6 +78,25 @@ public class DashbServiceImpl implements DashbService {
             if(response.isEmpty()) {
                 return ResponseDto.successNoData();
             }
+            return ResponseDto.success(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseDto.fail();
+        }
+    }
+
+    @Override
+    public ResponseEntity<? super ResponseDto<GetGameDetailRuleResponseDto>> getGameDetailRule(int gameId) {
+        try {
+            GameProfileEntity gameProfileEntity = gameProfileMapper.findGameProfileByGameId(gameId);
+            GameRuleEntity gameRuleEntity = gameRuleMapper.findGameRuleByGameId(gameId);
+            GetGameDetailRuleResponseDto response = new GetGameDetailRuleResponseDto(
+                    gameProfileEntity.getGameId(),
+                    gameProfileEntity.getGameProfilePath(),
+                    gameRuleEntity.getDescription(),
+                    gameRuleEntity.getImagePath(),
+                    gameRuleEntity.getDescriptionVideoPath()
+            );
             return ResponseDto.success(response);
         } catch (Exception e) {
             e.printStackTrace();

@@ -7,8 +7,20 @@
     <resultMap id="GameProfileEntityResultMap" type="com.ssafy.spring.entity.GameRuleEntity">
         <id column="game_id" property="gameId"/>
         <result column="description" property="description"/>
-        <result column="image_path" property="imagePath"/>
+        <result column="image_path" property="imagePath" typeHandler="com.ssafy.spring.entity.typehandler.StringArrayTypeHandler"/>
         <result column="description_video_path" property="descriptionVideoPath"/>
     </resultMap>
+
+    <select id="findGameRuleByGameId" resultMap="GameProfileEntityResultMap">
+        SELECT
+            game_id,
+            description,
+            image_path,
+            description_video_path
+        FROM
+            game_rule
+        WHERE
+            game_id = #{gameId}
+    </select>
 
 </mapper>
