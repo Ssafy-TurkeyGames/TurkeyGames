@@ -4,7 +4,7 @@ from pynput import keyboard
 import yaml
 
 class TriggerDetector:
-    def __init__(self, config_path="config.yaml"):
+    def __init__(self, config_path="video_config.yaml"):
         self.router = APIRouter()
         self.load_config(config_path)
         self._init_api()
@@ -48,3 +48,12 @@ class TriggerDetector:
 
     def get_router(self):
         return self.router
+
+_trigger_detector = None
+def get_trigger_detector():
+    global _trigger_detector
+    if _trigger_detector is None:
+        # 콜백 함수는 실제 영상 저장 로직 함수로 연결
+        from app.video.video_writer import save_video_clip
+        _trigger_detector = TriggerDetector(callback=save_video_clip)
+    return _trigger_detector

@@ -5,9 +5,9 @@ import time
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from buffer_manager import CircularBuffer
-from video_writer import VideoSaver
-from trigger_detector import TriggerDetector
+from app.video.buffer_manager import CircularBuffer
+from app.video.video_writer import VideoSaver
+from app.video.trigger_detector import TriggerDetector
 
 app = None
 buffer = None
@@ -18,7 +18,7 @@ is_buffer_ready = False  # 버퍼 준비 상태 플래그
 
 
 def load_config():
-    with open("config.yaml") as f:
+    with open("../app/config/video_config.yaml") as f:
         return yaml.safe_load(f)
 
 
@@ -91,7 +91,7 @@ async def lifespan(app: FastAPI):
     saver = VideoSaver(config)
 
     # 트리거 감지기 설정
-    trigger_detector = TriggerDetector(config_path="config.yaml")
+    trigger_detector = TriggerDetector(config_path="../app/config/video_config.yaml")
     trigger_detector.set_callback(on_trigger)
     app.include_router(trigger_detector.get_router())
 
