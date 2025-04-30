@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Security, HTTPException, BackgroundTasks
 from fastapi.security import APIKeyHeader
 from pynput import keyboard
-import threading
 import yaml
 
 class TriggerDetector:
@@ -10,6 +9,7 @@ class TriggerDetector:
         self.load_config(config_path)
         self._init_api()
         self._init_keyboard()
+        self.trigger_callback = None
 
     def load_config(self, path):
         with open(path) as f:
@@ -20,13 +20,14 @@ class TriggerDetector:
             api_key_header = APIKeyHeader(name="X-API-KEY")
 
             @self.router.post(self.config['triggers']['api']['endpoint'])
-            async def api_trigger(
+            def api_trigger(
                 background_tasks: BackgroundTasks,
                 api_key: str = Security(api_key_header)
             ):
                 if api_key != self.config['triggers']['api']['secret_key']:
                     raise HTTPException(status_code=401, detail="Invalid API key")
-                background_tasks.add_task(self.trigger_callback)
+                if self.trigger_callback:
+                    background_tasks.add_task(self.trigger_callback)
                 return {"status": "triggered"}
 
     def _init_keyboard(self):
@@ -39,7 +40,8 @@ class TriggerDetector:
     def _on_key_press(self, key):
         trigger_key = f"Key.{self.config['triggers']['keyboard']['key']}"
         if str(key) == trigger_key:
-            self.trigger_callback()
+            if self.trigger_callback:
+                self.trigger_callback()
 
     def set_callback(self, callback):
         self.trigger_callback = callback
