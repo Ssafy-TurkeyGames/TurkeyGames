@@ -84,7 +84,7 @@ async def select_score(game_id: str, selection: schema.ScoreSelection, db: Sessi
     # 점수 업데이트
     success = crud.update_player_score(db, selection.player_id, selection.category, selection.value)
     if not success:
-        raise HTTPException(status_code=400, detail="점수를 업데이트할 수 없습니다")
+        raise HTTPException(status_code=400, detail="이미 선택한 카테고리이거나 점수를 업데이트할 수 없습니다")
 
     # 다음 플레이어 턴으로 변경
     next_player_idx = DiceGame.next_turn(game_id)
@@ -95,7 +95,6 @@ async def select_score(game_id: str, selection: schema.ScoreSelection, db: Sessi
         DiceGame.end_game(game_id)
 
     return schema.ScoreResult(success=True, next_player=next_player_idx)
-
 
 @router.get("/{game_id}/scores", response_model=schema.AllScores)
 async def get_scores(game_id: str, db: Session = Depends(get_db)):
