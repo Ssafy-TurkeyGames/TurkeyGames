@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  backend:
+    build: . #현재 디렉토리에 있는 Dockerfile을 기반으로 이미지 빌드
+    image: busankim/ssafyproject:backend
+    container_name: backend-spring
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://k12e101.p.ssafy.io:5432/turkey_games
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
