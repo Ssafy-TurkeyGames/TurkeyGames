@@ -1,0 +1,63 @@
+package com.ssafy.spring.controller;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+public class DashbControllerIntegrationTest {
+    @Autowired
+    private TestRestTemplate restTemplate;
+
+    @Test
+    void getGameList_success() {
+        long startTime = System.currentTimeMillis();
+
+        ResponseEntity<?> response = restTemplate.getForEntity("/dashb", String.class);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println("📦 JSON 응답: " + response.getBody());
+        System.out.println("📦 응답 시간: " + duration + "ms");
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void getGameList_successNoData() {
+        long startTime = System.currentTimeMillis();
+
+        ResponseEntity<?> response = restTemplate.getForEntity("/dashb", String.class);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println("📦 JSON 응답: " + response.getBody());
+        System.out.println("📦 응답 시간: " + duration + "ms");
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void getGameList_fail() {
+        long startTime = System.currentTimeMillis();
+
+        ResponseEntity<?> response = restTemplate.getForEntity("/dashb", String.class);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println("📦 JSON 응답: " + response.getBody());
+        System.out.println("📦 응답 시간: " + duration + "ms");
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
