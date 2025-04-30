@@ -60,4 +60,53 @@ public class DashbControllerIntegrationTest {
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @Test
+    void getFilteredGameList_success() {
+        String url = "/dashb/filter?people=2,3,4&level=1";
+        long startTime = System.currentTimeMillis();
+
+        ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println("📦 JSON 응답: " + response.getBody());
+        System.out.println("📦 응답 시간: " + duration + "ms");
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void getFilteredGameList_successNoData() {
+        String url = "/dashb/filter?people=4&level=4";
+        long startTime = System.currentTimeMillis();
+
+        ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println("📦 JSON 응답: " + response.getBody());
+        System.out.println("📦 응답 시간: " + duration + "ms");
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void getFilteredGameList_fail() {
+        String url = "/dashb/filter?people=&level=";
+        long startTime = System.currentTimeMillis();
+
+        ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);
+
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        System.out.println("📦 JSON 응답: " + response.getBody());
+        System.out.println("📦 응답 시간: " + duration + "ms");
+
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 }
