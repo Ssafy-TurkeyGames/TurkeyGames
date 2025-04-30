@@ -10,4 +10,33 @@
         <result column="description" property="description"/>
     </resultMap>
 
+    <select id="getGameList" resultMap="GameListEntityResultMap">
+        SELECT
+            game_id,
+            title,
+            description
+        FROM
+            game_list
+    </select>
+
+    <select id="findGameListByGameId" resultMap="GameListEntityResultMap">
+        SELECT
+            game_id,
+            title,
+            description
+        FROM
+            game_list
+        WHERE
+            game_id = #{gameId}
+    </select>
+
+    <select id="findGameIdByTitle" resultType="integer">
+        SELECT
+            game_id
+        FROM
+            game_list
+        where
+            title LIKE CONCAT('%', #{title}, '%')
+    </select>
+
 </mapper>

@@ -1,16 +1,13 @@
-package com.ssafy.spring.entity;
+package com.ssafy.spring.dto.dashb.response;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
-@Data
-@Builder
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
-public class GameRuleEntity {
+public class GetGameDetailRuleResponseDto {
     private int gameId;
+    private String gameProfilePath;
     private String description;
     private String[] imagePath;
     private String descriptionVideoPath;
