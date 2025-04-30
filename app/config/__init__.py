@@ -1,16 +1,13 @@
 import os
 import yaml
 from pathlib import Path
-from typing import Dict, Any
 
 _BASE_DIR = Path(__file__).parent
 
-
-def load_config(filename: str) -> Dict[str, Any]:
-    """모듈별 YAML 설정 파일 로드"""
+def load_config(filename: str) -> dict:
     config_path = _BASE_DIR / filename
-    if not config_path.exists():
-        raise FileNotFoundError(f"Config file {filename} not found!")
-
+    print(f"🔧 Loading config from: {config_path}")  # 경로 확인 로그
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        config = yaml.safe_load(f)
+    print("📄 Config content:", config)  # 파싱 결과 확인
+    return config

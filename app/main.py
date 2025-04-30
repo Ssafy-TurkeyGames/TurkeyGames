@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from app.routers import video_router
+from app.routers.video_router import router as video_router
 from app.routers.yacht_router import router as yacht_router
 
 # FastAPI 앱 초기화
@@ -19,6 +19,7 @@ app.add_middleware(
 
 # 라우터 등록
 app.include_router(yacht_router)
+
 app.include_router(video_router)
 
 @app.get("/")

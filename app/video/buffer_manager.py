@@ -6,8 +6,9 @@ import time
 
 
 class CircularBuffer:
-    def __init__(self, max_frames=300):  # 10초 분량 (30fps 기준)
-        self.buffer = deque(maxlen=max_frames)
+    def __init__(self, config: dict):
+        self.max_frames = int(config['buffer']['max_frames'])  # 명시적 형변환
+        self.buffer = deque(maxlen=self.max_frames)
         self.lock = threading.Lock()
 
     def add_frame(self, frame):
