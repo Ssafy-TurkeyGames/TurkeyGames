@@ -1,0 +1,94 @@
+/* app/dashboard/src/components/Card.module.css */
+
+.bigCard {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    border: 3px solid #fff;
+    padding: 32px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-width: 340px;
+    min-height: 320px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.12s;
+    outline: none;
+    border-style: solid;
+  }
+  .bigCard:hover, .bigCard:focus {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    transform: translateY(-2px) scale(1.02);
+  }
+  
+  .bigIcon {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    opacity: 0.9;
+  }
+  
+  .bigTitle {
+    font-size: 48px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+    z-index: 1;
+  }
+  
+  .bigSub {
+    margin-top: 8px;
+    padding: 5px 22px;
+    border: 4px solid #fff;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    background: none;
+    display: inline-block;
+    z-index: 1;
+  }
+  
+  .smallCard {
+    background: rgba(255,255,255,0.12);
+    border-radius: 24px;
+    border: 2px solid #fff;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 180px;
+    min-height: 150px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.15s;
+    outline: none;
+    border-style: solid;
+  }
+  .smallCard:hover, .smallCard:focus {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.16);
+  }
+  
+  .smallIcon {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 8px;
+  }
+  
+  .smallTitle {
+    font-weight: 700;
+    margin-top: 8px;
+    color: #fff;
+    font-size: 30px;
+    text-align: center;
+  }
+  

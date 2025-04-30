@@ -1,0 +1,10 @@
+/* app/dashboard/src/components/Layout.module.css */
+
+.layout {
+    min-height: 100vh;
+  }
+  
+  .content {
+    padding-top: 120px; /* 헤더 높이보다 약간 더 크게 설정 */
+    margin: 0;
+  }

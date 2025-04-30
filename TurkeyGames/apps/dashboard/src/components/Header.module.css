@@ -1,0 +1,47 @@
+/* app/dashboard/src/components/Header.module.css */
+  
+.header {
+  background: #6d3d47;
+  color: #ffb84d;
+  padding: 0 15px 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom-left-radius: 32px;
+  border-bottom-right-radius: 32px;
+  position: fixed; /* sticky 대신 fixed로 변경 */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 100px;
+  box-sizing: border-box; /* 중요: 패딩을 높이에 포함 */
+}
+  
+  .logoImg {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+  
+  .langButton {
+    background: #fff;
+    color: #6d3d47;
+    border-radius: 16px;
+    padding: 4px 16px;
+    font-weight: 700;
+    font-size: 16px;
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+  }
+  
+  @media (max-width: 480px) {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+  
