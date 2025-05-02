@@ -23,6 +23,14 @@ while True:
     if not ret:
         print("카메라를 찾을 수 없습니다!")  # 검색결과[1] 오류 처리 참조
         break
+
+    # 현재 프레임의 해상도 구하기
+    height, width = frame.shape[:2]  # (세로, 가로)
+    resolution_text = f"{width} x {height}"
+
+    # 해상도 텍스트를 영상 좌측 상단에 표시
+    cv2.putText(frame, resolution_text, (10, 30), 
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     
     # 화면 표시 (검색결과[4] 참조)
     cv2.imshow('Camera Test', frame)
