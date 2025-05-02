@@ -63,7 +63,7 @@ public class DashbServiceImpl implements DashbService {
 //                            .build()
 //                    ).collect(Collectors.toList());
 
-            // ont table test
+            // one table test
             List<GameDashbOneTableTestEntity> gameDashbOneTableTestEntities = gameDashbOneTableTestMapper.getGameListTest();
             List<GetGameListResponseDto> response = gameDashbOneTableTestEntities.stream()
                     .map(entity -> GetGameListResponseDto.builder()
@@ -107,12 +107,26 @@ public class DashbServiceImpl implements DashbService {
 //                ));
 //            }
 
-            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getFilteredGameList(people, level);
-            List<GetFilteredGameListResponseDto> response = gameListEntities.stream()
+            // join test
+//            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getFilteredGameList(people, level);
+//            List<GetFilteredGameListResponseDto> response = gameListEntities.stream()
+//                    .map(entity -> GetFilteredGameListResponseDto.builder()
+//                            .gameId(entity.getGameId())
+//                            .title(entity.getTitle())
+//                            .description(entity.getDescription())
+//                            .gameProfilePath(entity.getGameProfilePath())
+//                            .people(entity.getPeople())
+//                            .level(entity.getLevel())
+//                            .build()
+//                    ).collect(Collectors.toList());
+
+            // one table test
+            List<GameDashbOneTableTestEntity> gameDashbOneTableTestEntities = gameDashbOneTableTestMapper.getFilteredGameList(people, level);
+            List<GetFilteredGameListResponseDto> response = gameDashbOneTableTestEntities.stream()
                     .map(entity -> GetFilteredGameListResponseDto.builder()
                             .gameId(entity.getGameId())
                             .title(entity.getTitle())
-                            .description(entity.getDescription())
+                            .description(entity.getShortDescription())
                             .gameProfilePath(entity.getGameProfilePath())
                             .people(entity.getPeople())
                             .level(entity.getLevel())
