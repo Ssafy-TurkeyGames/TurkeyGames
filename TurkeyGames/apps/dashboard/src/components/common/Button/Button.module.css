@@ -1,3 +1,4 @@
+/* app/dashboard/src/components/common/Button/Button.module.css */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -35,3 +36,4 @@
     cursor: not-allowed;
     box-shadow: none;
   }
+  

@@ -1,6 +1,7 @@
 // components/common/VoiceOption/VoiceOption.tsx
 import React from 'react';
 import styles from './VoiceOption.module.css';
+import Button from '../common/Button/Button';
 import userIcon from '../../assets/images/user.png';
 import boardIcon from '../../assets/images/board.png';
 import micIcon from '../../assets/images/mic.png';
@@ -47,30 +48,20 @@ export default function VoiceOption({
       
       <div className={styles.voiceGrid}>
         {VOICE_OPTIONS.map(voice => (
-          <button
-            key={voice}
-            className={`${styles.voiceBtn} ${selectedVoice === voice ? styles.active : ''}`}
-            onClick={() => onSelect(voice)}
-          >
-            {voice}
-          </button>
+          <Button
+          key={voice}
+          active={selectedVoice === voice}
+          onClick={() => onSelect(voice)}
+          style={{ width: 120, margin: 0 }}
+        >
+          {voice}
+        </Button>
         ))}
       </div>
       
       <div className={styles.buttonRow}>
-        <button 
-          className={styles.confirmBtn}
-          disabled={!selectedVoice}
-          onClick={onConfirm}
-        >
-          확인
-        </button>
-        <button 
-          className={styles.cancelBtn}
-          onClick={onCancel}
-        >
-          취소
-        </button>
+        <Button onClick={onCancel}>취소</Button>
+        <Button onClick={onConfirm} disabled={!selectedVoice}>확인</Button>
       </div>
     </div>
   );

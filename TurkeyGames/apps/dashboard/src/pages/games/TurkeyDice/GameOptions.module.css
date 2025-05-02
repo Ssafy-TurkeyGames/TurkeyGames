@@ -2,23 +2,21 @@
 .optionsRoot {
     min-height: 100vh;
     width: 100vw;
-    background: linear-gradient(180deg, #fffbe7 0%, #ffe5b4 100%);
+    background: #faebcb; /* 이미지의 연노랑 배경 */
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    box-sizing: border-box;
-    padding-top: 60px;
   }
   
   .optionsCard {
-    background: #fffbe7;
-    border-radius: 36px;
-    border: 2.5px solid #ffe09a;
-    width: 720px;
+    background: #ffc46c; /* 이미지의 카드 주황색 */
+    border-radius: 32px;
+    width: 800px;
     max-width: 96vw;
-    min-height: 540px;
-    box-shadow: 0 8px 44px rgba(0,0,0,0.10);
-    padding: 54px 54px 54px 54px;
+    min-height: 520px;
+    box-shadow: 0 6px 32px rgba(176,90,22,0.13);
+    padding: 32px 32px 32px 32px;
+    margin-top: 55px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -28,62 +26,118 @@
   
   .closeBtn {
     position: absolute;
-    top: 32px;
-    right: 38px;
-    background: #fffbe7;
-    border: 2.5px solid #ffe09a;
+    top: 24px;
+    right: 28px;
+    background: #fff;
+    border: none;
     border-radius: 50%;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 10;
     transition: background 0.15s;
+    box-shadow: 0 2px 8px rgba(176,90,22,0.08);
   }
   .closeBtn img {
-    width: 26px;
-    height: 26px;
+    width: 25px;
+    height: 25px;
   }
   .closeBtn:hover {
-    background: #ffe09a;
+    background: #ff8018;
+  }
+  
+  .centerWrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
   
   .finalRow {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 58px;
-    margin: 54px 0 38px 0;
+    gap: 36px;
+    margin: 46px 0 30px 0;
   }
   .finalRow > div {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
   }
   
   .startBtn {
-    width: 390px;
-    font-size: 1.6rem;
-    margin-top: 38px;
-    margin-bottom: 10px;
-    background: #e58a1f;
+    width: 240px;
+    font-size: 1.2rem;
+    margin-top: 22px;
+    margin-bottom: 6px;
+    background: #ffb74d;
     color: #fff;
-    border: 2.5px solid #ffe09a;
-    box-shadow: 0 4px 18px rgba(255,184,77,0.13);
-    border-radius: 25px;
-    padding: 17px 0;
+    border: none;
+    border-radius: 20px;
+    padding: 13px 0;
     font-weight: bold;
     cursor: pointer;
     text-align: center;
+    box-shadow: 0 2px 8px rgba(255,183,77,0.13);
+    transition: background 0.13s;
+  }
+  .startBtn:hover {
+    background: #e07b3c;
   }
   
   .stepBox {
-    min-height: 500px;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
   }
+  
+  .nextBtn {
+    width: 180px;
+    font-size: 1.1rem;
+    background: #ffb74d;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 11px 0;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background 0.13s;
+    box-shadow: 0 1px 6px rgba(255,183,77,0.10);
+  }
+  .nextBtn:disabled {
+    background: #ffe1b9;
+    color: #fff;
+    cursor: not-allowed;
+  }
+  .nextBtn:not(:disabled):hover {
+    background: #e07b3c;
+  }
+  
+  .iconSmall {
+    width: 32px;
+    height: 32px;
+    margin-right: 7px;
+  }
+  
+  .badge {
+    background: #fff;
+    color: #e07b3c;
+    border-radius: 16px;
+    padding: 5px 20px;
+    font-size: 1.02rem;
+    font-weight: bold;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  

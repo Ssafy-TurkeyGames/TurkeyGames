@@ -1,7 +1,7 @@
 // apps/dashboard/src/components/common/PlayerOption/PlayerOption.tsx
 import React from 'react';
 import styles from './PlayerOption.module.css';
-import userIcon from '../../../assets/images/user.png'
+import userIcon from '../../../assets/images/user (3).png'
 
 interface PlayerOptionProps {
     options: number[];
