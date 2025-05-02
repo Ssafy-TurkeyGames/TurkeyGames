@@ -9,7 +9,7 @@ buffer:
   max_frames: 900   # 30fps × 30초
 
 output:
-  dir: clips        # 저장 폴더 이름
+  dir: "/video_clips"        # 저장 폴더 이름
 
 video:
   codec: "H264"  # XVID, MP4V, MJPG 등 지원 코덱
@@ -23,7 +23,7 @@ server:
 triggers:
   api:
     enabled: true
-    endpoint: /trigger
+    endpoint: "/video/trigger"
     secret_key: "secure_key_123!"
   keyboard:
     enabled: true

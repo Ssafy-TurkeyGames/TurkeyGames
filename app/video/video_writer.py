@@ -5,10 +5,10 @@ from typing import List
 
 
 class VideoSaver:
-    def __init__(self, config: dict):
-        self.output_dir = config['output']['dir']
-        self.codec = config['video']['codec']
-        self.fps = config['video']['fps']
+    def __init__(self, output_dir: str, codec: str, fps: float):
+        self.output_dir = output_dir
+        self.codec = codec
+        self.fps = fps
         self._create_output_dir()
 
     def _create_output_dir(self):
@@ -25,26 +25,29 @@ class VideoSaver:
             resolution
         )
 
-    def save_clip(self, frames: List, resolution: tuple):
-        """프레임 리스트를 영상 파일로 저장"""
-        if not frames:
-            return
-
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"{self.output_dir}/clip_{timestamp}.{self._get_file_ext()}"
-
-        try:
-            out = self._get_writer(filename, resolution)
-            for frame in frames:
-                out.write(frame)
-        finally:
-            out.release()
-
     def _get_file_ext(self) -> str:
-        """코덱별 파일 확장자 매핑"""
         codec_ext_map = {
             'XVID': 'avi',
             'H264': 'mp4',
+            'MJPG': 'avi',
             'MP4V': 'mp4'
         }
         return codec_ext_map.get(self.codec, 'avi')
+
+    def save_clip(self, frames: List, resolution: tuple):
+        if not frames:
+            print("⚠️ 저장할 프레임이 없습니다.")
+            return
+
+        try:
+            self._create_output_dir()  # 저장 전 디렉토리 재확인
+            filename = os.path.abspath(  # 절대 경로 사용
+                f"{self.output_dir}/clip_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{self._get_file_ext()}"
+            )
+            out = self._get_writer(filename, resolution)
+            for frame in frames:
+                out.write(frame)
+            print(f"✅ {filename} 저장 완료 ({len(frames)}프레임)")
+        except Exception as e:
+            print(f"❌ 저장 실패: {str(e)}")
+            raise  # 오류 상세 정보 출력
