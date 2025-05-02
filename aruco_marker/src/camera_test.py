@@ -6,6 +6,18 @@ cv2.resizeWindow("Camera", 960, 540)          # 창 크기 지정
 # 카메라 초기화 (검색결과[2] 참조)
 cap = cv2.VideoCapture(0)
 
+# HD
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+
+# FHD
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+
+# QHD
+# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 2560)
+# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1440)
+
 while True:
     ret, frame = cap.read()
     if not ret:
