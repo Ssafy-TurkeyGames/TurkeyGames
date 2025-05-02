@@ -87,7 +87,10 @@ export default function SearchGame() {
                     }>
                     📖 규칙
                 </button>
-                <button className={styles.playBtn}>⚡ 게임 하기</button>
+                <button className={styles.playBtn}
+                onClick={() => navigate(`/game-options/${game.id}`)}>
+                ⚡ 게임 하기
+                </button>
             </div>
           </div>
         ))}

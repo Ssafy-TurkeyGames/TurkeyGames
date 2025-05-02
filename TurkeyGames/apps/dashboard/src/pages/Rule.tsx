@@ -148,9 +148,10 @@ export default function Rule({ isModal = false }) {
         </Link>
       </div>
       <div className={styles.buttonGroup}>
-        <Link to="/search" className={styles.backButton}>
+        <button className={styles.backButton}
+        onClick={() => navigate(`/game-options/${game_id}`)}>
         ⚡ 게임 시작
-        </Link>
+        </button>
       </div>
       </section>
       </div>

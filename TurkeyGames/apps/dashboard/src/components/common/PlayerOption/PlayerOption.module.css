@@ -1,0 +1,39 @@
+/* PlayerOption.module.css */
+.container {
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .title {
+    color: #6d3d47;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .optionButton {
+    width: 100px;
+    height: 100px;
+    border-radius: 15px;
+    background: #ffb84d;
+    border: 2px solid #fff;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .optionButton:hover {
+    transform: scale(1.05);
+  }
+  
+  .optionButton.active {
+    background: #d96c4a;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  

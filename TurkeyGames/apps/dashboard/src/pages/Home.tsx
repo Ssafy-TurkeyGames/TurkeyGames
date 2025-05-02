@@ -19,7 +19,7 @@ export default function Home() {
           <Card
             type="big"
             iconSrc={diceIcon}
-            iconAlt="주사위 아이콘"
+            iconAlt="주사위 아이콘 "
             title="게임 검색하기"
             subText="BoardGames"
             onClick={() => navigate('/search')}
