@@ -26,6 +26,7 @@ public class DashbServiceImpl implements DashbService {
     private final GameDetailMapper gameDetailMapper;
 
     private final GameDashbTestMapper gameDashbTestMapper;
+    private final GameDashbOneTableTestMapper gameDashbOneTableTestMapper;
 
     @Override
     public ResponseEntity<? super ResponseDto<List<GetGameListResponseDto>>> getGameList() {
@@ -34,7 +35,7 @@ public class DashbServiceImpl implements DashbService {
 //            List<GameProfileEntity> gameProfileEntities = gameProfileMapper.getGameProfileList();
 //            List<GameDetailEntity> gameDetailEntities = gameDetailMapper.getGameDetailList();
 
-            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getGameListTest();
+
 
 //            List<GetGameListResponseDto> response = new ArrayList<>();
 //            for(int i = 0; i < gameListEntities.size(); i++) {
@@ -48,16 +49,33 @@ public class DashbServiceImpl implements DashbService {
 //                );
 //            }
 
-            List<GetGameListResponseDto> response = gameListEntities.stream()
+            // join test
+//            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getGameListTest();
+//
+//            List<GetGameListResponseDto> response = gameListEntities.stream()
+//                    .map(entity -> GetGameListResponseDto.builder()
+//                            .gameId(entity.getGameId())
+//                            .title(entity.getTitle())
+//                            .description(entity.getDescription())
+//                            .gameProfilePath(entity.getGameProfilePath())
+//                            .people(entity.getPeople())
+//                            .level(entity.getLevel())
+//                            .build()
+//                    ).collect(Collectors.toList());
+
+            // ont table test
+            List<GameDashbOneTableTestEntity> gameDashbOneTableTestEntities = gameDashbOneTableTestMapper.getGameListTest();
+            List<GetGameListResponseDto> response = gameDashbOneTableTestEntities.stream()
                     .map(entity -> GetGameListResponseDto.builder()
                             .gameId(entity.getGameId())
                             .title(entity.getTitle())
-                            .description(entity.getDescription())
+                            .description(entity.getShortDescription())
                             .gameProfilePath(entity.getGameProfilePath())
                             .people(entity.getPeople())
                             .level(entity.getLevel())
                             .build()
                     ).collect(Collectors.toList());
+
 
             if(response.isEmpty()) {
                 return ResponseDto.successNoData();
