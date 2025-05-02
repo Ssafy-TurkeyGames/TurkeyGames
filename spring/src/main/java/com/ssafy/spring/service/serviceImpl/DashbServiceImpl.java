@@ -114,15 +114,25 @@ public class DashbServiceImpl implements DashbService {
     @Override
     public ResponseEntity<? super ResponseDto<GetGameDetailRuleResponseDto>> getGameDetailRule(int gameId) {
         try {
-            GameProfileEntity gameProfileEntity = gameProfileMapper.findGameProfileByGameId(gameId);
-            GameRuleEntity gameRuleEntity = gameRuleMapper.findGameRuleByGameId(gameId);
+//            GameProfileEntity gameProfileEntity = gameProfileMapper.findGameProfileByGameId(gameId);
+//            GameRuleEntity gameRuleEntity = gameRuleMapper.findGameRuleByGameId(gameId);
+//            GetGameDetailRuleResponseDto response = new GetGameDetailRuleResponseDto(
+//                    gameProfileEntity.getGameId(),
+//                    gameProfileEntity.getGameProfilePath(),
+//                    gameRuleEntity.getDescription(),
+//                    gameRuleEntity.getImagePath(),
+//                    gameRuleEntity.getDescriptionVideoPath()
+//            );
+
+            GameDashbDetailTestEntity gameDashbDetailTestEntity = gameDashbTestMapper.getGameDetailRule(gameId);
             GetGameDetailRuleResponseDto response = new GetGameDetailRuleResponseDto(
-                    gameProfileEntity.getGameId(),
-                    gameProfileEntity.getGameProfilePath(),
-                    gameRuleEntity.getDescription(),
-                    gameRuleEntity.getImagePath(),
-                    gameRuleEntity.getDescriptionVideoPath()
+                    gameDashbDetailTestEntity.getGameId(),
+                    gameDashbDetailTestEntity.getGameProfilePath(),
+                    gameDashbDetailTestEntity.getDescription(),
+                    gameDashbDetailTestEntity.getImagePath(),
+                    gameDashbDetailTestEntity.getDescriptionVideoPath()
             );
+
             return ResponseDto.success(response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -133,21 +143,34 @@ public class DashbServiceImpl implements DashbService {
     @Override
     public ResponseEntity<? super ResponseDto<List<GetSearchedGameListResponseDto>>> getSearchedGameList(String title) {
         try {
-            List<Integer> searchedGameIds = gameListMapper.findGameIdByTitle(title);
-            List<GetSearchedGameListResponseDto> response = new ArrayList<>();
-            for(int i = 0; i < searchedGameIds.size(); i++) {
-                GameListEntity gameListEntity = gameListMapper.findGameListByGameId(searchedGameIds.get(i));
-                GameProfileEntity gameProfileEntity = gameProfileMapper.findGameProfileByGameId(searchedGameIds.get(i));
-                GameDetailEntity gameDetailEntity = gameDetailMapper.findGameDetailByGameId(searchedGameIds.get(i));
-                response.add(new GetSearchedGameListResponseDto(
-                        gameListEntity.getGameId(),
-                        gameListEntity.getTitle(),
-                        gameListEntity.getDescription(),
-                        gameProfileEntity.getGameProfilePath(),
-                        gameDetailEntity.getPeople(),
-                        gameDetailEntity.getLevel()
-                ));
-            }
+//            List<Integer> searchedGameIds = gameListMapper.findGameIdByTitle(title);
+//            List<GetSearchedGameListResponseDto> response = new ArrayList<>();
+//            for(int i = 0; i < searchedGameIds.size(); i++) {
+//                GameListEntity gameListEntity = gameListMapper.findGameListByGameId(searchedGameIds.get(i));
+//                GameProfileEntity gameProfileEntity = gameProfileMapper.findGameProfileByGameId(searchedGameIds.get(i));
+//                GameDetailEntity gameDetailEntity = gameDetailMapper.findGameDetailByGameId(searchedGameIds.get(i));
+//                response.add(new GetSearchedGameListResponseDto(
+//                        gameListEntity.getGameId(),
+//                        gameListEntity.getTitle(),
+//                        gameListEntity.getDescription(),
+//                        gameProfileEntity.getGameProfilePath(),
+//                        gameDetailEntity.getPeople(),
+//                        gameDetailEntity.getLevel()
+//                ));
+//            }
+            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getSearchedGameList(title);
+
+            List<GetSearchedGameListResponseDto> response = gameListEntities.stream()
+                    .map(entity -> GetSearchedGameListResponseDto.builder()
+                            .gameId(entity.getGameId())
+                            .title(entity.getTitle())
+                            .description(entity.getDescription())
+                            .gameProfilePath(entity.getGameProfilePath())
+                            .people(entity.getPeople())
+                            .level(entity.getLevel())
+                            .build()
+                    ).collect(Collectors.toList());
+
             if(response.isEmpty()) {
                 return ResponseDto.successNoData();
             }

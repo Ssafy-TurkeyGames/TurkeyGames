@@ -13,6 +13,14 @@
         <result column="level" property="level"/>
     </resultMap>
 
+    <resultMap id="GameDashbDetailTestEntityResultMap" type="com.ssafy.spring.entity.GameDashbDetailTestEntity">
+        <id column="game_id" property="gameId"/>
+        <result column="title" property="gameProfilePath"/>
+        <result column="description" property="description"/>
+        <result column="image_path" property="imagePath" typeHandler="com.ssafy.spring.entity.typehandler.StringArrayTypeHandler"/>
+        <result column="description_video_path" property="descriptionVideoPath"/>
+    </resultMap>
+
     <select id="getGameListTest" resultMap="GameDashbTestEntityResultMap">
         SELECT
             gl.game_id,
@@ -21,7 +29,7 @@
             gp.game_profile_path,
             gd.people,
             gd.level
-        from
+        FROM
             game_list as gl
             left join
             game_detail as gd
@@ -58,5 +66,38 @@
             </foreach>
     </select>
 
-
+    <select id="getGameDetailRule" resultMap="GameDashbDetailTestEntityResultMap">
+        SELECT
+            gp.game_id,
+            gp.game_profile_path,
+            gr.description,
+            gr.image_path,
+            gr.description_video_path
+        FROM
+            game_profile as gp
+            left join
+            game_rule as gr
+            on gp.game_id = gr.game_id
+        WHERE
+            gp.game_id = #{gameId}
+    </select>
+    <select id="getSearchedGameList" resultMap="GameDashbTestEntityResultMap">
+        SELECT
+            gl.game_id,
+            gl.title,
+            gl.description,
+            gp.game_profile_path,
+            gd.people,
+            gd.level
+        FROM
+            game_list as gl
+            left join
+            game_detail as gd
+            on gl.game_id = gd.game_id
+            left join
+            game_profile as gp
+            on gl.game_id = gp.game_id
+        WHERE
+            gl.title LIKE CONCAT('%', #{title}, '%')
+    </select>
 </mapper>
