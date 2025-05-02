@@ -1,39 +1,69 @@
 /* PlayerOption.module.css */
-.container {
-    text-align: center;
-    padding: 20px;
-  }
-  
-  .title {
-    color: #6d3d47;
-    margin-bottom: 25px;
-    font-size: 1.8rem;
-  }
-  
-  .buttonGroup {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-  }
-  
-  .optionButton {
-    width: 100px;
-    height: 100px;
-    border-radius: 15px;
-    background: #ffb84d;
-    border: 2px solid #fff;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .optionButton:hover {
-    transform: scale(1.05);
-  }
-  
-  .optionButton.active {
-    background: #d96c4a;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  }
-  
+.bg {
+  width: 100vw;
+  min-height: 80vh;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: #fffbe7;
+  border-radius: 32px;
+  border: 2.5px solid #ffe09a;
+  box-shadow: 0 8px 44px rgba(0,0,0,0.10);
+  padding: 54px 54px 38px 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 420px;
+  min-height: 420px;
+  justify-content: center;
+}
+
+.icon {
+  width: 90px;
+  height: 90px;
+  margin-bottom: 30px;
+  margin-top: 10px;
+}
+
+.title {
+  color: #d97e6b;
+  margin-bottom: 34px;
+  font-size: 2.2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 44px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.optionButton {
+  width: 120px;
+  height: 120px;
+  border-radius: 30px;
+  background: #ffe2a9;
+  border: 2.5px solid #fff3c7;
+  color: #d97e6b;
+  font-size: 2.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.18s, color 0.16s, border 0.15s, transform 0.13s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.optionButton.active, .optionButton:hover {
+  background: #e58a1f;
+  color: #fff;
+  border: 2.5px solid #e58a1f;
+  transform: scale(1.08);
+}
