@@ -8,9 +8,5 @@ export default defineConfig({
     outDir: '../../dist/gameboard',
     emptyOutDir: true, // 1. 빌드 시 출력 디렉토리 초기화
   },
-  server: {
-    port: 3001,
-    strictPort: true // 3. 포트 강제 지정
-  },
   base: './'   // ★ 이 줄을 반드시 추가!
 })

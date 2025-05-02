@@ -7,7 +7,4 @@ export default defineConfig({
   build: {
     outDir: '../../dist/dashboard'
   },
-  server: {
-    port: 3000
-  }
 })

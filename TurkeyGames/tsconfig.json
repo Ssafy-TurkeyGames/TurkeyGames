@@ -9,15 +9,11 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "commonjs",  // esnext에서 commonjs로 변경
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": false,      // true에서 false로 변경
-    "outDir": "./dist",       // 컴파일 결과물이 dist 폴더에 생성됨
-    "rootDir": "./electron",  // 컴파일 대상 폴더를 electron으로 명시
+    "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["electron/**/*.ts"],  // electron 폴더 내 .ts 파일만 컴파일
-  "exclude": ["node_modules", "dist"]   // 제외할 폴더
+  "exclude": ["node_modules", "dist"]
 }

@@ -24,7 +24,7 @@
     "build": "npm run tsc && npm run build:dashboard && npm run build:gameboard",
     "build:all": "concurrently \"npm run build:dashboard\" \"npm run build:gameboard\"",
     "start": "electron dist/main.js",
-    "tsc": "tsc -p tsconfig.json",
+    "tsc": "tsc -p tsconfig.electron.json",
     "dev:dashboard": "cd apps/dashboard && vite",
     "dev:gameboard": "cd apps/gameboard && vite",
     "build:dashboard": "cd apps/dashboard && vite build --emptyOutDir",
