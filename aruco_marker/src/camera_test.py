@@ -1,7 +1,7 @@
 import cv2
 
 cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)  # 창 크기 조절 가능
-cv2.resizeWindow("Camera", 960, 540)          # 창 크기 지정
+cv2.resizeWindow("Camera", 960, 540)          # 창 크기 지정 
 
 # 카메라 초기화 (검색결과[2] 참조)
 cap = cv2.VideoCapture(0)
