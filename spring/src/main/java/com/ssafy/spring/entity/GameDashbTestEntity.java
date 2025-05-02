@@ -1,13 +1,15 @@
-package com.ssafy.spring.dto.dashb.response;
+package com.ssafy.spring.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
 @Builder
-@Getter
+@NoArgsConstructor
 @AllArgsConstructor
-public class GetGameListResponseDto {
+public class GameDashbTestEntity {
     private int gameId;
     private String title;
     private String description;

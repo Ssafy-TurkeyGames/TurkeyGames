@@ -1,5 +1,6 @@
 package com.ssafy.spring.controller;
 
+import com.ssafy.spring.config.NoCacheConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {NoCacheConfig.class})
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 public class DashbControllerIntegrationTest {
