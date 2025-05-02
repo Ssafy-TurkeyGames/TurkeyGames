@@ -28,7 +28,34 @@
             on gl.game_id = gd.game_id
             left join
             game_profile as gp
-            on gl.game_id = gp.game_id;
+            on gl.game_id = gp.game_id
+    </select>
+
+    <select id="getFilteredGameList" resultMap="GameDashbTestEntityResultMap">
+        SELECT
+            gl.game_id,
+            gl.title,
+            gl.description,
+            gp.game_profile_path,
+            gd.people,
+            gd.level
+        from
+            game_list as gl
+            left join
+            game_detail as gd
+            on gl.game_id = gd.game_id
+            left join
+            game_profile as gp
+            on gl.game_id = gp.game_id
+        WHERE
+            gd.people @>
+            <foreach collection="people" item="person" open="ARRAY[" close="]" separator=",">
+                #{person}
+            </foreach>
+            AND gd.level IN
+            <foreach collection="level" item="lvl" open="(" close=")" separator=",">
+                #{lvl}
+            </foreach>
     </select>
 
 
