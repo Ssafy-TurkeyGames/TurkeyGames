@@ -1,0 +1,90 @@
+/* components/common/VoiceOption/VoiceOption.module.css */
+.voiceOptionContainer {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  justify-content: center;
+}
+
+.iconSmall {
+  width: 38px;
+  height: 38px;
+  margin-right: 10px;
+}
+
+.badge {
+  background: #fff;
+  color: #d97e6b;
+  border-radius: 20px;
+  padding: 7px 28px;
+  font-size: 1.22rem;
+  font-weight: bold;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+
+.boardMini {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  margin-left: 10px;
+  background: #fff;
+  padding: 3px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.micIcon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 24px auto;
+  display: block;
+}
+
+.voiceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px 32px;
+  margin: 38px 0 32px 0;
+  justify-items: center;
+}
+
+.voiceBtn {
+  background: #fff;
+  color: #e58a1f;
+  border: 2px solid #ffe09a;
+  border-radius: 20px;
+  font-size: 1.18rem;
+  font-weight: bold;
+  padding: 15px 0;
+  width: 120px;
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s, border 0.13s;
+  box-shadow: 0 1px 7px rgba(0,0,0,0.07);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voiceBtn.active, .voiceBtn:hover {
+  background: #e58a1f;
+  color: #fff;
+  border: 2px solid #e58a1f;
+}
+
+.buttonRow {
+  display: flex;
+  gap: 36px;
+  justify-content: center;
+  margin-top: 24px;
+}

@@ -1,0 +1,89 @@
+/* GameOptions.module.css */
+.optionsRoot {
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(180deg, #fffbe7 0%, #ffe5b4 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    padding-top: 60px;
+  }
+  
+  .optionsCard {
+    background: #fffbe7;
+    border-radius: 36px;
+    border: 2.5px solid #ffe09a;
+    width: 720px;
+    max-width: 96vw;
+    min-height: 540px;
+    box-shadow: 0 8px 44px rgba(0,0,0,0.10);
+    padding: 54px 54px 54px 54px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .closeBtn {
+    position: absolute;
+    top: 32px;
+    right: 38px;
+    background: #fffbe7;
+    border: 2.5px solid #ffe09a;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.15s;
+  }
+  .closeBtn img {
+    width: 26px;
+    height: 26px;
+  }
+  .closeBtn:hover {
+    background: #ffe09a;
+  }
+  
+  .finalRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 58px;
+    margin: 54px 0 38px 0;
+  }
+  .finalRow > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  
+  .startBtn {
+    width: 390px;
+    font-size: 1.6rem;
+    margin-top: 38px;
+    margin-bottom: 10px;
+    background: #e58a1f;
+    color: #fff;
+    border: 2.5px solid #ffe09a;
+    box-shadow: 0 4px 18px rgba(255,184,77,0.13);
+    border-radius: 25px;
+    padding: 17px 0;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .stepBox {
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
