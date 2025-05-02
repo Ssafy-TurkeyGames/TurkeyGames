@@ -114,7 +114,7 @@ public class DashbControllerIntegrationTest {
 
     @Test
     void getGameDetailRule_success() {
-        String url = "/dashb/detail/1";
+        String url = "/dashb/detail/3";
         long startTime = System.currentTimeMillis();
 
         ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);

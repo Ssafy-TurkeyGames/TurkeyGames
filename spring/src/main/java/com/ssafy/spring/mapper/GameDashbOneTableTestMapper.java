@@ -14,4 +14,7 @@ public interface GameDashbOneTableTestMapper {
             @Param("people") List<Integer> people,
             @Param("level") List<Integer> level
     );
+    public GameDashbOneTableTestEntity getGameDetailRule(
+            @Param("gameId") int gameId
+    );
 }

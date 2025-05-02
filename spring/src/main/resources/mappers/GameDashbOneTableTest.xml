@@ -49,4 +49,17 @@
             </foreach>
     </select>
 
+    <select id="getGameDetailRule" resultMap="GameDashbOneTableTestEntityResultMap">
+        SELECT
+            game_id,
+            game_profile_path,
+            long_description,
+            image_path,
+            description_video_path
+        FROM
+            game
+        WHERE
+            game_id = #{gameId}
+    </select>
+
 </mapper>

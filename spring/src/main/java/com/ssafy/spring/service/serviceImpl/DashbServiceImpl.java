@@ -156,14 +156,25 @@ public class DashbServiceImpl implements DashbService {
 //                    gameRuleEntity.getDescriptionVideoPath()
 //            );
 
-            GameDashbDetailTestEntity gameDashbDetailTestEntity = gameDashbTestMapper.getGameDetailRule(gameId);
-            GetGameDetailRuleResponseDto response = new GetGameDetailRuleResponseDto(
-                    gameDashbDetailTestEntity.getGameId(),
-                    gameDashbDetailTestEntity.getGameProfilePath(),
-                    gameDashbDetailTestEntity.getDescription(),
-                    gameDashbDetailTestEntity.getImagePath(),
-                    gameDashbDetailTestEntity.getDescriptionVideoPath()
-            );
+            // join test
+//            GameDashbDetailTestEntity gameDashbDetailTestEntity = gameDashbTestMapper.getGameDetailRule(gameId);
+//            GetGameDetailRuleResponseDto response = new GetGameDetailRuleResponseDto(
+//                    gameDashbDetailTestEntity.getGameId(),
+//                    gameDashbDetailTestEntity.getGameProfilePath(),
+//                    gameDashbDetailTestEntity.getDescription(),
+//                    gameDashbDetailTestEntity.getImagePath(),
+//                    gameDashbDetailTestEntity.getDescriptionVideoPath()
+//            );
+
+            // one table test
+            GameDashbOneTableTestEntity gameDashbOneTableTestEntity = gameDashbOneTableTestMapper.getGameDetailRule(gameId);
+            GetGameDetailRuleResponseDto response = GetGameDetailRuleResponseDto.builder()
+                    .gameId(gameDashbOneTableTestEntity.getGameId())
+                    .gameProfilePath(gameDashbOneTableTestEntity.getGameProfilePath())
+                    .description(gameDashbOneTableTestEntity.getLongDescription())
+                    .imagePath(gameDashbOneTableTestEntity.getImagePath())
+                    .descriptionVideoPath(gameDashbOneTableTestEntity.getDescriptionVideoPath())
+                    .build();
 
             return ResponseDto.success(response);
         } catch (Exception e) {
