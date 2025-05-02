@@ -17,34 +17,54 @@ last_people_count = 0
 people_count_history = []
 stable_count_duration = 5
 
+# 사람 수를 서버에 전송함. 추후 전송 데이터 추가
 def send_data_to_server(people_count):
     print(f"Sending {people_count} people count to server")
 
-def calculate_distance(bbox1, bbox2):
-    cx1, cy1 = (bbox1[0] + bbox1[2]) / 2, (bbox1[1] + bbox1[3]) / 2
-    cx2, cy2 = (bbox2[0] + bbox2[2]) / 2, (bbox2[1] + bbox2[3]) / 2
-    return math.sqrt((cx2 - cx1)**2 + (cy2 - cy1)**2)
+# 사람으로 인식하여 전달받은 두 관절 간 유클리드 거리 계산
+# 한쪽 어깨 - 한쪽 팔꿈치 간 거리가 너무 멀다면 그건 신체 1개가 아님
+def calculate_distance(point1, point2):
+    x1, y1 = point1
+    x2, y2 = point2
+    return math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
 
 # 결과에서 'person' 클래스를 필터링하는 대신 keypoints로 사람을 구별
 def extract_persons_from_pose(detections):
     persons = []
     for result in detections:
-        keypoints = result.xy  # 각 사람의 관절 좌표들
+        keypoints = result.xy  # 관절 좌표
         if keypoints is not None and len(keypoints) > 5:
-            # 예시로, 어깨 좌표만 확인하거나, 어깨, 팔꿈치, 손목 등 특정 부위를 확인
-            shoulder = keypoints[5]  # 어깨
-            elbow = keypoints[7]  # 팔꿈치
-            wrist = keypoints[9]  # 손목
-            if is_valid_person(shoulder, elbow, wrist):
+            # 양쪽 어깨와 양쪽 팔꿈치가 동시에 인식되면 사람 1명으로 판단
+            shoulder_left = keypoints[5]  # 어깨
+            shoulder_right = keypoints[6] 
+            elbow_left = keypoints[7]  # 팔꿈치
+            elbow_right = keypoints[8]
+            
+            # 사람인지 판별하는 함수로 전송
+            if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
                 persons.append(result)
         else :
             print("ㅠㅠ")
     return persons
 
-def is_valid_person(shoulder, elbow, wrist):
-    min_distance = 50
-    distance = calculate_distance(shoulder, wrist)
-    return distance > min_distance
+def is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
+    # 어깨와 팔꿈치가 모두 존재하는지 확인
+    if shoulder_left is None or shoulder_right is None or elbow_left is None or elbow_right is None:
+        return False  # 어깨나 팔꿈치가 없으면 유효한 사람이 아님
+
+    # 팔꿈치와 어깨 간의 거리를 계산하여 너무 가까우면 사람으로 인정하지 않음
+    min_distance = 50  # 최소 거리 설정 (이 값은 조정이 필요할 수 있습니다)
+    
+    # 왼쪽 어깨와 왼쪽 팔꿈치 간의 거리 계산
+    distance_left = calculate_distance(shoulder_left, elbow_left)
+    # 오른쪽 어깨와 오른쪽 팔꿈치 간의 거리 계산
+    distance_right = calculate_distance(shoulder_right, elbow_right)
+    
+    # 팔꿈치와 어깨 간의 거리가 너무 가까우면 유효하지 않음
+    if distance_left < min_distance or distance_right < min_distance:
+        return False
+
+    return True
 
 def filter_by_distance(detections, min_distance=100):
     valid_detections = []
@@ -60,9 +80,6 @@ def filter_by_distance(detections, min_distance=100):
             valid_detections.append(bbox1)
     return valid_detections
 
-# def limit_people_count(detections, max_people=4):
-#     return detections[:max_people]
-
 while True:
     ret, frame = cap.read()
     
@@ -77,9 +94,6 @@ while True:
 
     # 최소 거리 기준으로 필터링
     filtered_people = filter_by_distance(filtered_people)
-
-    # # 최대 사람 수 제한
-    # filtered_people = limit_people_count(filtered_people)
 
     people_count_history.append(len(filtered_people))
     if len(people_count_history) > stable_count_duration:
