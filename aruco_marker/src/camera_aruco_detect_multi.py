@@ -28,7 +28,7 @@ while True:
 
         # 각 마커의 중심에 ID 표시
         for i, corner in enumerate(corners):
-            # corners[i][0]은 4개의 꼭짓점 좌표 (x, y)
+            # corners[i][0]은 4개의 꼭짓점 좌표 (x, y) 
             pts = corner[0]
             center_x = int(pts[:, 0].mean())
             center_y = int(pts[:, 1].mean())
