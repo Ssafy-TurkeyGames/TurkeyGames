@@ -25,16 +25,20 @@ def calculate_distance(bbox1, bbox2):
     cx2, cy2 = (bbox2[0] + bbox2[2]) / 2, (bbox2[1] + bbox2[3]) / 2
     return math.sqrt((cx2 - cx1)**2 + (cy2 - cy1)**2)
 
+# 결과에서 'person' 클래스를 필터링하는 대신 keypoints로 사람을 구별
 def extract_persons_from_pose(detections):
     persons = []
-    for detection in detections:
-        keypoints = detection.keypoints
-        if keypoints:
+    for result in detections:
+        keypoints = result.xy  # 각 사람의 관절 좌표들
+        if keypoints is not None and len(keypoints) > 5:
+            # 예시로, 어깨 좌표만 확인하거나, 어깨, 팔꿈치, 손목 등 특정 부위를 확인
             shoulder = keypoints[5]  # 어깨
             elbow = keypoints[7]  # 팔꿈치
             wrist = keypoints[9]  # 손목
             if is_valid_person(shoulder, elbow, wrist):
-                persons.append(detection)
+                persons.append(result)
+        else :
+            print("ㅠㅠ")
     return persons
 
 def is_valid_person(shoulder, elbow, wrist):
@@ -56,8 +60,8 @@ def filter_by_distance(detections, min_distance=100):
             valid_detections.append(bbox1)
     return valid_detections
 
-def limit_people_count(detections, max_people=4):
-    return detections[:max_people]
+# def limit_people_count(detections, max_people=4):
+#     return detections[:max_people]
 
 while True:
     ret, frame = cap.read()
@@ -68,16 +72,14 @@ while True:
 
     results = model(frame)
 
-    people = [result for result in results[0].keypoints if results[0].names[int(result.cls[0])] == 'person']
-
     # Pose 모델을 사용해 사람 구분
-    filtered_people = extract_persons_from_pose(people)
+    filtered_people = extract_persons_from_pose(results[0].keypoints)
 
     # 최소 거리 기준으로 필터링
     filtered_people = filter_by_distance(filtered_people)
 
-    # 최대 사람 수 제한
-    filtered_people = limit_people_count(filtered_people)
+    # # 최대 사람 수 제한
+    # filtered_people = limit_people_count(filtered_people)
 
     people_count_history.append(len(filtered_people))
     if len(people_count_history) > stable_count_duration:
