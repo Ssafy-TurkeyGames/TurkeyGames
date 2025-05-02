@@ -4,7 +4,8 @@ cv2.namedWindow("Camera", cv2.WINDOW_NORMAL)  # 창 크기 조절 가능
 cv2.resizeWindow("Camera", 960, 540)          # 창 크기 지정 
 
 # 카메라 초기화 (검색결과[2] 참조)
-cap = cv2.VideoCapture(0)
+current_cam = 0
+cap = cv2.VideoCapture(current_cam)
 
 # HD
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
@@ -45,6 +46,12 @@ while True:
         cap.release()
         current_cam = 1
         cap = cv2.VideoCapture(current_cam)
+    elif key == ord('c'):
+        # 파일명에 시간과 번호를 넣어서 저장
+        filename = f"capture_{time.strftime('%Y%m%d_%H%M%S')}_{capture_count}.png"
+        cv2.imwrite(filename, frame)
+        print(f"촬영 완료: {filename}")
+        capture_count += 1
     # 종료
     elif key == ord('q'):
         break
