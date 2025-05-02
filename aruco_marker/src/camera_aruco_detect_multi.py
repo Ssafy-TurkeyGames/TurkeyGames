@@ -23,7 +23,7 @@ while True:
     corners, ids, rejected = detector.detectMarkers(frame)
 
     if ids is not None and len(ids) > 0:
-        # 마커 테두리 그리기
+        # 마커 테두리 그리기 
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
 
         # 각 마커의 중심에 ID 표시
