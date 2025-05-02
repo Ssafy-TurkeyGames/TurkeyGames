@@ -1,3 +1,25 @@
+# 김가현이 추가한 라이브러리
+
+# YOLO 모델 및 관련 라이브러리
+ultralytics==8.3.119
+ultralytics-thop==2.0.14
+
+# 데이터 처리 및 과학 계산
+numpy==1.26.4
+opencv-contrib-python==4.11.0.86
+opencv-python==4.11.0.86
+pandas==2.2.3
+scipy==1.15.2
+tqdm==4.67.1
+pillow==11.2.1
+
+# 기타 필요한 라이브러리
+requests==2.32.3
+protobuf==4.25.7
+PyYAML==6.0.2
+
+
+# 기존 develop-fastapi에 있던 라이브러리
 fastapi==0.104.1
 uvicorn==0.23.2
 pydantic==2.4.2
