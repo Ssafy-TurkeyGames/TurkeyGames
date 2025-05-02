@@ -201,17 +201,32 @@ public class DashbServiceImpl implements DashbService {
 //                        gameDetailEntity.getLevel()
 //                ));
 //            }
-            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getSearchedGameList(title);
 
-            List<GetSearchedGameListResponseDto> response = gameListEntities.stream()
+            // test join
+//            List<GameDashbTestEntity> gameListEntities = gameDashbTestMapper.getSearchedGameList(title);
+//
+//            List<GetSearchedGameListResponseDto> response = gameListEntities.stream()
+//                    .map(entity -> GetSearchedGameListResponseDto.builder()
+//                            .gameId(entity.getGameId())
+//                            .title(entity.getTitle())
+//                            .description(entity.getDescription())
+//                            .gameProfilePath(entity.getGameProfilePath())
+//                            .people(entity.getPeople())
+//                            .level(entity.getLevel())
+//                            .build()
+//                    ).collect(Collectors.toList());
+
+            // one table test
+            List<GameDashbOneTableTestEntity> gameListEntities = gameDashbOneTableTestMapper.getSearchedGameList(title);
+                List<GetSearchedGameListResponseDto> response = gameListEntities.stream()
                     .map(entity -> GetSearchedGameListResponseDto.builder()
-                            .gameId(entity.getGameId())
-                            .title(entity.getTitle())
-                            .description(entity.getDescription())
-                            .gameProfilePath(entity.getGameProfilePath())
-                            .people(entity.getPeople())
-                            .level(entity.getLevel())
-                            .build()
+                        .gameId(entity.getGameId())
+                        .title(entity.getTitle())
+                        .description(entity.getShortDescription())
+                        .gameProfilePath(entity.getGameProfilePath())
+                        .people(entity.getPeople())
+                        .level(entity.getLevel())
+                        .build()
                     ).collect(Collectors.toList());
 
             if(response.isEmpty()) {

@@ -62,4 +62,17 @@
             game_id = #{gameId}
     </select>
 
+    <select id="getSearchedGameList" resultMap="GameDashbOneTableTestEntityResultMap">
+        SELECT
+            game_id,
+            title,
+            short_description,
+            people,
+            level
+        FROM
+            game
+        WHERE
+            title LIKE CONCAT('%', #{title}, '%')
+    </select>
+
 </mapper>

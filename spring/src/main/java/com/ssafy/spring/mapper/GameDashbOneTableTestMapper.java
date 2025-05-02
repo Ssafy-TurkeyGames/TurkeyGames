@@ -17,4 +17,8 @@ public interface GameDashbOneTableTestMapper {
     public GameDashbOneTableTestEntity getGameDetailRule(
             @Param("gameId") int gameId
     );
+
+    public List<GameDashbOneTableTestEntity> getSearchedGameList(
+            @Param("title") String title
+    );
 }
