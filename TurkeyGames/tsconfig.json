@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
     "target": "es2015",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -15,5 +16,6 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
+  "include": ["src", "vite-env.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
