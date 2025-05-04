@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
-# .env 파일에서 환경 변수 로드
+# ..env 파일에서 환경 변수 로드
 load_dotenv()
 
 # 데이터베이스 URL 가져오기
