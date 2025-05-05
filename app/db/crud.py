@@ -5,7 +5,7 @@ from typing import List, Dict, Optional
 from app.db import models
 from app.yacht import schema
 
-
+# 야추
 def create_game_setting(db: Session, settings: schema.GameSettings) -> models.TurkeyDiceSetting:
     """게임 설정을 데이터베이스에 저장"""
     # 다음 사용할 ID 찾기
@@ -129,3 +129,78 @@ def check_game_finished(db: Session, player_ids: List[int]) -> bool:
             return False
 
     return True
+
+# 5초 준다
+
+def create_five_sec_setting(db: Session, settings) -> models.FiveSecSetting:
+    """5초준다 게임 설정 생성"""
+    db_setting = models.FiveSecSetting(
+        people=settings.people,
+        round=settings.round,
+        voice=settings.voice
+    )
+    db.add(db_setting)
+    db.commit()
+    db.refresh(db_setting)
+    return db_setting
+
+
+def create_five_sec_score(db: Session) -> models.FiveSecScore:
+    """5초준다 게임 점수 생성"""
+    db_score = models.FiveSecScore(score=0)
+    db.add(db_score)
+    db.commit()
+    db.refresh(db_score)
+    return db_score
+
+
+def get_five_sec_score(db: Session, player_id: int) -> Optional[models.FiveSecScore]:
+    """5초준다 게임 점수 조회"""
+    return db.query(models.FiveSecScore).filter(models.FiveSecScore.id == player_id).first()
+
+
+def update_five_sec_score(db: Session, player_id: int, success: bool) -> bool:
+    """5초준다 게임 점수 업데이트 (성공/실패)"""
+    db_score = get_five_sec_score(db, player_id)
+    if not db_score:
+        return False
+
+    if success:
+        db_score.score += 1
+
+    db.commit()
+    db.refresh(db_score)
+    return True
+
+
+def update_five_sec_score_direct(db: Session, player_id: int, score: int) -> bool:
+    """5초준다 게임 점수 직접 설정"""
+    db_score = get_five_sec_score(db, player_id)
+    if not db_score:
+        return False
+
+    db_score.score = score
+    db.commit()
+    db.refresh(db_score)
+    return True
+
+
+def delete_five_sec_game(db: Session, setting_id: int, player_ids: List[int]) -> bool:
+    """5초준다 게임 삭제 (설정 및 점수)"""
+    try:
+        # 설정 삭제
+        db_setting = db.query(models.FiveSecSetting).filter(models.FiveSecSetting.id == setting_id).first()
+        if db_setting:
+            db.delete(db_setting)
+
+        # 플레이어 점수 삭제
+        for player_id in player_ids:
+            db_score = db.query(models.FiveSecScore).filter(models.FiveSecScore.id == player_id).first()
+            if db_score:
+                db.delete(db_score)
+
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        return False

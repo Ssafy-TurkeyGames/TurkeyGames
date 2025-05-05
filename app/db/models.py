@@ -33,6 +33,7 @@ class ScoreTableYacht(Base):
 
 class ScoreTableYachtAvailable(Base):
     __tablename__ = "turkey_dice_score_available"
+
     id = Column(Integer, primary_key=True)
     ace = Column(Boolean, nullable=False, default=False)
     dual = Column(Boolean, nullable=False, default=False)
@@ -46,3 +47,17 @@ class ScoreTableYachtAvailable(Base):
     small_straight = Column(Boolean, nullable=False, default=False)
     large_straight = Column(Boolean, nullable=False, default=False)
     turkey = Column(Boolean, nullable=False, default=False)
+
+class FiveSecSetting(Base):
+    __tablename__ = "five_sec_setting"
+
+    id = Column(Integer, primary_key=True)
+    people = Column(Integer, nullable=False)
+    round = Column(Integer, nullable=False)
+    voice = Column(Integer, nullable=False)
+
+class FiveSecScore(Base):
+    __tablename__ = "five_sec_score"
+
+    id = Column(Integer, primary_key=True)  # INT PRIMARY KEY
+    score = Column(Integer, nullable=False)
