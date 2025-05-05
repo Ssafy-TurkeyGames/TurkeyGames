@@ -67,6 +67,7 @@
             game_id,
             title,
             short_description,
+            game_profile_path,
             people,
             level
         FROM
