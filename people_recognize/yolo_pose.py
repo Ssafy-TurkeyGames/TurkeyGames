@@ -6,7 +6,7 @@ import math
 # YOLOv8 pose 모델 불러오기
 model = YOLO('yolov8n-pose.pt')  # Pose 모델 사용
 
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
     print("웹캠을 열 수 없습니다.")
@@ -33,18 +33,33 @@ def extract_persons_from_pose(detections):
     persons = []
     for result in detections:
         keypoints = result.xy  # 관절 좌표
-        if keypoints is not None and len(keypoints) > 5:
+        confidences = result.conf  # 각 관절의 신뢰도
+        if keypoints is not None and keypoints.shape[1] > 0:  # keypoints가 비어있지 않으면
+            print(f"Detected keypoints: {keypoints}")  # 디버깅 keypoints 출력
+
+              # 신뢰도(confidence)가 0.5 이상인 좌표만 사용
+            valid_keypoints = []
+            for i in range(keypoints.shape[1]):
+                # 좌표가 (0.0, 0.0) 이거나 신뢰도가 너무 낮은 경우를 제외
+                if keypoints[0][i][0] != 0.0 and keypoints[0][i][1] != 0.0 and confidences[0][i] > 0.5:
+                    valid_keypoints.append(keypoints[0][i][:2])  # (x, y) 좌표만 저장
+
+            # 만약 중요한 관절이 유효하지 않다면 사람으로 인정하지 않음
+            if len(valid_keypoints) < 4:
+                print("Not enough valid keypoints detected.")
+                continue
+
             # 양쪽 어깨와 양쪽 팔꿈치가 동시에 인식되면 사람 1명으로 판단
-            shoulder_left = keypoints[5]  # 어깨
-            shoulder_right = keypoints[6] 
-            elbow_left = keypoints[7]  # 팔꿈치
-            elbow_right = keypoints[8]
+            shoulder_left = valid_keypoints[5]  # 어깨
+            shoulder_right = valid_keypoints[6] 
+            elbow_left = valid_keypoints[7]  # 팔꿈치
+            elbow_right = valid_keypoints[8]
             
             # 사람인지 판별하는 함수로 전송
             if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
                 persons.append(result)
         else :
-            print("ㅠㅠ")
+            print("No valid keypoints detected")
     return persons
 
 def is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
@@ -53,7 +68,7 @@ def is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
         return False  # 어깨나 팔꿈치가 없으면 유효한 사람이 아님
 
     # 팔꿈치와 어깨 간의 거리를 계산하여 너무 가까우면 사람으로 인정하지 않음
-    min_distance = 50  # 최소 거리 설정 (이 값은 조정이 필요할 수 있습니다)
+    min_distance = 10  # 최소 거리 설정 (이 값은 조정이 필요할 수 있습니다)
     
     # 왼쪽 어깨와 왼쪽 팔꿈치 간의 거리 계산
     distance_left = calculate_distance(shoulder_left, elbow_left)
@@ -87,7 +102,13 @@ while True:
         print("프레임을 읽을 수 없습니다.")
         break
 
+    # 원본영상 디버깅
+    # cv2.imshow('Input Frame', frame)
+
     results = model(frame)
+
+    print(f"Results: {results}")  # 전체 결과 출력
+    print(f"Keypoints: {results[0].keypoints}")  # keypoints 값 확인
 
     # Pose 모델을 사용해 사람 구분
     filtered_people = extract_persons_from_pose(results[0].keypoints)
