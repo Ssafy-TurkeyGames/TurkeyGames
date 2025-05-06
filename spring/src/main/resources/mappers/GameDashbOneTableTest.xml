@@ -17,15 +17,16 @@
     </resultMap>
 
     <select id="getGameListTest" resultMap="GameDashbOneTableTestEntityResultMap">
-        SELECT
-            game_id,
-            title,
-            short_description,
-            game_profile_path,
-            people,
-            level
-        FROM
-            game
+<!--        SELECT-->
+<!--            game_id,-->
+<!--            title,-->
+<!--            short_description,-->
+<!--            game_profile_path,-->
+<!--            people,-->
+<!--            level-->
+<!--        FROM-->
+<!--            game-->
+        SELECT * FROM get_game_list()
     </select>
 
     <select id="getFilteredGameList" resultMap="GameDashbOneTableTestEntityResultMap">
