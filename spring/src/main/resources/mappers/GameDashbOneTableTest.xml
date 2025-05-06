@@ -69,17 +69,18 @@
     </select>
 
     <select id="getSearchedGameList" resultMap="GameDashbOneTableTestEntityResultMap">
-        SELECT
-            game_id,
-            title,
-            short_description,
-            game_profile_path,
-            people,
-            level
-        FROM
-            game
-        WHERE
-            title LIKE CONCAT('%', #{title}, '%')
+<!--        SELECT-->
+<!--            game_id,-->
+<!--            title,-->
+<!--            short_description,-->
+<!--            game_profile_path,-->
+<!--            people,-->
+<!--            level-->
+<!--        FROM-->
+<!--            game-->
+<!--        WHERE-->
+<!--            title LIKE CONCAT('%', #{title}, '%')-->
+        SELECT * FROM get_searched_game_list(#{title})
     </select>
 
 </mapper>
