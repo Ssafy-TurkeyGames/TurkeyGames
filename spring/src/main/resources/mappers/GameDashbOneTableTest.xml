@@ -30,24 +30,28 @@
     </select>
 
     <select id="getFilteredGameList" resultMap="GameDashbOneTableTestEntityResultMap">
-        SELECT
-            game_id,
-            title,
-            short_description,
-            game_profile_path,
-            people,
-            level
-        FROM
-            game
-        WHERE
-            people @>
-            <foreach collection="people" item="person" open="ARRAY[" close="]" separator=",">
-                #{person}
-            </foreach>
-            AND level IN
-            <foreach collection="level" item="lvl" open="(" close=")" separator=",">
-                #{lvl}
-            </foreach>
+<!--        SELECT-->
+<!--            game_id,-->
+<!--            title,-->
+<!--            short_description,-->
+<!--            game_profile_path,-->
+<!--            people,-->
+<!--            level-->
+<!--        FROM-->
+<!--            game-->
+<!--        WHERE-->
+<!--            people @>-->
+<!--            <foreach collection="people" item="person" open="ARRAY[" close="]" separator=",">-->
+<!--                #{person}-->
+<!--            </foreach>-->
+<!--            AND level IN-->
+<!--            <foreach collection="level" item="lvl" open="(" close=")" separator=",">-->
+<!--                #{lvl}-->
+<!--            </foreach>-->
+        SELECT * FROM get_filtered_game_list(
+            #{people, typeHandler=com.ssafy.spring.entity.typehandler.IntArrayTypeHandler},
+            #{level, typeHandler=com.ssafy.spring.entity.typehandler.IntArrayTypeHandler}
+        )
     </select>
 
     <select id="getGameDetailRule" resultMap="GameDashbOneTableTestEntityResultMap">

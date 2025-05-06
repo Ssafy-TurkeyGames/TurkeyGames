@@ -121,7 +121,12 @@ public class DashbServiceImpl implements DashbService {
 //                    ).collect(Collectors.toList());
 
             // one table test
-            List<GameDashbOneTableTestEntity> gameDashbOneTableTestEntities = gameDashbOneTableTestMapper.getFilteredGameList(people, level);
+//            List<GameDashbOneTableTestEntity> gameDashbOneTableTestEntities = gameDashbOneTableTestMapper.getFilteredGameList(people, level);
+
+            // function
+            int[] peopleArray = people.stream().mapToInt(Integer::intValue).toArray();
+            int[] levelArray = level.stream().mapToInt(Integer::intValue).toArray();
+            List<GameDashbOneTableTestEntity> gameDashbOneTableTestEntities = gameDashbOneTableTestMapper.getFilteredGameList(peopleArray, levelArray);
             List<GetFilteredGameListResponseDto> response = gameDashbOneTableTestEntities.stream()
                     .map(entity -> GetFilteredGameListResponseDto.builder()
                             .gameId(entity.getGameId())

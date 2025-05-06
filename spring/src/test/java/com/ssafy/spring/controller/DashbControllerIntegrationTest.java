@@ -66,7 +66,7 @@ public class DashbControllerIntegrationTest {
 
     @Test
     void getFilteredGameList_success() {
-        String url = "/dashb/filter?people=2,3,4&level=1";
+        String url = "/dashb/filter?people=2&level=3,4";
         long startTime = System.currentTimeMillis();
 
         ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);
