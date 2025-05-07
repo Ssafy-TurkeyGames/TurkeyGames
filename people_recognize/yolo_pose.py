@@ -6,7 +6,7 @@ import math
 # YOLOv8 pose 모델 불러오기
 model = YOLO('yolov8n-pose.pt')  # Pose 모델 사용
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 if not cap.isOpened():
     print("웹캠을 열 수 없습니다.")
@@ -34,6 +34,7 @@ def extract_persons_from_pose(detections):
     for result in detections:
         keypoints = result.xy  # 관절 좌표
         confidences = result.conf  # 각 관절의 신뢰도
+
         if keypoints is not None and keypoints.shape[1] > 0:  # keypoints가 비어있지 않으면
             print(f"Detected keypoints: {keypoints}")  # 디버깅 keypoints 출력
 
@@ -48,12 +49,16 @@ def extract_persons_from_pose(detections):
             if len(valid_keypoints) < 4:
                 print("Not enough valid keypoints detected.")
                 continue
-
-            # 양쪽 어깨와 양쪽 팔꿈치가 동시에 인식되면 사람 1명으로 판단
-            shoulder_left = valid_keypoints[5]  # 어깨
-            shoulder_right = valid_keypoints[6] 
-            elbow_left = valid_keypoints[7]  # 팔꿈치
-            elbow_right = valid_keypoints[8]
+            # valid_keypoints에서 어깨와 팔꿈치 좌표만 정확히 추출
+            try:
+                # 양쪽 어깨와 양쪽 팔꿈치가 동시에 인식되면 사람 1명으로 판단
+                shoulder_left = valid_keypoints[5]  # 어깨
+                shoulder_right = valid_keypoints[6]
+                elbow_left = valid_keypoints[7]  # 팔꿈치
+                elbow_right = valid_keypoints[8]
+            except IndexError:
+                print("Not enough valid keypoints for shoulders and elbows.")
+                continue
             
             # 사람인지 판별하는 함수로 전송
             if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
@@ -85,9 +90,12 @@ def filter_by_distance(detections, min_distance=100):
     valid_detections = []
     for i, bbox1 in enumerate(detections):
         too_close = False
+        bbox1_coords = bbox1.xy[0][5][:2]  # shoulder_left (xy[5]) 예시
+
         for j, bbox2 in enumerate(detections):
             if i != j:
-                distance = calculate_distance(bbox1, bbox2)
+                bbox2_coords = bbox2.xy[0][5][:2]  # shoulder_left (xy[5]) 예시
+                distance = calculate_distance(bbox1_coords, bbox2_coords)
                 if distance < min_distance:
                     too_close = True
                     break
