@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+import asyncio # Added import
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -29,13 +30,36 @@ app.include_router(video_router)
 
 # video 초기화
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    # VideoService 인스턴스 생성 시 __init__에서 카메라 스레드가 시작됨
+async def lifespan(app_instance: FastAPI): # Renamed app to app_instance to avoid conflict
+    print("🚀 Application startup: Initializing services...")
     video_service = VideoService()
+    app_instance.state.video_service = video_service # Store for potential access if needed
+
+    current_loop = asyncio.get_event_loop()
+    trigger_detector = TriggerDetector(
+        config=video_service.config,  # Use config from the single video_service
+        callback=video_service.on_trigger,
+        loop=current_loop
+    )
+    app_instance.state.trigger_detector = trigger_detector # Store for potential access
+
+    # Create and include the video router, passing dependencies
+    video_router_instance = create_video_router(video_service, trigger_detector)
+    app_instance.include_router(video_router_instance)
+
+    # Include other routers
+    app_instance.include_router(yacht_router)
+    app_instance.include_router(api_router)
+    
+    print("✅ Services initialized and routers included.")
     yield
-    # 애플리케이션 종료 시 필요한 정리 작업 (예: video_service.stop()) 추가 가능
+    
     print("⏳ 애플리케이션 종료 중... VideoService 중지 시도...")
-    video_service.stop() # 애플리케이션 종료 시 서비스 중지
+    video_service.stop()
+    print("🛑 VideoService 중지 완료.")
+
+# Assign lifespan to the app
+app.router.lifespan_context = lifespan
 
 @app.get("/")
 def read_root():

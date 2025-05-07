@@ -1,8 +1,9 @@
 import cv2
-import threading
 import os
 import time
-from threading import Timer, Event # Timer와 Event 임포트
+import asyncio
+import threading # Added import
+from threading import Event
 from app.video.buffer_manager import CircularBuffer
 from app.video.video_writer import VideoSaver
 from .trigger_detector import TriggerDetector
@@ -17,14 +18,16 @@ class VideoService:
         self.is_buffer_ready = False
         self.is_saving = False  # ✅ is_saving 초기화 추가
         self.buffer = CircularBuffer(
-            max_frames=self.config['buffer']['max_frames']
+            max_frames=self.config['buffer']['max_frames'],
+            frame_width=self.config['camera']['width'],
+            frame_height=self.config['camera']['height']
         )
         self.saver = VideoSaver(
             output_dir=self.config['output']['dir'],
             codec=self.config['video']['codec'],
             fps=self.config['video']['fps']
         )
-        self._init_components()
+        # self._init_components()
         self.camera_thread = None
         self.stop_event = Event() # 스레드 종료 이벤트
         self.camera_ready_event = Event() # ✅ 카메라 준비 완료 이벤트 추가
@@ -48,19 +51,6 @@ class VideoService:
 
         return config
 
-    def _init_components(self):
-        """컴포넌트 초기화"""
-        # 버퍼 초기화 (명시적 파라미터 전달)
-        self.buffer = CircularBuffer(
-            max_frames=self.config['buffer']['max_frames']
-        )
-
-        # 트리거 감지기 초기화
-        self.trigger_detector = TriggerDetector(
-            config=self.config,
-            callback=self.on_trigger
-        )
-
     def initialize(self):
         """모듈 초기화"""
         self.saver = VideoSaver(self.config)
@@ -68,7 +58,7 @@ class VideoService:
         # __init__에서 이미 초기화되므로 중복 제거 또는 역할 명확화 필요
         # 여기서는 카메라 스레드 시작만 담당하도록 가정
         if self.camera_thread is None or not self.camera_thread.is_alive():
-             self._start_camera_thread()
+            self._start_camera_thread()
         else:
             print("ℹ️ 카메라 스레드가 이미 실행 중입니다.")
 
@@ -145,7 +135,7 @@ class VideoService:
         self.camera_ready_event.clear() # ✅ 스레드 종료 시 카메라 준비 안됨 신호
 
 
-    def on_trigger(self):
+    async def on_trigger(self):
         """트리거 콜백 핸들러 - post_seconds 만큼 지연 후 저장 시작"""
         # 카메라 준비 완료 이벤트를 최대 1초간 기다림
         if not self.camera_ready_event.wait(timeout=1.0):
@@ -162,10 +152,13 @@ class VideoService:
 
         # post_seconds 후에 _finalize_and_save_clip 메소드 실행 예약
         # 이 시간 동안 _capture_frames 스레드는 계속 버퍼에 프레임을 추가합니다.
-        timer = Timer(post_seconds, self._finalize_and_save_clip)
-        timer.start()
+        asyncio.create_task(self._delayed_finalize_and_save_clip(post_seconds))
 
-    def _finalize_and_save_clip(self):
+    async def _delayed_finalize_and_save_clip(self, delay):
+        await asyncio.sleep(delay)
+        await self._finalize_and_save_clip()
+
+    async def _finalize_and_save_clip(self):
         """post_seconds 경과 후 실제 클립 생성 및 저장 로직"""
         print(f"⏰ {self.config['buffer']['post_seconds']}초 경과. 클립 생성 및 저장 실행...")
         try:
@@ -174,33 +167,29 @@ class VideoService:
             post_seconds = self.config['buffer']['post_seconds']
             fps = self.config['video']['fps']
 
-            # 이제 버퍼에는 트리거 이전 pre_seconds + 트리거 이후 post_seconds 동안의 프레임이 쌓여있음
-            # get_clip은 현재 버퍼 상태에서 pre_seconds 만큼의 과거 프레임을 가져옴
-            # (주의: buffer_manager.py의 get_clip은 post_seconds를 직접 사용하지 않음.
-            # 현재 구현은 트리거 후 post_seconds 동안 쌓인 프레임을 포함하여,
-            # pre_seconds 만큼의 과거 프레임을 가져오는 방식)
+            # Now buffer contains frames from pre_seconds before trigger + post_seconds after trigger
             clip_frames = self.buffer.get_clip(
                 pre_seconds=pre_seconds,
-                post_seconds=post_seconds, # 이 값은 get_clip 내부 계산에는 사용 안됨
+                post_seconds=post_seconds,
                 fps=fps
             )
 
             if clip_frames:
-                print(f"🎞️ 클립 프레임 ({len(clip_frames)}개) 가져오기 완료. 저장 시작...")
+                print(f"🎞️ Clip frames ({len(clip_frames)} frames) retrieval complete. Starting save...")
                 resolution = (
                     int(self.config['camera']['width']),
                     int(self.config['camera']['height'])
                 )
                 self.saver.save_clip(clip_frames, resolution)
-                print(f"✅ 클립 저장 완료.")
+                print(f"✅ Clip save complete.")
             else:
-                print("⚠️ 클립 생성 실패 (get_clip에서 빈 리스트 반환됨. 버퍼에 충분한 프레임이 없거나 다른 문제 발생)")
+                print("⚠️ Clip creation failed (empty list returned from get_clip. Insufficient frames in buffer or other issue occurred)")
         except Exception as e:
-             print(f"❌ 클립 저장 중 오류 발생: {e}")
+            print(f"❌ Error occurred during clip save: {e}")
         finally:
-            # 저장 시도 완료 후 플래그 해제
+            # Release flag after save attempt is complete
             self.is_saving = False
-            print("🔄 저장 상태 해제.")
+            print("🔄 Save state released.")
 
 
     def stop(self):

@@ -99,3 +99,10 @@ fabric.properties
 
 # 가상환경
 venv/
+
+# pytyhon
+__pycache__/*
+*.pyc
+
+#video 
+video_buffer.mmap
