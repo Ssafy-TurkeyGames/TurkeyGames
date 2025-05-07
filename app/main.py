@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
@@ -5,6 +7,7 @@ import uvicorn
 from app.routers import yacht_router
 from app.routers import fivesec_router
 from app.websocket.manager import socket_app
+from app.video import VideoService
 
 # FastAPI 앱 초기화
 app = FastAPI(title="Turkey Games")
@@ -21,6 +24,18 @@ app.add_middleware(
 # 라우터 등록
 app.include_router(yacht_router)
 app.include_router(fivesec_router)
+
+app.include_router(video_router)
+
+# video 초기화
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # VideoService 인스턴스 생성 시 __init__에서 카메라 스레드가 시작됨
+    video_service = VideoService()
+    yield
+    # 애플리케이션 종료 시 필요한 정리 작업 (예: video_service.stop()) 추가 가능
+    print("⏳ 애플리케이션 종료 중... VideoService 중지 시도...")
+    video_service.stop() # 애플리케이션 종료 시 서비스 중지
 
 @app.get("/")
 def read_root():
