@@ -51,7 +51,7 @@ public class DashbServiceImpl implements DashbService {
         try {
             int[] peopleArray = people.stream().mapToInt(Integer::intValue).toArray();
             int[] levelArray = level.stream().mapToInt(Integer::intValue).toArray();
-            List<GameEntity> gameEntities = gameMapper.getFilteredGameList(peopleArray, levelArray);
+            List<GameEntity> gameEntities = gameMapper.getFilteredGameList(peopleArray.length == 0 ? null : peopleArray, levelArray.length == 0 ? null : levelArray);
             List<GetFilteredGameListResponseDto> response = gameEntities.stream()
                     .map(entity -> GetFilteredGameListResponseDto.builder()
                             .gameId(entity.getGameId())

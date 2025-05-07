@@ -27,8 +27,8 @@ public class DashbController {
 
     @GetMapping("/filter")
     public ResponseEntity<? super ResponseDto<List<GetFilteredGameListResponseDto>>> getFilteredGameList(
-            @RequestParam(name = "people") List<Integer> people,
-            @RequestParam(name = "level") List<Integer> level
+            @RequestParam(name = "people", required = false) List<Integer> people,
+            @RequestParam(name = "level", required = false) List<Integer> level
     ) {
         ResponseEntity<? super ResponseDto<List<GetFilteredGameListResponseDto>>> response = dashbService.getFilteredGameList(people, level);
         return response;
