@@ -5,12 +5,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# Updated imports: router creation function and TriggerDetector
-from app.routers.video_router import create_video_router
-from app.routers.yacht_router import router as yacht_router
-from app.routers.api_router import router as api_router
-from app.video.service import VideoService
-from app.video.trigger_detector import TriggerDetector
+from app.routers import yacht_router
+from app.routers import fivesec_router
+from app.websocket.manager import socket_app
+from app.video import VideoService
 
 # FastAPI 앱 초기화
 app = FastAPI(title="Turkey Games")
@@ -24,7 +22,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# video 초기화 and router registration within lifespan
+# 라우터 등록
+app.include_router(yacht_router)
+app.include_router(fivesec_router)
+
+app.include_router(video_router)
+
+# video 초기화
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI): # Renamed app to app_instance to avoid conflict
     print("🚀 Application startup: Initializing services...")
@@ -61,6 +65,8 @@ app.router.lifespan_context = lifespan
 def read_root():
     return {"message": "Welcome to Turkey Games API"}
 
+# Socket.IO 앱 마운트
+app.mount("/", socket_app)
 
 # This code will only run if this file is executed directly (not imported)
 if __name__ == "__main__":

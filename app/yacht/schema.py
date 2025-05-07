@@ -5,8 +5,8 @@ from typing import List, Dict, Optional, Union
 class GameSettings(BaseModel):
     """게임 설정 모델"""
     people: int = Field(..., ge=1, le=4, description="플레이어 수")
-    map: Optional[str] = Field(None, description="맵 설정")
-    voice: bool = Field(False, description="음성 사용 여부")
+    map: int = Field(0, description="맵 설정")
+    voice: int = Field(0, description="음성 사용 여부")
 
 
 class DiceRoll(BaseModel):
