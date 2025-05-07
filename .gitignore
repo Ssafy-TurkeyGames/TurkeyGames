@@ -101,5 +101,8 @@ fabric.properties
 venv/
 
 # pytyhon
-__pycache__/
+__pycache__/*
 *.pyc
+
+#video 
+video_buffer.mmap

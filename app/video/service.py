@@ -2,6 +2,7 @@ import cv2
 import os
 import time
 import asyncio
+import threading # Added import
 from threading import Event
 from app.video.buffer_manager import CircularBuffer
 from app.video.video_writer import VideoSaver
@@ -166,15 +167,6 @@ class VideoService:
             post_seconds = self.config['buffer']['post_seconds']
             fps = self.config['video']['fps']
 
-            # Get the last trigger data from Redis
-            last_trigger_data = await redis_client.get("last_trigger_data")
-            print(f"Last trigger data: {last_trigger_data}")
-
-            # Compare the current data with the last trigger data
-            # and determine the priority for video recording
-            priority = self._determine_priority(last_trigger_data)
-            print(f"Priority: {priority}")
-
             # Now buffer contains frames from pre_seconds before trigger + post_seconds after trigger
             clip_frames = self.buffer.get_clip(
                 pre_seconds=pre_seconds,
@@ -199,16 +191,6 @@ class VideoService:
             self.is_saving = False
             print("🔄 Save state released.")
 
-
-    def _determine_priority(self, last_trigger_data):
-        """Determine the priority for video recording based on the last trigger data."""
-        # Implement your logic here to compare the current data with the last trigger data
-        # and determine the priority for video recording
-        # This is just a placeholder implementation
-        if last_trigger_data:
-            return 1
-        else:
-            return 0
 
     def stop(self):
         """서비스 중지 (카메라 스레드 종료)"""

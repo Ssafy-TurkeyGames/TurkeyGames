@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 from app.video.service import VideoService
-from app.cache.redis_client import redis_client
+
 
 router = APIRouter()
 
@@ -11,9 +11,6 @@ async def trigger_video_capture(request: Request, video_service: VideoService = 
     """
     data = await request.json()
     print(f"Received data: {data}")
-
-    # Store the data in Redis
-    await redis_client.set("last_trigger_data", str(data))
 
     video_service.on_trigger()
     return {"message": "Video capture triggered", "data": data}
