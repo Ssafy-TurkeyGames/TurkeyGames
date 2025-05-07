@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>주사위 실시간 테스트</title>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  </head>
+  <body>
+    <h2>🎲 주사위 값 실시간 수신 로그</h2>
+    <ul id="log"></ul>
+
+    <script>
+      const socket = io('http://localhost:8000/ws');
+      const logList = document.getElementById('log');
+
+      socket.on('connect', () => {
+        console.log('✅ Socket connected');
+      });
+
+      socket.on('dice_result', (data) => {
+        console.log('🎲 주사위 결과:', data);
+
+        const li = document.createElement('li');
+        li.textContent = `🎲 주사위 결과: ${data.dice}`;
+        logList.appendChild(li);
+      });
+    </script>
+  </body>
+</html>

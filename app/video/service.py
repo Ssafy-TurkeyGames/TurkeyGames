@@ -2,11 +2,13 @@ import cv2
 import threading
 import os
 import time
+import asyncio  # 비동기식 처리를 위해서 추가
 from threading import Timer, Event # Timer와 Event 임포트
 from app.video.buffer_manager import CircularBuffer
 from app.video.video_writer import VideoSaver
 from .trigger_detector import TriggerDetector
 from app.config import load_config
+from app.websocket.manager import send_dice_data  # 비동기식 처리를 위해 추가
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 
 
@@ -144,8 +146,8 @@ class VideoService:
         self.is_buffer_ready = False
         self.camera_ready_event.clear() # ✅ 스레드 종료 시 카메라 준비 안됨 신호
 
-
-    def on_trigger(self):
+# 🟦 기존 동기 함수 → 비동기 함수로 수정
+    async def on_trigger(self):
         """트리거 콜백 핸들러 - post_seconds 만큼 지연 후 저장 시작"""
         # 카메라 준비 완료 이벤트를 최대 1초간 기다림
         if not self.camera_ready_event.wait(timeout=1.0):
@@ -162,16 +164,20 @@ class VideoService:
 
         # post_seconds 후에 _finalize_and_save_clip 메소드 실행 예약
         # 이 시간 동안 _capture_frames 스레드는 계속 버퍼에 프레임을 추가합니다.
-        timer = Timer(post_seconds, self._finalize_and_save_clip)
-        timer.start()
+        # 🟥 Timer 제거 → asyncio 사용
+        asyncio.create_task(self._finalize_and_save_clip())
+        #timer = Timer(post_seconds, self._finalize_and_save_clip)
+        #timer.start()
 
-    def _finalize_and_save_clip(self):
+    # 🟦 기존 동기 함수 → 비동기 함수로 수정
+    async def _finalize_and_save_clip(self):
         """post_seconds 경과 후 실제 클립 생성 및 저장 로직"""
         print(f"⏰ {self.config['buffer']['post_seconds']}초 경과. 클립 생성 및 저장 실행...")
         try:
             pre_seconds = self.config['buffer']['pre_seconds']
             # post_seconds 값은 get_clip에서 직접 사용되진 않지만, 로직상 필요했던 시간임
             post_seconds = self.config['buffer']['post_seconds']
+            await asyncio.sleep(post_seconds)  # 🟥 대기 처리
             fps = self.config['video']['fps']
 
             # 이제 버퍼에는 트리거 이전 pre_seconds + 트리거 이후 post_seconds 동안의 프레임이 쌓여있음
@@ -193,6 +199,7 @@ class VideoService:
                 )
                 self.saver.save_clip(clip_frames, resolution)
                 print(f"✅ 클립 저장 완료.")
+                await send_dice_data({"clipSaved": True})  # 🟩 웹소켓으로 알림 전송
             else:
                 print("⚠️ 클립 생성 실패 (get_clip에서 빈 리스트 반환됨. 버퍼에 충분한 프레임이 없거나 다른 문제 발생)")
         except Exception as e:
