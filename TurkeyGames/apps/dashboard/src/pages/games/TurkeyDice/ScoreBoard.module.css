@@ -1,0 +1,91 @@
+/* apps/dashboard/src/pages/games/TurkeyDice/ScoreBoard.module.css */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #4e2e31;
+    background-image: url('../../../assets/images/dice-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+  }
+  
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .logo {
+    color: #f4a261;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .scoreCardsContainer {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    gap: 15px;
+    width: 100%;
+    max-width: 1200px;
+    margin-bottom: 30px;
+  }
+  
+  .buttonContainer {
+    margin-top: 20px;
+  }
+  
+  .resultButton {
+    background-color: #e76f51;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .resultButton:hover {
+    background-color: #f4a261;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    .scoreCardsContainer {
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .title {
+      font-size: 2rem;
+      margin: 15px 0 30px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .scoreCardsContainer {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  
