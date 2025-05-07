@@ -16,7 +16,7 @@
         <result column="level" property="level"/>
     </resultMap>
 
-    <select id="getGameListTest" resultMap="GameEntityEntityResultMap">
+    <select id="getGameList" resultMap="GameEntityEntityResultMap">
         SELECT * FROM get_game_list()
     </select>
 

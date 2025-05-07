@@ -8,7 +8,7 @@ import java.util.List;
 
 @Mapper
 public interface GameMapper {
-    public List<GameEntity> getGameListTest();
+    public List<GameEntity> getGameList();
 
     public List<GameEntity> getFilteredGameList(
             @Param("people") int[] people,

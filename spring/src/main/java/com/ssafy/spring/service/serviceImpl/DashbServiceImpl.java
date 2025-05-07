@@ -24,7 +24,7 @@ public class DashbServiceImpl implements DashbService {
     @Override
     public ResponseEntity<? super ResponseDto<List<GetGameListResponseDto>>> getGameList() {
         try {
-            List<GameEntity> gameEntities = gameMapper.getGameListTest();
+            List<GameEntity> gameEntities = gameMapper.getGameList();
             List<GetGameListResponseDto> response = gameEntities.stream()
                     .map(entity -> GetGameListResponseDto.builder()
                             .gameId(entity.getGameId())
