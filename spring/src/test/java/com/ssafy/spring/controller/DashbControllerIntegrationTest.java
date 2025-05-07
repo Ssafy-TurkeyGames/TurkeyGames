@@ -1,5 +1,6 @@
 package com.ssafy.spring.controller;
 
+import com.ssafy.spring.config.NoCacheConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,10 +9,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {NoCacheConfig.class})
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class DashbControllerIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
@@ -63,7 +66,7 @@ public class DashbControllerIntegrationTest {
 
     @Test
     void getFilteredGameList_success() {
-        String url = "/dashb/filter?people=2,3,4&level=1";
+        String url = "/dashb/filter?people=2&level=3,4";
         long startTime = System.currentTimeMillis();
 
         ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);
@@ -111,7 +114,7 @@ public class DashbControllerIntegrationTest {
 
     @Test
     void getGameDetailRule_success() {
-        String url = "/dashb/detail/1";
+        String url = "/dashb/detail/3";
         long startTime = System.currentTimeMillis();
 
         ResponseEntity<?> response = restTemplate.getForEntity(url, String.class);

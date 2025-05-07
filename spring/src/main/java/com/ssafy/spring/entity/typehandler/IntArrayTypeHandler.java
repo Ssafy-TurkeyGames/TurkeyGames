@@ -9,12 +9,21 @@ import java.util.stream.Collectors;
 
 public class IntArrayTypeHandler extends BaseTypeHandler<int[]> {
 
+//    @Override
+//    public void setNonNullParameter(PreparedStatement ps, int i, int[] parameter, JdbcType jdbcType) throws SQLException {
+//        String arrayString = "{" + Arrays.stream(parameter)
+//                .mapToObj(String::valueOf)
+//                .collect(Collectors.joining(",")) + "}";
+//        ps.setString(i, arrayString);
+//    }
+
     @Override
     public void setNonNullParameter(PreparedStatement ps, int i, int[] parameter, JdbcType jdbcType) throws SQLException {
-        String arrayString = "{" + Arrays.stream(parameter)
-                .mapToObj(String::valueOf)
-                .collect(Collectors.joining(",")) + "}";
-        ps.setString(i, arrayString);
+        // 반드시 boxed로 감싸야 합니다: int → Integer
+        Integer[] boxedArray = Arrays.stream(parameter).boxed().toArray(Integer[]::new);
+        // PostgreSQL INT[] 타입으로 변환
+        Array array = ps.getConnection().createArrayOf("INT", boxedArray);
+        ps.setArray(i, array);
     }
 
     private int[] parseArray(String result) {
