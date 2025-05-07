@@ -36,7 +36,7 @@ def extract_persons_from_pose(detections):
         confidences = result.conf  # 각 관절의 신뢰도
 
         if keypoints is not None and keypoints.shape[1] > 0:  # keypoints가 비어있지 않으면
-            print(f"Detected keypoints: {keypoints}")  # 디버깅 keypoints 출력
+            # print(f"Detected keypoints: {keypoints}")  # 디버깅 keypoints 출력
 
               # 신뢰도(confidence)가 0.5 이상인 좌표만 사용
             valid_keypoints = []
@@ -45,25 +45,24 @@ def extract_persons_from_pose(detections):
                 if keypoints[0][i][0] != 0.0 and keypoints[0][i][1] != 0.0 and confidences[0][i] > 0.5:
                     valid_keypoints.append(keypoints[0][i][:2])  # (x, y) 좌표만 저장
 
-            # 만약 중요한 관절이 유효하지 않다면 사람으로 인정하지 않음
-            if len(valid_keypoints) < 4:
+            # 어깨 2개와 팔꿈치 2개만 있으면 사람으로 인정
+            if len(valid_keypoints) >= 4:  # 어깨 2개, 팔꿈치 2개
+                # 유효한 좌표만 있을 때 어깨와 팔꿈치 좌표 추출
+                shoulder_left = valid_keypoints[5] if len(valid_keypoints) > 5 else None  # 어깨 왼쪽 (xy[5])
+                shoulder_right = valid_keypoints[6] if len(valid_keypoints) > 6 else None  # 어깨 오른쪽 (xy[6])
+                elbow_left = valid_keypoints[7] if len(valid_keypoints) > 7 else None  # 팔꿈치 왼쪽 (xy[7])
+                elbow_right = valid_keypoints[8] if len(valid_keypoints) > 8 else None  # 팔꿈치 오른쪽 (xy[8])
+
+                # 만약 필요한 좌표가 하나라도 없으면 사람으로 인식하지 않음
+                if None not in [shoulder_left, shoulder_right, elbow_left, elbow_right]:
+                    # 사람인지 판별하는 함수로 전송
+                    if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
+                        persons.append(result)
+                else:
+                    print("Missing keypoints for shoulders or elbows.")
+            else:
                 print("Not enough valid keypoints detected.")
-                continue
-            # valid_keypoints에서 어깨와 팔꿈치 좌표만 정확히 추출
-            try:
-                # 양쪽 어깨와 양쪽 팔꿈치가 동시에 인식되면 사람 1명으로 판단
-                shoulder_left = valid_keypoints[5]  # 어깨
-                shoulder_right = valid_keypoints[6]
-                elbow_left = valid_keypoints[7]  # 팔꿈치
-                elbow_right = valid_keypoints[8]
-            except IndexError:
-                print("Not enough valid keypoints for shoulders and elbows.")
-                continue
-            
-            # 사람인지 판별하는 함수로 전송
-            if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
-                persons.append(result)
-        else :
+        else:
             print("No valid keypoints detected")
     return persons
 
@@ -115,8 +114,8 @@ while True:
 
     results = model(frame)
 
-    print(f"Results: {results}")  # 전체 결과 출력
-    print(f"Keypoints: {results[0].keypoints}")  # keypoints 값 확인
+    # print(f"Results: {results}")  # 전체 결과 출력
+    # print(f"Keypoints: {results[0].keypoints}")  # keypoints 값 확인
 
     # Pose 모델을 사용해 사람 구분
     filtered_people = extract_persons_from_pose(results[0].keypoints)
