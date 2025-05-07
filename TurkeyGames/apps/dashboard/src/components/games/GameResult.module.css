@@ -1,0 +1,203 @@
+/* src/components/games/GameResult.module.css */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 20px;
+    background-color: #4e2e31;
+    background-image: url('../../assets/images/dice-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+  }
+  
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+  
+  .logo {
+    color: #f4a261;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  
+  .title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0;
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  .resultTable {
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 40px;
+  }
+  
+  .tableHeader {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 20px;
+    color: #f4a261;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .playerColumn {
+    flex: 1;
+  }
+  
+  .scoreColumn {
+    width: 100px;
+    text-align: center;
+  }
+  
+  .tableBody {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .noData {
+    padding: 20px;
+    text-align: center;
+    color: white;
+    font-size: 1.2rem;
+  }
+  
+  .playerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .playerRow:last-child {
+    border-bottom: none;
+  }
+  
+  .playerInfo {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .playerRank {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f4a261;
+    color: #4e2e31;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 50%;
+    margin-right: 15px;
+  }
+  
+  .playerNumber {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f4a261;
+    color: #4e2e31;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 50%;
+    margin-right: 15px;
+  }
+  
+  .playerName {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  .playerScore {
+    width: 100px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .buttonContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
+  
+  .buttonContainer button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .highlightButton {
+    background-color: #e76f51;
+    color: white;
+  }
+  
+  .retryButton {
+    background-color: #f4a261;
+    color: #4e2e31;
+  }
+  
+  .backButton {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  
+  .buttonContainer button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  @media (max-width: 768px) {
+    .title {
+      font-size: 2rem;
+    }
+    
+    .playerNumber {
+      width: 35px;
+      height: 35px;
+      font-size: 20px;
+    }
+    
+    .playerName {
+      font-size: 1rem;
+    }
+    
+    .playerScore {
+      font-size: 1.2rem;
+    }
+    
+    .buttonContainer {
+      flex-direction: column;
+      width: 100%;
+      max-width: 300px;
+    }
+    
+    .buttonContainer button {
+      width: 100%;
+    }
+  }
+  

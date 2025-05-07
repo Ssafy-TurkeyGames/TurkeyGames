@@ -44,7 +44,7 @@ export default function TurkeyDiceOptions() {
       <button
         className={styles.startBtn}
         onClick={() => {
-          alert(`게임 시작!\n${players}인, ${board}, ${voice}`);
+          navigate('/games/TurkeyDice/score');
         }}
       >
         게임 시작
