@@ -54,7 +54,9 @@ def extract_persons_from_pose(detections):
                 elbow_right = valid_keypoints[8] if len(valid_keypoints) > 8 else None  # 팔꿈치 오른쪽 (xy[8])
 
                 # 만약 필요한 좌표가 하나라도 없으면 사람으로 인식하지 않음
-                if None not in [shoulder_left, shoulder_right, elbow_left, elbow_right]:
+                # if None not in [shoulder_left, shoulder_right, elbow_left, elbow_right]:
+                if (shoulder_left is not None and shoulder_right is not None and
+                    (elbow_left is not None or elbow_right is not None)):
                     # 사람인지 판별하는 함수로 전송
                     if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
                         persons.append(result)
