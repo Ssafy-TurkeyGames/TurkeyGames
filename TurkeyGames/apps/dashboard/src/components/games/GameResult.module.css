@@ -12,6 +12,7 @@
     background-position: center;
     background-repeat: no-repeat;
     color: white;
+    position: relative;
   }
   
   .header {
@@ -22,34 +23,43 @@
   }
   
   .logo {
-    color: #f4a261;
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 10px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 120px;
+    height: auto;
+    cursor: pointer;
   }
   
   .title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin: 10px 0;
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin: 80px 0 40px;
     text-align: center;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    color: #fff;
+    text-shadow: 
+      2px 2px 4px rgba(0, 0, 0, 0.5),
+      0 0 10px rgba(255, 165, 0, 0.5);
   }
   
   .resultTable {
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     margin-bottom: 40px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
   
   .tableHeader {
     display: flex;
     justify-content: space-between;
-    padding: 10px 20px;
-    color: #f4a261;
-    font-weight: bold;
-    font-size: 1.2rem;
+    padding: 18px 30px;
+    background: #e76f51;
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
   }
   
   .playerColumn {
@@ -57,29 +67,20 @@
   }
   
   .scoreColumn {
-    width: 100px;
+    width: 150px;
     text-align: center;
   }
   
   .tableBody {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-
-  .noData {
-    padding: 20px;
-    text-align: center;
-    color: white;
-    font-size: 1.2rem;
+    background-color: rgba(255, 255, 255, 0.9);
   }
   
   .playerRow {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px 30px;
+    border-bottom: 2px solid #eee;
   }
   
   .playerRow:last-child {
@@ -89,115 +90,119 @@
   .playerInfo {
     display: flex;
     align-items: center;
-    flex: 1;
+    gap: 20px;
   }
-
+  
   .playerRank {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 40px;
-    height: 40px;
-    background-color: #f4a261;
+    width: 50px;
+    height: 50px;
+    background: #f4a261;
     color: #4e2e31;
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 28px;
+    font-weight: 800;
     border-radius: 50%;
-    margin-right: 15px;
-  }
-  
-  .playerNumber {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    background-color: #f4a261;
-    color: #4e2e31;
-    font-size: 24px;
-    font-weight: bold;
-    border-radius: 50%;
-    margin-right: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
   
   .playerName {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #4e2e31;
   }
   
   .playerScore {
-    width: 100px;
+    width: 150px;
     text-align: center;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #e76f51;
   }
   
   .buttonContainer {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 20px;
+    margin-top: 40px;
   }
   
   .buttonContainer button {
-    padding: 12px 20px;
+    padding: 16px 40px;
     border: none;
-    border-radius: 25px;
-    font-size: 1rem;
-    font-weight: bold;
+    border-radius: 35px;
+    font-size: 1.2rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   
   .highlightButton {
-    background-color: #e76f51;
+    background: linear-gradient(135deg, #e76f51, #f4a261);
     color: white;
   }
   
   .retryButton {
-    background-color: #f4a261;
+    background: linear-gradient(135deg, #f4a261, #e9c46a);
     color: #4e2e31;
   }
   
   .backButton {
-    background-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
     color: white;
+    border: 2px solid rgba(255, 255, 255, 0.2);
   }
   
   .buttonContainer button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   }
   
   @media (max-width: 768px) {
     .title {
-      font-size: 2rem;
+      font-size: 2.2rem;
+      margin: 60px 0 30px;
     }
-    
-    .playerNumber {
-      width: 35px;
-      height: 35px;
-      font-size: 20px;
+  
+    .resultTable {
+      margin-bottom: 30px;
     }
-    
+  
+    .tableHeader {
+      padding: 14px 20px;
+      font-size: 1.1rem;
+    }
+  
+    .playerRow {
+      padding: 15px 20px;
+    }
+  
+    .playerRank {
+      width: 40px;
+      height: 40px;
+      font-size: 24px;
+    }
+  
     .playerName {
-      font-size: 1rem;
-    }
-    
-    .playerScore {
       font-size: 1.2rem;
     }
-    
+  
+    .playerScore {
+      font-size: 1.4rem;
+    }
+  
     .buttonContainer {
       flex-direction: column;
       width: 100%;
       max-width: 300px;
     }
-    
+  
     .buttonContainer button {
       width: 100%;
+      padding: 14px;
+      font-size: 1.1rem;
     }
   }
   

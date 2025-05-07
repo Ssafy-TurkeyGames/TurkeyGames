@@ -3,9 +3,6 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 
 function createWindow() {
-  // 대시보드 웹 (React) - 브라우저에서 직접 접속
-  // http://localhost:3000
-
   // 게임보드 창 생성
   const gameboard = new BrowserWindow({
     width: 1920,

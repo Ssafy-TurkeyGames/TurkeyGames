@@ -11,7 +11,6 @@ interface SearchBarProps {
 
 const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder }) => (
   <div className={styles.searchBar}>
-    <img src={searchIcon} alt="검색" className={styles.icon} />
     <input
       className={styles.input}
       type="text"
@@ -19,6 +18,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder }) =
       onChange={onChange}
       placeholder={placeholder || '게임을 검색해보세요'}
     />
+    <img src={searchIcon} alt="검색" className={styles.icon} />
   </div>
 );
 

@@ -1,9 +1,10 @@
-/* apps\dashboard\src\components\games\TurkeyDice/ScoreCard.module.css */
+/* components/games/TurkeyDice/ScoreCard.module.css */
 .scoreCard {
     display: flex;
     flex-direction: column;
     width: 220px;
     margin: 0 10px 20px;
+    transition: all 0.3s ease;
   }
   
   .playerHeader {
@@ -45,33 +46,72 @@
   
   .scoreTable {
     background-color: white;
-    border-radius: 12px;  /* 모서리를 더 둥글게 수정 */
+    border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
-  .scoreItem {
-    padding: 8px 12px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-    color: #333;
-    font-size: 0.9rem;
+  .scoreTable table {
+    width: 100%;
+    border-collapse: collapse;
   }
   
-  .scoreItem:last-child {
+  .scoreTable tr {
+    border-bottom: 1px solid #eee;
+  }
+  
+  .scoreTable tr:last-child {
     border-bottom: none;
   }
   
-  .completed {
+  .scoreTable td {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  
+  .itemName {
+    text-align: left;
+  }
+  
+  .itemScore {
+    text-align: right;
+    font-weight: bold;
+  }
+  
+  .completed td {
     color: #e76f51;
     font-weight: bold;
   }
   
+  /* 1등 스타일 강조 */
+  .firstPlace .playerNumber {
+    font-size: 32px;
+    width: 60px;
+    height: 60px;
+    background-color: #ffc107;
+    color: #4e2e31;
+  }
+  
+  .firstPlace .playerName {
+    font-size: 1.2rem;
+  }
+  
+  .firstPlace .scoreValue {
+    font-size: 1.2rem;
+  }
+  
   @media (max-width: 768px) {
     .scoreCard {
-      width: 45%;  /* 화면이 작아지면 너비를 45%로 설정하여 한 줄에 2개 표시 */
+      width: 45%;
       max-width: 220px;
       margin: 0 5px 15px;
+    }
+    
+    .firstPlace {
+      order: -1; /* 모바일에서 1등을 맨 위로 배치 */
+      width: 90%;
+      max-width: 300px;
     }
   }
   
@@ -79,6 +119,10 @@
     .scoreCard {
       width: 100%;
       max-width: 250px;
+    }
+    
+    .firstPlace {
+      max-width: 280px;
     }
   }
   
