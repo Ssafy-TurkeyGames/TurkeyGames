@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ScoreBoard.module.css';
 import ScoreCard from '../../../components/games/TurkeyDice/ScoreCard';
+import logo from '../../../assets/images/logo.png';
 
 interface PlayerData {
   id: number;
@@ -54,9 +55,21 @@ const ScoreBoard: React.FC = () => {
     const handleGameResult = () => {
         navigate('/games/TurkeyDice/result');
       };
+    
+    const handleHomeButton = () => {
+        navigate('/');  
+    }
 
   return (
       <div className={styles.container}>
+        <span
+            className={styles.logo}
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
+            title="홈으로 이동"
+            >
+            <img src={logo} alt="logo" className={styles.logoImg} />
+        </span>
         <h1 className={styles.title}>점수 현황</h1>
         <div className={styles.scoreCardsContainer}>
           {players.map(player => (

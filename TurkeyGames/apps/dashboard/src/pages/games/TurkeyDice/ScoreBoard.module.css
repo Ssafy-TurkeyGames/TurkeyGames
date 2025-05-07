@@ -22,12 +22,13 @@
   }
   
   .logo {
-    color: #f4a261;
-    font-size: 28px;
-    font-weight: bold;
-    margin-bottom: 10px;
+
   }
-  
+
+  .logoImg {
+
+  }
+
   .title {
     font-size: 2.5rem;
     font-weight: bold;
@@ -65,6 +66,24 @@
   }
   
   .resultButton:hover {
+    background-color: #f4a261;
+    transform: translateY(-2px);
+  }
+
+  .homeButton {
+    background-color: #e76f51;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .homeButton:hover {
     background-color: #f4a261;
     transform: translateY(-2px);
   }
