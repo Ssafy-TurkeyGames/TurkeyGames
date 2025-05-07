@@ -1,0 +1,104 @@
+/* apps/dashboard/src/components/games/Highlight.module.css */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modalContent {
+    background-color: #b44e47; /* 이미지와 유사한 빨간색 배경 */
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    border-radius: 15px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .closeIcon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .modalTitle {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 12px 20px;
+    border-radius: 50px;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 16px;
+    max-width: 90%;
+  }
+  
+  .qrCodeContainer {
+    background-color: white;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .qrCode {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .arrowRight {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid transparent;
+    border-left: 20px solid white;
+  }
+  
+  @media (max-width: 768px) {
+    .modalContent {
+      width: 90%;
+      padding: 20px;
+    }
+    
+    .modalTitle {
+      font-size: 14px;
+    }
+    
+    .qrCode {
+      width: 150px;
+      height: 150px;
+    }
+  }
+  
