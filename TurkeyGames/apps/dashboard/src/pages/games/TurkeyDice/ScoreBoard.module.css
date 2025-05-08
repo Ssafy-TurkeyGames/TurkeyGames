@@ -69,24 +69,6 @@
     background-color: #f4a261;
     transform: translateY(-2px);
   }
-
-  .homeButton {
-    background-color: #e76f51;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-  }
-  
-  .homeButton:hover {
-    background-color: #f4a261;
-    transform: translateY(-2px);
-  }
   
   @media (max-width: 768px) {
     .scoreCardsContainer {
