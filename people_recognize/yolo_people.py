@@ -36,36 +36,30 @@ def extract_persons_from_pose(detections):
         confidences = result.conf  # 각 관절의 신뢰도
 
         if keypoints is not None and keypoints.shape[1] > 0:  # keypoints가 비어있지 않으면
-            # print(f"Detected keypoints: {keypoints}")  # 디버깅 keypoints 출력
-
-              # 신뢰도(confidence)가 0.5 이상인 좌표만 사용
+            # 신뢰도(confidence)가 0.5 이상인 좌표만 사용
             valid_keypoints = []
             for i in range(keypoints.shape[1]):
                 # 좌표가 (0.0, 0.0) 이거나 신뢰도가 너무 낮은 경우를 제외
-                if keypoints[0][i][0] != 0.0 and keypoints[0][i][1] != 0.0 and confidences[0][i] > 0.5:
+                if keypoints[0][i][0] != 0.0 and keypoints[0][i][1] != 0.0 and confidences[0][i] > 0.3:
                     valid_keypoints.append(keypoints[0][i][:2])  # (x, y) 좌표만 저장
 
-            # 어깨 2개와 팔꿈치 2개만 있으면 사람으로 인정
-            if len(valid_keypoints) >= 4:  # 어깨 2개, 팔꿈치 2개
-                # 유효한 좌표만 있을 때 어깨와 팔꿈치 좌표 추출
-                shoulder_left = valid_keypoints[5] if len(valid_keypoints) > 5 else None  # 어깨 왼쪽 (xy[5])
-                shoulder_right = valid_keypoints[6] if len(valid_keypoints) > 6 else None  # 어깨 오른쪽 (xy[6])
-                elbow_left = valid_keypoints[7] if len(valid_keypoints) > 7 else None  # 팔꿈치 왼쪽 (xy[7])
-                elbow_right = valid_keypoints[8] if len(valid_keypoints) > 8 else None  # 팔꿈치 오른쪽 (xy[8])
+            # 목, 왼쪽 어깨, 오른쪽 어깨, 왼쪽 팔꿈치, 오른쪽 팔꿈치의 인덱스
+            keypoints_required = [1, 5, 6, 7, 8]
+            count_valid_keypoints = 0
 
-                # 만약 필요한 좌표가 하나라도 없으면 사람으로 인식하지 않음
-                # if None not in [shoulder_left, shoulder_right, elbow_left, elbow_right]:
-                if (shoulder_left is not None and shoulder_right is not None and
-                    (elbow_left is not None or elbow_right is not None)):
-                    # 사람인지 판별하는 함수로 전송
-                    if is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
-                        persons.append(result)
-                else:
-                    print("Missing keypoints for shoulders or elbows.")
+            # 필수 키포인트들 중 유효한 키포인트 개수 셈
+            for idx in keypoints_required:
+                if len(valid_keypoints) > idx and valid_keypoints[idx] is not None:
+                    count_valid_keypoints += 1
+
+            # 유효한 키포인트가 3개 이상인 경우 사람으로 인정
+            if count_valid_keypoints >= 3:
+                persons.append(result)
             else:
-                print("Not enough valid keypoints detected.")
+                print(f"Not enough valid keypoints. Found {count_valid_keypoints} valid points.")
         else:
             print("No valid keypoints detected")
+
     return persons
 
 def is_valid_person(shoulder_left, shoulder_right, elbow_left, elbow_right):
