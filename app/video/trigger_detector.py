@@ -22,10 +22,10 @@ class TriggerDetector:
     def _setup_api_trigger(self):
         api_config = self.config.get('triggers', {}).get('api', {})
         endpoint = api_config.get('endpoint', '/trigger') # Default endpoint
-        secret_key = api_config.get('secret_key')
-
-        if not secret_key:
-            print("⚠️ API trigger secret key not configured. API trigger will not be secured.")
+        # secret_key = api_config.get('secret_key')
+        #
+        # if not secret_key:
+        #     print("⚠️ API trigger secret key not configured. API trigger will not be secured.")
 
         api_key_header = APIKeyHeader(name="X-API-KEY", auto_error=False)
 
@@ -34,8 +34,8 @@ class TriggerDetector:
                 background_tasks: BackgroundTasks,
                 api_key: str = Security(api_key_header)
         ):
-            if secret_key and api_key != secret_key: # Check key only if configured
-                raise HTTPException(status_code=401, detail="Invalid API key")
+            # if secret_key and api_key != secret_key: # Check key only if configured
+            #     raise HTTPException(status_code=401, detail="Invalid API key")
             
             # Ensure callback is callable
             if callable(self.callback):
