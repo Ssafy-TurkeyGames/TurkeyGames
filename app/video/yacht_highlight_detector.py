@@ -25,7 +25,7 @@ class YachtHighlightDetector:
             # 한 번의 game_state 업데이트에서 여러 조건이 동시에 만족될 수 있으나,
             # 우선순위가 가장 높은 하나만 선택하여 하이라이트를 생성하고 반환합니다.
             # 만약 한 번의 주사위 굴림으로 여러 하이라이트 조건(예: 야추와 동시에 보너스 달성)을
-            # 모두 기록하고 싶다면, 아래 return 문들을 제거하고 각 조건마다 create_highlight를 호출하도록 수정해야 합니다.
+            # 모두 기록하고 싶다면, 아래 return 문들을 제거하고 각 조건마다 create_highlight를 호출하도록 수정
             # 현재 로직은 "가장 중요한" 하이라이트 하나만 그 시점에 기록합니다.
             return
 
@@ -63,7 +63,6 @@ class YachtHighlightDetector:
         UPPER_SECTION_CATEGORIES = ["ace", "dual", "triple", "quad", "penta", "hexa"]
         UPPER_SECTION_BONUS_THRESHOLD = 63 # 통상적인 야추 규칙
         BONUS_POINTS = 35
-        # TURNS_TO_PROJECT = 4 # 이제 파라미터로 받음
 
         max_projected_opponent_final_score = 0
 
@@ -79,7 +78,7 @@ class YachtHighlightDetector:
             # 1. 사용 가능한 카테고리에서 얻을 수 있는 최대 점수 추가
             for category, max_score in MAX_CATEGORY_SCORES.items():
                 # 카테고리가 아직 채워지지 않았거나 (값이 None), 키 자체가 없다면 사용 가능으로 간주합니다.
-                # 만약 점수판에 0점으로 기록되었다면 (값이 0), 해당 카테고리는 이미 사용된 것입니다.
+                # 만약 점수판에 0점으로 기록되었다면 (값이 0), 해당 카테고리는 이미 사용된 것.
                 if opponent_scorecard.get(category) is None:
                     potential_scores_for_opponent.append(max_score)
             

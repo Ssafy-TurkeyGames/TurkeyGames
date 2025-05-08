@@ -8,6 +8,7 @@ import uvicorn
 
 from app.routers import yacht_router
 from app.routers import fivesec_router
+from app.routers import download_router # Import the new download router
 from app.routers.video_router import create_video_router
 from app.video.yacht_highlight_detector import YachtHighlightDetector
 from app.websocket.manager import socket_app
@@ -39,6 +40,7 @@ app.add_middleware(
 
 app.include_router(yacht_router)
 app.include_router(fivesec_router)
+app.include_router(download_router.router) # Include the download router
 
 
 # video 초기화
@@ -87,4 +89,3 @@ app.mount("/ws", socket_app)  # 👉 웹소켓 전용 prefix 부여
 if __name__ == "__main__":
     # Run the server with Uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
