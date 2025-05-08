@@ -5,26 +5,3 @@
     height: 100%;
     background-color: #592E36;
 }
-
-.turkey {
-    animation: rotate 15s linear infinite;
-    display: inline-block;
-}
-
-@keyframes rotate {
-    from {
-      transform: rotate(0deg);
-    }
-  
-    to {
-      transform: rotate(360deg);
-    }
-}
-
-.turkey>img {
-    transition: transform 0.3s ease;
-}
-
-.turkey>img:active {
-    transform: scale(0.8);
-}
