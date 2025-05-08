@@ -1,4 +1,4 @@
-/* app/dashboard/src/pages/SearchGame.module.css */
+/* apps/dashboard/src/pages/SearchGame.module.css */
 
 .container {
     width: 100%;
@@ -63,7 +63,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 0 0 18px 0; /* 상단 마진 제거 */
+    margin: 70px 0 25px 0; /* 상단 마진 제거 */
     justify-content: center;
   }
   
@@ -75,7 +75,7 @@
     padding: 8px 26px;
     font-size: 20px;
     font-weight: 700;
-    margin: 120px 0 10px 0;
+    margin: 0;
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
   }
@@ -87,7 +87,7 @@
   .divider {
     font-size: 24px;
     color: #d6a75f;
-    margin: 120px 20px 12px 20px;
+    margin: 0 18px 0px 18px;
   }
   
   .cardList {
@@ -188,7 +188,7 @@
     margin-bottom: 8px;
   }
   .ruleBtn:hover {
-    background: #ffb84d;
+    background: #823333;
     color: #fff;
   }
   
@@ -197,7 +197,7 @@
     color: #fff;
   }
   .playBtn:hover {
-    background: #fff;
-    color: #d96c4a;
+    background: #823333;
+    color: #fff;
   }
   

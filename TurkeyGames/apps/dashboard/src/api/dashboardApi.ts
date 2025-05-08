@@ -37,16 +37,20 @@ export const getFilteredGames = async (
 
 // 키워드로 게임 검색
 export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse<Game[]>> => {
-    if (!keyword.trim()) {
-      return getAllGames();
-    }
+  console.log('API 검색 요청:', keyword);
+  if (!keyword.trim()) {
+    return getAllGames();
+  }
     
-    const response = await axiosInstance.get<ApiResponse<Game[]>>(`/dashb/search?title=${encodeURIComponent(keyword)}`);
-    return response.data;
-  };
+  const url = `/dashb/search?title=${encodeURIComponent(keyword)}`;
+  console.log('요청 URL:', url);
+  const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
+  console.log('검색 응답:', response.data);
+  return response.data;
+};
 
-  // 게임 규칙 조회 API 추가
-export const getGameRule = async (game_id: string | number): Promise<ApiResponse<GameRule>> => {
-    const response = await axiosInstance.get<ApiResponse<GameRule>>(`/dashb/detail/${game_id}`);
+  // 게임 규칙 조회 API
+export const getGameRule = async (gameId: string | number): Promise<ApiResponse<GameRule>> => {
+    const response = await axiosInstance.get<ApiResponse<GameRule>>(`/dashb/detail/${gameId}`);
     return response.data;
   };
