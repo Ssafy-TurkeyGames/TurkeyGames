@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-import asyncio # Added import
+import asyncio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,8 +7,10 @@ import uvicorn
 
 from app.routers import yacht_router
 from app.routers import fivesec_router
+from app.routers.video_router import create_video_router
 from app.websocket.manager import socket_app
 from app.video import VideoService
+from app.video.trigger_detector import TriggerDetector
 
 # FastAPI 앱 초기화
 app = FastAPI(title="Turkey Games")
@@ -22,44 +24,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 라우터 등록
 app.include_router(yacht_router)
 app.include_router(fivesec_router)
 
-app.include_router(video_router)
-
-# video 초기화
+# lifespan context manager for initialization and cleanup
 @asynccontextmanager
-async def lifespan(app_instance: FastAPI): # Renamed app to app_instance to avoid conflict
+async def lifespan(app_instance: FastAPI):
     print("🚀 Application startup: Initializing services...")
     video_service = VideoService()
-    app_instance.state.video_service = video_service # Store for potential access if needed
+    app_instance.state.video_service = video_service
 
     current_loop = asyncio.get_event_loop()
     trigger_detector = TriggerDetector(
-        config=video_service.config,  # Use config from the single video_service
+        config=video_service.config,
         callback=video_service.on_trigger,
         loop=current_loop
     )
-    app_instance.state.trigger_detector = trigger_detector # Store for potential access
+    app_instance.state.trigger_detector = trigger_detector
 
-    # Create and include the video router, passing dependencies
+    # video_router만 의존성이 필요하므로 lifespan 내부에서 생성 및 등록
     video_router_instance = create_video_router(video_service, trigger_detector)
     app_instance.include_router(video_router_instance)
 
-    # Include other routers
-    app_instance.include_router(yacht_router)
-    app_instance.include_router(api_router)
-    
     print("✅ Services initialized and routers included.")
     yield
-    
+
     print("⏳ 애플리케이션 종료 중... VideoService 중지 시도...")
     video_service.stop()
     print("🛑 VideoService 중지 완료.")
 
 # Assign lifespan to the app
-app.router.lifespan_context = lifespan
+app.lifespan = lifespan
 
 @app.get("/")
 def read_root():
