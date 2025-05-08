@@ -181,7 +181,7 @@ class VideoService:
                     int(self.config['camera']['height'])
                 )
                 self.saver.save_clip(clip_frames, resolution)
-                print(f"✅ Clip save complete.")
+                print(f"✅ 클립 저장 완료.")
             else:
                 print("⚠️ Clip creation failed (empty list returned from get_clip. Insufficient frames in buffer or other issue occurred)")
         except Exception as e:

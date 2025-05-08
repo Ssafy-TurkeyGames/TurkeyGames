@@ -34,6 +34,7 @@ class DiceGame:
             "dice_values": [0, 0, 0, 0, 0],
             "rolls_left": MAX_ROLL_PER_TURN,
             "status": "waiting"
+            "turn_counts": {pid: 0 for pid in player_ids},  # 각 플레이어별 턴 수
         }
 
         # 인메모리 저장소에 게임 상태 저장

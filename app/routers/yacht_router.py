@@ -76,6 +76,7 @@ async def select_score(
         game_id: str,
         selection: schema.ScoreSelection,
         background_tasks: BackgroundTasks,
+        request: Request, # 앱 상태 접근을 위함
         db: Session = Depends(get_db)
 ):
     """점수 선택 및 기록"""
@@ -90,6 +91,21 @@ async def select_score(
 
     # 점수 업데이트
     success = crud.update_player_score(db, selection.player_id, selection.category, selection.value)
+    if success :
+        game["turn_counts"][selection.player_id] += 1  # 턴 수 증가
+        remaining_turns = 12 - game["turn_counts"][selection.player_id]
+    
+        # 2. 하이라이트 트리거 호출 추가 (아래 코드 추가)
+        yacht_detector = request.app.state.yacht_highlight_detector
+        all_scores = await get_scores(game_id, db)  # 기존 코드 재사용
+        background_tasks.add_task(
+            yacht_detector.process_game_state,
+            game_id,
+            selection.player_id,
+            game["dice_values"],
+            {str(s.player_id): s.dict() for s in all_scores.scores},
+            remaining_turns
+        )
     if not success:
         raise HTTPException(status_code=400, detail="이미 선택한 카테고리이거나 점수를 업데이트할 수 없습니다")
 
@@ -119,6 +135,7 @@ async def select_score(
                     player_score.small_straight + player_score.large_straight +
                     player_score.turkey
             )
+            
 
             scores.append(schema.PlayerScore(
                 player_id=player_id,
