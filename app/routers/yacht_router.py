@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.db import crud
 from app.yacht import schema
 from app.yacht.dice import DiceGame
-from app.websocket.manager import broadcast_scores
+from app.websocket.manager import broadcast_scores, game_rooms, sio
 
 # 요트 게임 라우터 초기화
 router = APIRouter(
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post("/start", response_model=schema.GameState)
-async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db)):
+async def start_game(settings: schema.GameSettings, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """새 게임 시작"""
     # 게임 설정 저장
     db_setting = crud.create_game_setting(db, settings)
@@ -32,7 +32,8 @@ async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db
     # 게임 ID가 문자열인지 확인 (Pydantic 검증 통과를 위해)
     game_id_str = str(game_id) if game_id else "1"
 
-    return schema.GameState(
+    # 게임 상태 생성
+    game_state = schema.GameState(
         id=game_id_str,
         players=player_ids,
         current_player_idx=0,
@@ -41,6 +42,12 @@ async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db
         status="waiting"
     )
 
+    # 로비에 게임 생성 정보 전송
+    background_tasks.add_task(sio.emit, 'game_created', {
+        "game_id": game_id_str,
+        "settings": settings.dict()
+    })
+    return game_state
 
 @router.get("/{game_id}/status", response_model=schema.GameState)
 async def get_game_status(game_id: str):
