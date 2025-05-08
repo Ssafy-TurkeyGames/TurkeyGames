@@ -3,6 +3,7 @@ import asyncio
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html  # ✅ 추가
 import uvicorn
 
 from app.routers import yacht_router
@@ -12,9 +13,20 @@ from app.websocket.manager import socket_app
 from app.video import VideoService
 from app.video.trigger_detector import TriggerDetector
 
-# FastAPI 앱 초기화
-app = FastAPI(title="Turkey Games")
+# ✅ Swagger 자동 docs 끔 → 직접 커스터마이징
+app = FastAPI(
+    title="Turkey Games"
+)
 
+# ✅ Swagger UI 직접 구성
+@app.get("/docs", include_in_schema=False)  # 이 부분을 수정 (/fastapi 제거)
+async def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url="/openapi.json",  # 이 부분을 수정 (/fastapi 제거)
+        title="Turkey Games Swagger",
+        swagger_js_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui-bundle.js",
+        swagger_css_url="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/swagger-ui.css"
+    )
 # CORS 설정
 app.add_middleware(
     CORSMiddleware,
@@ -61,7 +73,8 @@ def read_root():
     return {"message": "Welcome to Turkey Games API"}
 
 # Socket.IO 앱 마운트
-app.mount("/", socket_app)
+#app.mount("/", socket_app) >>socket_app mount 경로 변경 (가장 권장)
+app.mount("/ws", socket_app)  # 👉 웹소켓 전용 prefix 부여
 
 # This code will only run if this file is executed directly (not imported)
 if __name__ == "__main__":
