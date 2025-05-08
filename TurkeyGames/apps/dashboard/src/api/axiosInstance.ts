@@ -15,23 +15,17 @@ const axiosInstance = axios.create({
 
 // 요청 인터셉터
 axiosInstance.interceptors.request.use(
-    (config) => {
-      return config;
-    },
-    (error) => {
-      return Promise.reject(error);
-    }
-  );
+    (config) => config,
+    (error) => Promise.reject(error)
+    );
 
 // 응답 인터셉터
 axiosInstance.interceptors.response.use(
-    (response) => {
-      return response;
-    },
+    (response) => response,
     (error) => {
-      console.error('API 호출 오류:', error);
-      return Promise.reject(error);
+        console.error('API 호출 오류:', error);
+        return Promise.reject(error);
     }
-  );
+    );
 
 export default axiosInstance;

@@ -21,21 +21,19 @@ export const getAllGames = async (): Promise<ApiResponse<Game[]>> => {
   };
 
 // 필터링된 게임 목록 조회
-export const getFilteredGames = async (people?: number[], level?: number[]): Promise<ApiResponse<Game[]>> => {
-  let queryParams = '';
+export const getFilteredGames = async (
+    people?: number[],
+    level?: number[]
+  ): Promise<ApiResponse<Game[]>> => {
+    const params = new URLSearchParams();
+
+    params.append('people', people?.join(',') || '');
+    params.append('level', level?.join(',') || '');
   
-  if (people && people.length > 0) {
-    queryParams += `people=${people.join(',')}`;
-  }
-  
-  if (level && level.length > 0) {
-    queryParams += queryParams ? `&level=${level.join(',')}` : `level=${level.join(',')}`;
-  }
-  
-  const url = queryParams ? `/dashb/filter?${queryParams}` : '/dashb';
-  const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
-  return response.data;
-};
+    const url = `/dashb/filter?${params.toString()}`;
+    const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
+    return response.data;
+  };
 
 // 키워드로 게임 검색
 export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse<Game[]>> => {
