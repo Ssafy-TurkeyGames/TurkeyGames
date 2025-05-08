@@ -1,6 +1,5 @@
 .turkey {
     animation: rotate 15s linear infinite;
-    display: inline-block;
 }
 
 @keyframes rotate {
