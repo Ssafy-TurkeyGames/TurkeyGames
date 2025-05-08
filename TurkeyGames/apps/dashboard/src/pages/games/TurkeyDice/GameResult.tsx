@@ -11,7 +11,11 @@ const TurkeyDiceResult: React.FC = () => {
     { id: 4, name: '동현', score: 200 }
   ];
 
-  return <GameResult players={players} gameId="TurkeyDice" />;
+  return (
+    <div className={StyleSheet.container}>
+      <GameResult players={players} gameId="TurkeyDice"/>;
+    </div>
+  )
 };
 
 export default TurkeyDiceResult;
