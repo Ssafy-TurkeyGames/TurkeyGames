@@ -1,5 +1,8 @@
 .turkey {
-    animation: rotate 15s linear infinite;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: rotate 15s linear infinite;
 }
 
 @keyframes rotate {
@@ -13,9 +16,10 @@
 }
 
 .turkey>img {
-    transition: transform 0.3s ease;
+  width: 50%;
+  transition: transform 0.3s ease;
 }
 
 .turkey>img:active {
-    transform: scale(0.8);
+  transform: scale(0.8);
 }
