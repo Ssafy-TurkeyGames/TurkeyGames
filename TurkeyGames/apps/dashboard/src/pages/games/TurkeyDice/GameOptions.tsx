@@ -1,6 +1,7 @@
 /* apps/dashboard/src/pages/games/TurkeyDice/GameOptions.tsx */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../../../components/common/Button/Button';
 import PlayerOption from '../../../components/common/PlayerOption/PlayerOption';
 import BoardSelect from '../../../components/games/TurkeyDice/BoardSelect';
 import VoiceOption from '../../../components/games/VoiceOption';
@@ -41,14 +42,15 @@ export default function TurkeyDiceOptions() {
           <div className={styles.badge}>{voice}</div>
         </div>
       </div>
-      <button
+      <Button
+        variant="primary"
         className={styles.startBtn}
         onClick={() => {
           navigate('/games/TurkeyDice/score');
         }}
       >
         게임 시작
-      </button>
+      </Button>
     </div>
   );
 
@@ -66,11 +68,13 @@ export default function TurkeyDiceOptions() {
               onSelect={setPlayers}
               title="플레이어 수를 선택하세요"
             />
-            <button
-              className={styles.nextBtn}
+            <Button
+              variant="primary"
               disabled={players === null}
               onClick={() => setStep(1)}
-            >다음</button>
+            >
+              다음
+            </Button>
           </div>
         )}
         {step === 1 && (

@@ -2,7 +2,13 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './GameResult.module.css';
-import logo from '../../assets/images/logo.png';
+import Logo from '../common/Logo';
+// 등수 이미지 import
+import rank1 from '../../assets/images/ranks/1.png';
+import rank2 from '../../assets/images/ranks/2.png';
+import rank3 from '../../assets/images/ranks/3.png';
+import rank4 from '../../assets/images/ranks/4.png';
+import rankEffect from '../../assets/images/ranks/rank_effect.png';
 
 interface PlayerResult {
   id: number;
@@ -34,6 +40,17 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
     return { ...player, rank: currentRank };
   });
 
+  // 등수별 이미지 매핑
+  const getRankImage = (rank: number) => {
+    switch(rank) {
+      case 1: return rank1;
+      case 2: return rank2;
+      case 3: return rank3;
+      case 4: return rank4;
+      default: return rank4;
+    }
+  };
+
   const handleHighlightClick = () => {
     navigate('/games/TurkeyDice/highlight', {
       state: {
@@ -45,63 +62,63 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
   };
 
   const handleRetryClick = () => navigate(`/games/${gameId}/options`);
-  const handleBackClick = () => navigate(-1);
+  const handleBackClick = () => navigate('/');
 
   return (
     <div className={styles.container}>
-      <div className={styles.fireworks}></div>
-      
-      <img 
-        src={logo}
-        alt="Turkey Games Logo" 
-        className={styles.logo}
-        onClick={() => navigate('/')}
-      />
-      
-      <div className={styles.buttonContainer}>
-        <button className={styles.highlightButton} onClick={handleHighlightClick}>
-          하이라이트
-        </button>
-        <button className={styles.retryButton} onClick={handleRetryClick}>
-          다시하기
-        </button>
-        <button className={styles.backButton} onClick={handleBackClick}>
-          그만하기
-        </button>
+    <div className={styles.logoContainer}>
+      <Logo size="medium" />
+    </div>
+    
+    <h1 className={styles.title}>게임 결과</h1>
+    
+    <div className={styles.resultContainer}>
+      <div className={styles.resultHeader}>
+        <div className={styles.rankHeader}>RANK</div>
+        <div className={styles.playerHeader}>PLAYER</div>
+        <div className={styles.scoreHeader}>SCORE</div>
       </div>
       
-      <h1 className={styles.title}>게임 결과</h1>
-      
-      <div className={styles.resultArea}>
-        <div className={styles.rankNumbers}>
-          {rankedPlayers.map((player) => (
-            <div key={`rank-${player.id}`} className={styles.bigRankNumber}>
-              {player.rank}
+      <div className={styles.resultRows}>
+        {rankedPlayers.map((player) => (
+          <div 
+            key={player.id} 
+            className={`${styles.resultRow} ${player.rank === 1 ? styles.firstPlace : ''}`}
+          >
+            <div className={styles.rankCell}>
+              <img 
+                src={getRankImage(player.rank || 1)} 
+                alt={`${player.rank}등`} 
+                className={styles.rankImage}
+              />
+              {player.rank === 1 && (
+                <img 
+                  src={rankEffect} 
+                  alt="1등 효과" 
+                  className={styles.rankEffect}
+                />
+              )}
             </div>
-          ))}
-        </div>
-        
-        <div className={styles.resultTable}>
-          <div className={styles.tableHeader}>
-            <div className={styles.playerColumn}>PLAYER</div>
-            <div className={styles.scoreColumn}>SCORE</div>
+            <div className={styles.playerName}>{player.name}</div>
+            <div className={styles.playerScore}>{player.score}</div>
           </div>
-          
-          <div className={styles.tableBody}>
-            {rankedPlayers.map((player) => (
-              <div 
-                key={player.id} 
-                className={styles.playerRow}
-              >
-                <div className={styles.playerName}>{player.name}</div>
-                <div className={styles.playerScore}>{player.score}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </div>
-  );
+    
+    <div className={styles.buttonContainer}>
+      <button className={styles.highlightButton} onClick={handleHighlightClick}>
+        하이라이트
+      </button>
+      <button className={styles.retryButton} onClick={handleRetryClick}>
+        다시하기
+      </button>
+      <button className={styles.backButton} onClick={handleBackClick}>
+        그만하기
+      </button>
+    </div>
+  </div>
+);
 };
 
 export default GameResult;

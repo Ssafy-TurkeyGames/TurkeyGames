@@ -31,26 +31,38 @@ export default function BoardSelect({
       </div>
       
       <div className={styles.boardGrid}>
-        <Button
+        <div 
           className={`${styles.boardCard} ${selectedBoard === 'Turkey' ? styles.active : ''}`}
           onClick={() => onSelect('Turkey')}
         >
-          <img src={turkeyIcon} alt="꼬끼오 결투장" style={{ width: 70, height: 70, borderRadius: 16, marginBottom: 10 }} />
-          <div style={{ marginTop: 8 }}>꼬끼오 결투장</div>
-        </Button>
-        <Button
+          <img src={turkeyIcon} alt="꼬끼오 결투장" />
+          <span>꼬끼오 결투장</span>
+        </div>
+        <div 
           className={`${styles.boardCard} ${selectedBoard === 'Arcade' ? styles.active : ''}`}
           onClick={() => onSelect('Arcade')}
         >
-          <img src={arcadeIcon} alt="아케이드 결투장" style={{ width: 70, height: 70, borderRadius: 16, marginBottom: 10 }} />
-          <div style={{ marginTop: 8 }}>아케이드 결투장</div>
-        </Button>
+          <img src={arcadeIcon} alt="아케이드 결투장" />
+          <span>아케이드 결투장</span>
+        </div>
       </div>
       
       <div className={styles.navBtns}>
-        <Button onClick={onPrevStep} className={styles.smallBtn}>이전</Button>
-        <Button onClick={onNextStep} disabled={!selectedBoard}
-                className={styles.smallBtn}>다음</Button>
+        <Button 
+          variant="outline" 
+          onClick={onPrevStep}
+          className="small"
+        >
+          이전
+        </Button>
+        <Button 
+          variant="primary" 
+          onClick={onNextStep} 
+          disabled={!selectedBoard}
+          className="small"
+        >
+          다음
+        </Button>
       </div>
     </div>
   );

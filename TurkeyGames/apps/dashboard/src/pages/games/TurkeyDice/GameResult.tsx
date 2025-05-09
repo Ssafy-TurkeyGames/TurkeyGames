@@ -1,6 +1,7 @@
 // apps/dashboard/src/pages/games/TurkeyDice/GameResult.tsx
 import React from 'react';
 import GameResult from '../../../components/games/GameResult';
+import styles from './GameResult.module.css';
 
 const TurkeyDiceResult: React.FC = () => {
   // 플레이어 데이터 (실제로는 상태나 props로 받아올 수 있음)
@@ -12,10 +13,10 @@ const TurkeyDiceResult: React.FC = () => {
   ];
 
   return (
-    <div className={StyleSheet.container}>
-      <GameResult players={players} gameId="TurkeyDice"/>;
+    <div className={styles.container}>
+      <GameResult players={players} gameId="TurkeyDice" />
     </div>
-  )
+  );
 };
 
 export default TurkeyDiceResult;

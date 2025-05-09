@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ScoreBoard.module.css';
 import ScoreCard from '../../../components/games/TurkeyDice/ScoreCard';
-import turkeyLogo from '../../../assets/images/logo.png';
+import Logo from '../../../components/common/Logo';
 
 interface ScoreItem {
   name: string;
@@ -72,13 +72,10 @@ const ScoreBoard: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.logoContainer}>
-        <img 
-          src={turkeyLogo} 
-          alt="Turkey Games" 
-          className={styles.logo} 
+        <Logo 
+          size="medium" 
+          className={styles.logo}
           onClick={() => navigate('/')}
-          draggable="false"
-          tabIndex="-1" /* 포커스 방지 */
         />
       </div>
       

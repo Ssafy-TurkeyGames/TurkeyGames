@@ -9,32 +9,84 @@
   justify-content: space-between;
   border-bottom-left-radius: 32px;
   border-bottom-right-radius: 32px;
-  position: fixed; /* sticky 대신 fixed로 변경 */
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   height: 100px;
-  box-sizing: border-box; /* 중요: 패딩을 높이에 포함 */
+  box-sizing: border-box;
 }
+
   
-  .logoImg {
-    width: 100px;
-    height: 100px;
-    object-fit: contain;
-    vertical-align: middle;
-  }
+.logoImg {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
   
-  .langButton {
-    background: #fff;
-    color: #6d3d47;
-    border-radius: 16px;
-    padding: 4px 16px;
-    font-weight: 700;
-    font-size: 16px;
-    margin-left: 16px;
+  .soundToggleContainer {
     display: flex;
     align-items: center;
+    margin-right: 1%;
+    gap: 8px;
+  }
+  
+  .soundIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .soundLabel {
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .toggleSwitch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+  
+  .toggleSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: #ffb84d;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(26px);
   }
   
   @media (max-width: 480px) {
@@ -43,5 +95,9 @@
       align-items: flex-start;
       gap: 12px;
     }
+    
+    .soundButton {
+      margin-left: 0;
+      align-self: flex-end;
+    }
   }
-  

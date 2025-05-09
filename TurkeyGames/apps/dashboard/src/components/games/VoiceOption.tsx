@@ -1,4 +1,4 @@
-// components/common/VoiceOption/VoiceOption.tsx
+// components/common/games/VoiceOption.tsx
 import React from 'react';
 import styles from './VoiceOption.module.css';
 import Button from '../common/Button/Button';
@@ -49,19 +49,33 @@ export default function VoiceOption({
       <div className={styles.voiceGrid}>
         {VOICE_OPTIONS.map(voice => (
           <Button
-          key={voice}
-          active={selectedVoice === voice}
-          onClick={() => onSelect(voice)}
-          style={{ width: 120, margin: 0 }}
-        >
-          {voice}
-        </Button>
+            key={voice}
+            active={selectedVoice === voice}
+            onClick={() => onSelect(voice)}
+            className={styles.voiceBtn}
+            style={{ width: 120, margin: 0 }}
+          >
+            {voice}
+          </Button>
         ))}
       </div>
       
       <div className={styles.buttonRow}>
-        <Button onClick={onCancel}>취소</Button>
-        <Button onClick={onConfirm} disabled={!selectedVoice}>확인</Button>
+        <Button 
+          variant="outline" 
+          onClick={onCancel}
+          className={styles.smallBtn}
+        >
+          취소
+        </Button>
+        <Button 
+          variant="primary" 
+          onClick={onConfirm} 
+          disabled={!selectedVoice}
+          className={styles.smallBtn}
+        >
+          확인
+        </Button>
       </div>
     </div>
   );
