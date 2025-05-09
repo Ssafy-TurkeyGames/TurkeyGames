@@ -8,6 +8,8 @@ import turkeyDuceDefaultScore from '../../assets/images/turkey_default_score.png
 import turkeyDiceAcadeMap from '../../assets/images/turkey_acade_map.png';
 import turkeyDiceAcadeScore from '../../assets/images/turkey_acade_score.png';
 import TurkeyDiceScoreCard from '../../components/turkeyDice/TurkeyDiceScoreCard/TurkeyDiceScoreCard';
+import { SpriteAnimator } from 'react-sprite-animator'
+import test from '../../assets/effect/test.jpg';
 
 export default function TurkeyDice() {
   return (
@@ -16,15 +18,16 @@ export default function TurkeyDice() {
         <SpinTurkey image={turkey} />
       </div>
       <div className={styles.leftArea}>
-        <TurkeyDiceScoreCard image={turkeyDiceAcadeScore} />
-        <TurkeyDiceScoreCard image={turkeyDiceAcadeScore} />
+        <TurkeyDiceScoreCard image={turkeyDuceDefaultScore} />
+        <TurkeyDiceScoreCard image={turkeyDuceDefaultScore} />
       </div>
+      
       <div className={styles.map}>
-        <img src={turkeyDiceAcadeMap} alt="turkeyDice Map" />
+        <img src={turkeyDiceDefaultMap} alt="turkeyDice Map" />
       </div>
       <div className={styles.rightArea}>
-        <TurkeyDiceScoreCard image={turkeyDiceAcadeScore} />
-        <TurkeyDiceScoreCard image={turkeyDiceAcadeScore} />
+        <TurkeyDiceScoreCard image={turkeyDuceDefaultScore} />
+        <TurkeyDiceScoreCard image={turkeyDuceDefaultScore} />
       </div>
     </div>
   )
