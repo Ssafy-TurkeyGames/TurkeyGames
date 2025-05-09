@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+// components/common/games/VoiceOption.tsx
+import React, { useRef, useState, useEffect } from 'react';
 import styles from './VoiceOption.module.css';
 import Button from '../common/Button/Button';
 import userIcon from '../../assets/images/user.png';
@@ -6,6 +7,7 @@ import boardIcon from '../../assets/images/board.png';
 import micIcon from '../../assets/images/mic.png';
 import turkeyIcon from '../../assets/images/turkey.png';
 import arcadeIcon from '../../assets/images/arcade.png';
+import { getSoundEnabled, playSound, onSoundSettingChange  } from '../../utils/soundUtils';
 
 // 오디오 파일 import
 import daegilGreeting from '../../assets/voice/daegil/인사.mp3';
@@ -32,26 +34,28 @@ export default function VoiceOption({
   onConfirm,
   onCancel
 }: VoiceOptionProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [soundEnabled, setSoundEnabled] = useState(getSoundEnabled());
+  
+  // 소리 설정 변경 이벤트 리스너 등록
+  useEffect(() => {
+    const unsubscribe = onSoundSettingChange((enabled) => {
+      // console.log('VoiceOption received sound setting change:', enabled);
+      setSoundEnabled(enabled);
+    });
+    
+    return unsubscribe;
+  }, []);
 
-  const playVoice = (voice: string) => {
-    // 기존 오디오 중지
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-
-    // 새 오디오 재생
-    let audioSrc = '';
-    if (voice === "대길") {
-      audioSrc = daegilGreeting;
-    } else if (voice === "개나리") {
-      audioSrc = gaenariGreeting;
-    }
-
-    if (audioSrc) {
-      audioRef.current = new Audio(audioSrc);
-      audioRef.current.play().catch(e => console.error("오디오 재생 실패:", e));
+  const handleVoiceSelect = (voice: string) => {
+  //  console.log('Voice selected:', voice, 'Sound enabled:', soundEnabled);
+    
+    // 소리 재생 (소리 설정이 켜져 있을 때만)
+    if (soundEnabled) {
+      if (voice === "대길") {
+        playSound(daegilGreeting);
+      } else if (voice === "개나리") {
+        playSound(gaenariGreeting);
+      }
     }
 
     // 선택 상태 업데이트
@@ -78,7 +82,7 @@ export default function VoiceOption({
           <Button
             key={voice}
             active={selectedVoice === voice}
-            onClick={() => playVoice(voice)}
+            onClick={() => handleVoiceSelect(voice)}
             className={styles.voiceBtn}
             style={{ width: 120, margin: 0 }}
           >
