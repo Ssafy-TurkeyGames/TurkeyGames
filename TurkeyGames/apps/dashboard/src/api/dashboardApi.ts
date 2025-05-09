@@ -5,16 +5,16 @@ import { ApiResponse, Game } from './types';
 
 // 모든 게임 목록 조회
 export const getAllGames = async (): Promise<ApiResponse<Game[]>> => {
-    console.log('API 요청 URL:', `${axiosInstance.defaults.baseURL}/dashb`);
+    // console.log('API 요청 URL:', `${axiosInstance.defaults.baseURL}/dashb`);
     try {
       const response = await axiosInstance.get<ApiResponse<Game[]>>('/dashb');
-      console.log('API 응답:', response);
+      // console.log('API 응답:', response);
       return response.data;
     } catch (error) {
-      console.error('getAllGames 에러 세부 정보:', error);
+      // console.error('getAllGames 에러 세부 정보:', error);
       if (error.response) {
-        console.error('서버 응답:', error.response.data);
-        console.error('서버 상태 코드:', error.response.status);
+        // console.error('서버 응답:', error.response.data);
+        // console.error('서버 상태 코드:', error.response.status);
       }
       throw error;
     }
@@ -37,15 +37,15 @@ export const getFilteredGames = async (
 
 // 키워드로 게임 검색
 export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse<Game[]>> => {
-  console.log('API 검색 요청:', keyword);
+ // console.log('API 검색 요청:', keyword);
   if (!keyword.trim()) {
     return getAllGames();
   }
     
   const url = `/dashb/search?title=${encodeURIComponent(keyword)}`;
-  console.log('요청 URL:', url);
+ // console.log('요청 URL:', url);
   const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
-  console.log('검색 응답:', response.data);
+ // console.log('검색 응답:', response.data);
   return response.data;
 };
 
