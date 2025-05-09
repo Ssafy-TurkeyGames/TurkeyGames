@@ -1,5 +1,4 @@
-// components/common/games/VoiceOption.tsx
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import styles from './VoiceOption.module.css';
 import Button from '../common/Button/Button';
 import userIcon from '../../assets/images/user.png';
@@ -7,6 +6,10 @@ import boardIcon from '../../assets/images/board.png';
 import micIcon from '../../assets/images/mic.png';
 import turkeyIcon from '../../assets/images/turkey.png';
 import arcadeIcon from '../../assets/images/arcade.png';
+
+// 오디오 파일 import
+import daegilGreeting from '../../assets/voice/daegil/인사.mp3';
+import gaenariGreeting from '../../assets/voice/flower/인사.mp3';
 
 interface VoiceOptionProps {
   selectedVoice: string | null;
@@ -18,9 +21,7 @@ interface VoiceOptionProps {
 }
 
 const VOICE_OPTIONS = [
-  "카우보이", "치킨집 사장", "외계인",
-  "군인", "요정", "발키리",
-  "티모", "사코", "니코"
+  "대길", "개나리", "애니"
 ];
 
 export default function VoiceOption({
@@ -31,6 +32,32 @@ export default function VoiceOption({
   onConfirm,
   onCancel
 }: VoiceOptionProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playVoice = (voice: string) => {
+    // 기존 오디오 중지
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+
+    // 새 오디오 재생
+    let audioSrc = '';
+    if (voice === "대길") {
+      audioSrc = daegilGreeting;
+    } else if (voice === "개나리") {
+      audioSrc = gaenariGreeting;
+    }
+
+    if (audioSrc) {
+      audioRef.current = new Audio(audioSrc);
+      audioRef.current.play().catch(e => console.error("오디오 재생 실패:", e));
+    }
+
+    // 선택 상태 업데이트
+    onSelect(voice);
+  };
+
   return (
     <div className={styles.voiceOptionContainer}>
       <div className={styles.iconRow}>
@@ -51,7 +78,7 @@ export default function VoiceOption({
           <Button
             key={voice}
             active={selectedVoice === voice}
-            onClick={() => onSelect(voice)}
+            onClick={() => playVoice(voice)}
             className={styles.voiceBtn}
             style={{ width: 120, margin: 0 }}
           >
