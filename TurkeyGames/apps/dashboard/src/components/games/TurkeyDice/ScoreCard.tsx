@@ -1,6 +1,13 @@
 // components/games/TurkeyDice/ScoreCard.tsx
 import React from 'react';
 import styles from './ScoreCard.module.css';
+import Logo from '../../common/Logo';
+
+// 등수 이미지 임포트
+import rank1 from '../../../assets/images/1.png';
+import rank2 from '../../../assets/images/2.png';
+import rank3 from '../../../assets/images/3.png';
+import rank4 from '../../../assets/images/4.png';
 
 interface ScoreItem {
   name: string;
@@ -20,14 +27,28 @@ const ScoreCard: React.FC<ScoreCardProps> = ({
   playerNumber, 
   playerName, 
   score, 
-  items,
-  isFirst = false 
+  items
 }) => {
+  // 플레이어 번호에 따라 등수 이미지 선택
+  const getRankImage = (number: number) => {
+    switch(number) {
+      case 1: return rank1;
+      case 2: return rank2;
+      case 3: return rank3;
+      case 4: return rank4;
+      default: return rank1;
+    }
+  };
+
   return (
-    <div className={`${styles.scoreCard} ${isFirst ? styles.firstPlace : ''}`}>
+    <div className={styles.scoreCard}>
       <div className={styles.playerHeader}>
-        <div className={`${styles.playerNumber} ${isFirst ? styles.firstPlaceNumber : ''}`}>
-          {playerNumber}
+        <div className={styles.playerNumberContainer}>
+          <img 
+            src={getRankImage(playerNumber)} 
+            alt={`${playerNumber}등`} 
+            className={styles.rankImage}
+          />
         </div>
         <div className={styles.playerName}>{playerName}</div>
       </div>

@@ -21,34 +21,36 @@ export const getAllGames = async (): Promise<ApiResponse<Game[]>> => {
   };
 
 // 필터링된 게임 목록 조회
-export const getFilteredGames = async (people?: number[], level?: number[]): Promise<ApiResponse<Game[]>> => {
-  let queryParams = '';
-  
-  if (people && people.length > 0) {
-    queryParams += `people=${people.join(',')}`;
-  }
-  
-  if (level && level.length > 0) {
-    queryParams += queryParams ? `&level=${level.join(',')}` : `level=${level.join(',')}`;
-  }
-  
-  const url = queryParams ? `/dashb/filter?${queryParams}` : '/dashb';
-  const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
-  return response.data;
-};
+export const getFilteredGames = async (
+    people?: number[],
+    level?: number[]
+  ): Promise<ApiResponse<Game[]>> => {
+    const params = new URLSearchParams();
 
-// 키워드로 게임 검색
-export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse<Game[]>> => {
-    if (!keyword.trim()) {
-      return getAllGames();
-    }
-    
-    const response = await axiosInstance.get<ApiResponse<Game[]>>(`/dashb/search?title=${encodeURIComponent(keyword)}`);
+    params.append('people', people?.join(',') || '');
+    params.append('level', level?.join(',') || '');
+  
+    const url = `/dashb/filter?${params.toString()}`;
+    const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
     return response.data;
   };
 
-  // 게임 규칙 조회 API 추가
-export const getGameRule = async (game_id: string | number): Promise<ApiResponse<GameRule>> => {
-    const response = await axiosInstance.get<ApiResponse<GameRule>>(`/dashb/detail/${game_id}`);
+// 키워드로 게임 검색
+export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse<Game[]>> => {
+  console.log('API 검색 요청:', keyword);
+  if (!keyword.trim()) {
+    return getAllGames();
+  }
+    
+  const url = `/dashb/search?title=${encodeURIComponent(keyword)}`;
+  console.log('요청 URL:', url);
+  const response = await axiosInstance.get<ApiResponse<Game[]>>(url);
+  console.log('검색 응답:', response.data);
+  return response.data;
+};
+
+  // 게임 규칙 조회 API
+export const getGameRule = async (gameId: string | number): Promise<ApiResponse<GameRule>> => {
+    const response = await axiosInstance.get<ApiResponse<GameRule>>(`/dashb/detail/${gameId}`);
     return response.data;
   };

@@ -1,110 +1,153 @@
 /* apps/dashboard/src/pages/games/TurkeyDice/ScoreBoard.module.css */
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    min-height: 100vh;
-    padding: 20px;
-    background-color: #4e2e31;
-    background-image: url('../../../assets/images/dice-bg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    color: white;
-  }
-  
-  .header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #4e2e31;
+  background-image: url('../../../assets/images/dice-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  position: relative; /* 추가: 로고 위치 지정을 위해 */
+}
+
+.logoContainer {
+  position: absolute; /* 절대 위치로 설정 */
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.logo {
+  width: 120px; /* 헤더 로고와 크기 맞춤 */
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  user-select: none; /* 텍스트 선택 방지 */
+  -webkit-user-drag: none; /* 드래그 방지 */
+  pointer-events: auto; /* 클릭 이벤트 허용 */
+}
+
+
+/* 포커스 스타일 제거 */
+.logo:focus {
+  outline: none;
+}
+
+/* 포커스 시 테두리 제거 */
+.logo:focus-visible {
+  outline: none;
+}
+
+
+.logo:hover {
+  transform: scale(1.05); /* 추가: 호버 시 약간 확대 */
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 90px 0 30px; /* 상단 여백 증가 (로고 공간 확보) */
+  text-align: center;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.scoreCardsContainer {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 25px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.buttonContainer {
+  margin-top: 20px;
+}
+
+.resultButton {
+  background-color: #e76f51;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.resultButton:hover {
+  background-color: #f4a261;
+  transform: translateY(-2px);
+}
+
+/* 반응형 디자인 - 큰 화면 */
+@media (min-width: 1200px) {
   .logo {
-
+    width: 150px; /* 큰 화면에서 더 크게 */
   }
-
-  .logoImg {
-
-  }
-
+  
   .title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    margin: 10px 0;
-    text-align: center;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin: 50px 0 40px;
+    font-size: 3rem;
   }
   
   .scoreCardsContainer {
-    display: flex;
-    justify-content: space-evenly;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 15px;
-    width: 100%;
-    max-width: 1200px;
-    margin-bottom: 30px;
   }
-  
-  .buttonContainer {
-    margin-top: 20px;
-  }
-  
-  .resultButton {
-    background-color: #e76f51;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-  }
-  
-  .resultButton:hover {
-    background-color: #f4a261;
-    transform: translateY(-2px);
-  }
+}
 
-  .homeButton {
-    background-color: #e76f51;
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
+/* 중간 화면 */
+@media (max-width: 992px) {
+  .logo {
+    width: 100px;
   }
   
-  .homeButton:hover {
-    background-color: #f4a261;
-    transform: translateY(-2px);
+  .title {
+    margin: 90px 0 30px;
+    font-size: 2.2rem;
+  }
+}
+
+/* 태블릿 */
+@media (max-width: 768px) {
+  .logo {
+    width: 80px;
   }
   
-  @media (max-width: 768px) {
-    .scoreCardsContainer {
-      flex-direction: row;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    
-    .title {
-      font-size: 2rem;
-      margin: 15px 0 30px;
-    }
+  .title {
+    font-size: 2rem;
+    margin: 80px 0 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 60px; /* 변경: 모바일에서 더 작게 */
   }
   
-  @media (max-width: 480px) {
-    .scoreCardsContainer {
-      flex-direction: column;
-      align-items: center;
-    }
+  .logoContainer {
+    top: 15px;
+    left: 15px;
   }
   
+  .title {
+    font-size: 1.8rem;
+    margin: 60px 0 25px; /* 변경: 상단 여백 조정 */
+  }
+  
+  .scoreCardsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+}

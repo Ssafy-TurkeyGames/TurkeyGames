@@ -1,0 +1,10 @@
+.container {
+    overflow: hidden;
+    height: 100vh; /* 화면 높이에 맞춤 */
+    width: 100%;
+    position: fixed; /* 고정 위치 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}

@@ -8,6 +8,7 @@ import TurkeyDiceOptions from '../pages/games/TurkeyDice/GameOptions';  // 터�
 import ScoreBoard from '../pages/games/TurkeyDice/ScoreBoard';  // 터키다이스 점수 현황 페이지
 import TurkeyDiceResult from '../components/games/GameResult';  // 터키다이스 게임 결과 페이지
 import HighlightModal from '../pages/HighlightModal'; // 하이라이트 모달
+import Rule from '../pages/Rule.tsx'
 // ...다른 페이지 import
 
 export default function AppRoutes() {
@@ -21,8 +22,9 @@ export default function AppRoutes() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchGame />} />
+          <Route path="/rule/:gameId" element={<Rule />} />
           {/* 게임 옵션 라우트 */}
-          <Route path="game-options/:game_id" element={<TurkeyDiceOptions />} />
+          <Route path="game-options/:gameId" element={<TurkeyDiceOptions />} />
           {/* 터키다이스 게임 라우트 */}
           <Route path="games/TurkeyDice">
             <Route path="score" element={<ScoreBoard />} />
