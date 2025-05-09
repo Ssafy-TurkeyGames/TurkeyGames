@@ -26,13 +26,16 @@
   }
   
   .logo {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    width: 100px;
+    width: 120px; /* 기본 크기 */
     height: auto;
-    z-index: 1;
     cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: auto;
+  }
+
+  .logo:focus, .logo:focus-visible {
+    outline: none;
   }
   
   .title {
