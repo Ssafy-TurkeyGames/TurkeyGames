@@ -28,12 +28,16 @@ while True:
     # 왜곡 보정해서 어깨를 기반으로 사람 검출
     keypoints = detect_people(undistorted)
 
-    # 검출된 사람에 따른 자리 추적
-    seat_occupancy = get_seat_occupancy(keypoints)
-    update_seat_status(seat_occupancy)
+    # 아루코 마커 감지 및 동적으로 좌석 범위 매핑
+    aruco_markers = draw_aruco_markers(undistorted)
 
-    # 아루코 마커 그리기 (필요있나?)
-    draw_aruco_markers(undistorted)
+    # 만약 aruco_markers가 None이면 빈 딕셔너리로 처리
+    if aruco_markers is None:
+        aruco_markers = {}
+
+    # 검출된 사람에 따른 자리 추적
+    seat_occupancy = get_seat_occupancy(keypoints, aruco_markers)
+    update_seat_status(seat_occupancy)
 
     # 디버깅: 사람 위치 출력
     for person in keypoints:

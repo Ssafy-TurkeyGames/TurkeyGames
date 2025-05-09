@@ -11,6 +11,8 @@ def draw_aruco_markers(frame):
     parameters = cv2.aruco.DetectorParameters()
     corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
 
+    aruco_markers = {}
+
     if ids is not None:
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
 
@@ -26,16 +28,22 @@ def draw_aruco_markers(frame):
             bottom_left = sorted_markers[2]  # 2번 좌석 (왼쪽 아래)
             bottom_right = sorted_markers[3]  # 3번 좌석 (오른쪽 아래)
 
-            # 좌석 좌표 범위를 동적으로 매핑
-            return {
-                0: (top_left[0][0], top_left[0][1], top_right[0][0], top_right[0][1]),
-                1: (top_right[0][0], top_right[0][1], bottom_right[0][0], bottom_right[0][1]),
-                2: (bottom_left[0][0], bottom_left[0][1], top_left[0][0], top_left[0][1]),
-                3: (bottom_right[0][0], bottom_right[0][1], top_right[0][0], top_right[0][1])
-            }
+            # 각 좌석의 좌표 범위를 ARUCO_MARKERS에 저장
+            aruco_markers[0] = (top_left[0], top_left[1], top_right[0], top_right[1])  # 좌석 0번
+            aruco_markers[1] = (top_right[0], top_right[1], bottom_right[0], bottom_right[1])  # 좌석 1번
+            aruco_markers[2] = (bottom_left[0], bottom_left[1], top_left[0], top_left[1])  # 좌석 2번
+            aruco_markers[3] = (bottom_right[0], bottom_right[1], top_right[0], top_right[1])  # 좌석 3번
+
+    return aruco_markers  # 마커가 없으면 빈 딕셔너리 반환
 
 # 아루코 마커들의 위치를 좌석 번호에 맞게 정렬하는 함수
 def sort_markers_based_on_position(markers):
+    if len(markers) < 4:  # 마커가 4개 미만이면 정렬하지 않음
+        return markers  # 4개 미만일 경우 그대로 반환
+    
+    # 각 좌표를 튜플로 변환하여 정렬
+    markers = [tuple(marker) for marker in markers]  # 각 좌표를 튜플로 변환
+    
     # 마커들이 영상 내에서 변할 때마다 상대적인 위치를 바탕으로 순서를 결정
     # (왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서대로 정렬)
     top_left = sorted(markers, key=lambda x: (x[0], x[1]))[0]  # 왼쪽 위
