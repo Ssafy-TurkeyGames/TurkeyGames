@@ -1,4 +1,5 @@
 .turkey {
+  width: 200px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,7 +17,7 @@
 }
 
 .turkey>img {
-  width: 80%;
+  width: 100%;
   transition: transform 0.3s ease;
 }
 

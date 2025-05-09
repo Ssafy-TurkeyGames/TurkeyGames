@@ -16,6 +16,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.2",
+    "react-sprite-animator": "^2.0.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

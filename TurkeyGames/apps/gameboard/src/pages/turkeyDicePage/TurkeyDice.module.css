@@ -1,0 +1,33 @@
+.layout {
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+    background-color: #592E36;
+    overflow-y: hidden;
+}
+
+.spinBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -120.225px;
+    margin-left: -100px;
+    z-index: 9999;
+    opacity: 0.5;
+}
+
+.leftArea {
+    height: 100%;
+}
+
+.map {
+    height: 100%;
+}
+
+.map>img {
+    height: 100%;
+}
+
+.rightArea {
+    height: 100%;
+}
