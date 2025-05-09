@@ -43,3 +43,22 @@ table {
 html, body, #root {
     height: 100%;
 }
+
+html, body, div, span, p, h1, h2, h3, h4, h5, h6, button {
+    /* 드래그 방지 */
+    -ms-user-select: none;
+    -moz-user-select: -moz-none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    
+    /* 커서 깜빡임 제거 */
+    caret-color: transparent;
+  }
+  
+  /* input 요소는 제외 */
+  input, textarea {
+    user-select: auto;
+    caret-color: auto;
+  }
+  
