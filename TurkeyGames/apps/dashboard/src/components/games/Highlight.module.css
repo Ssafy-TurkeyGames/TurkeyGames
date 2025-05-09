@@ -15,7 +15,8 @@
   .modalContent {
     background-color: #b44e47; /* 이미지와 유사한 빨간색 배경 */
     width: 90%;
-    max-width: 500px;
+    max-width: 800px;
+    height: 450px;
     padding: 30px;
     border-radius: 15px;
     position: relative;
@@ -52,8 +53,8 @@
     padding: 12px 20px;
     border-radius: 50px;
     text-align: center;
-    margin-bottom: 30px;
-    font-size: 16px;
+    margin-bottom: 50px;
+    font-size: 24px;
     max-width: 90%;
   }
   
@@ -67,8 +68,8 @@
   }
   
   .qrCode {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -86,7 +87,7 @@
     border-left: 20px solid white;
   }
   
-  @media (max-width: 768px) {
+  /* @media (max-width: 768px) {
     .modalContent {
       width: 90%;
       padding: 20px;
@@ -101,4 +102,4 @@
       height: 150px;
     }
   }
-  
+   */
