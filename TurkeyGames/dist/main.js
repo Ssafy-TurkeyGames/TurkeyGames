@@ -27,8 +27,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const path = __importStar(require("path"));
 function createWindow() {
-    // 대시보드 웹 (React) - 브라우저에서 직접 접속
-    // http://localhost:3000
     // 게임보드 창 생성
     const gameboard = new electron_1.BrowserWindow({
         width: 1920,
