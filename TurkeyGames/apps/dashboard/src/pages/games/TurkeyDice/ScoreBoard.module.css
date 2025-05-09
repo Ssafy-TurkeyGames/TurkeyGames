@@ -13,6 +13,7 @@
   background-repeat: no-repeat;
   color: white;
   position: relative; /* 추가: 로고 위치 지정을 위해 */
+  overflow: hidden;
 }
 
 .logoContainer {
@@ -49,9 +50,9 @@
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
-  margin: 90px 0 30px; /* 상단 여백 증가 (로고 공간 확보) */
+  margin: 90px 0 60px; /* 상단 여백 증가 (로고 공간 확보) */
   text-align: center;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -74,9 +75,9 @@
   background-color: #e76f51;
   color: white;
   border: none;
-  padding: 12px 30px;
+  padding: 15px 50px;
   border-radius: 25px;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: bold;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -94,10 +95,10 @@
     width: 150px; /* 큰 화면에서 더 크게 */
   }
   
-  .title {
+  /* .title {
     margin: 50px 0 40px;
     font-size: 3rem;
-  }
+  } */
   
   .scoreCardsContainer {
     flex-direction: row;

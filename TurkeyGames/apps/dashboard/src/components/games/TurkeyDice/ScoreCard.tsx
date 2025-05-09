@@ -1,13 +1,12 @@
 // components/games/TurkeyDice/ScoreCard.tsx
 import React from 'react';
 import styles from './ScoreCard.module.css';
-import Logo from '../../common/Logo';
 
 // 등수 이미지 임포트
-import rank1 from '../../../assets/images/1.png';
-import rank2 from '../../../assets/images/2.png';
-import rank3 from '../../../assets/images/3.png';
-import rank4 from '../../../assets/images/4.png';
+import rank1 from '../../../assets/images/ranks/1.png';
+import rank2 from '../../../assets/images/ranks/2.png';
+import rank3 from '../../../assets/images/ranks/3.png';
+import rank4 from '../../../assets/images/ranks/4.png';
 
 interface ScoreItem {
   name: string;
