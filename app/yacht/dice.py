@@ -33,7 +33,8 @@ class DiceGame:
             "current_player_idx": 0,
             "dice_values": [0, 0, 0, 0, 0],
             "rolls_left": MAX_ROLL_PER_TURN,
-            "status": "waiting"
+            "status": "waiting",
+            "turn_counts" : {pid: 0 for pid in player_ids},  # 각 플레이어별 턴 수
         }
 
         # 인메모리 저장소에 게임 상태 저장
@@ -71,7 +72,8 @@ class DiceGame:
         # 주사위 굴리기
         for i in range(DICE_COUNT):
             if i not in keep_indices:
-                game["dice_values"][i] = random.randint(1, 6)
+                # game["dice_values"][i] = random.randint(1, 6)
+                game["dice_values"][i] = 5
 
         # 남은 굴림 횟수 감소
         game["rolls_left"] -= 1
