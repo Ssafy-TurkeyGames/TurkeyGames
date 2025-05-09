@@ -1,0 +1,189 @@
+/* components/test/GameTestPanel.module.css */
+.testPanel {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 20px auto;
+  }
+  
+  .testPanel h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  
+  .section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+  }
+  
+  .section h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .connectionStatus {
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .connected {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .disconnected {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .formGroup {
+    margin-bottom: 10px;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+    font-size: 14px;
+  }
+  
+  .formGroup select,
+  .formGroup input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    width: 100%;
+  }
+  
+  .button:hover:not(:disabled) {
+    background-color: #2980b9;
+  }
+  
+  .button:disabled {
+    background-color: #95a5a6;
+    cursor: not-allowed;
+  }
+  
+  .buttonGroup {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .buttonGroup .button {
+    flex: 1;
+    margin-top: 0;
+  }
+  
+  .gameInfo {
+    background-color: #e8f4fd;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+  
+  .gameInfo p {
+    margin: 5px 0;
+    font-size: 14px;
+  }
+  
+  .diceContainer {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .dice {
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border: 2px solid #3498db;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .dice.selected {
+    background-color: #e0f7fa;
+    border-color: #00acc1;
+    transform: translateY(-5px);
+  }
+  
+  .scoreTable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  
+  .scoreTable th,
+  .scoreTable td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+  
+  .scoreTable th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+  
+  /* 반응형 */
+  @media (max-width: 767px) {
+    .testPanel {
+      padding: 15px;
+      margin: 10px;
+    }
+    
+    .section {
+      padding: 10px;
+    }
+    
+    .dice {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+    
+    .buttonGroup {
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .scoreTable th,
+    .scoreTable td {
+      padding: 5px;
+      font-size: 12px;
+    }
+  }
