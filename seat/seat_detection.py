@@ -1,7 +1,7 @@
 import cv2
 import time
 import numpy as np
-from main import process_frame  # main.py에서 사람 처리 함수 import
+from people_recognition import process_frame  # main.py에서 사람 처리 함수 import
 
 # 아루코 마커와 좌석 영역 매핑
 aruco_markers = {
@@ -20,14 +20,23 @@ dist_coeffs = np.load('dist_coeffs.npy')
 
 # 왜곡 보정 함수
 def undistort_frame(frame, camera_matrix, dist_coeffs):
-    return cv2.undistort(frame, camera_matrix, dist_coeffs)
+    # 왜곡 보정
+    undistorted_frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
+    return undistorted_frame
 
 # 아루코 마커 감지 함수
 def detect_aruco_markers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
-    parameters = cv2.aruco.DetectorParameters_create()
+    aruco_dict = cv2.aruco.Dictionary(cv2.aruco.DICT_4X4_250, 250)
+    parameters = cv2.aruco.DetectorParameters()
+
+    # 아루코 마커 감지
     corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+
+    # 마커 감지되지 않으면 메시지 출력
+    if ids is None:
+        return None, None
+
     return corners, ids
 
 def get_seat_number(person_pos, aruco_markers):
@@ -50,7 +59,7 @@ while True:
     filtered_people, frame = process_frame(cap)
 
     if filtered_people is None:
-        break
+        continue
 
     seat_occupancy = {}  # 좌석에 사람이 앉았는지 추적하는 딕셔너리
 
