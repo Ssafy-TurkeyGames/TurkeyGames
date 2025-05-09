@@ -1,8 +1,10 @@
 // apps/dashboard/src/components/Header.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 import logo from '../assets/images/logo.png';
+import soundOnIcon from '../assets/images/sound-on.png'; // 소리 켜기 아이콘
+import soundOffIcon from '../assets/images/sound-off.png'; // 소리 끄기 아이콘
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -10,6 +12,12 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ children }) => {
   const navigate = useNavigate();
+  const [isSoundOn, setIsSoundOn] = useState(true);
+
+  const toggleSound = () => {
+    setIsSoundOn(!isSoundOn);
+    // 실제 소리 켜고 끄는 로직 추가
+  };
 
   return (
     <header className={styles.header}>
@@ -21,9 +29,22 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
       >
         <img src={logo} alt="logo" className={styles.logoImg} />
       </span>
-      {/* children이 있으면(검색창 등) 가운데 렌더 */}
       {children && <div className={styles.headerCenter}>{children}</div>}
-      <span className={styles.langButton}>💰 KO ▼</span>
+      <div className={styles.soundToggleContainer}>
+        <img 
+          src={isSoundOn ? soundOnIcon : soundOffIcon} 
+          alt={isSoundOn ? "소리 켜짐" : "소리 꺼짐"} 
+          className={styles.soundIcon}
+        />
+        <label className={styles.toggleSwitch}>
+          <input 
+            type="checkbox" 
+            checked={isSoundOn} 
+            onChange={toggleSound}
+          />
+          <span className={styles.slider}></span>
+        </label>
+      </div>
     </header>
   );
 };
