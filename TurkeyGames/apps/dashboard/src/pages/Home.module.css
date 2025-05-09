@@ -1,25 +1,35 @@
-/* app/dashboard/src/pages/Home.module.css */
+/* apps/dashboard/src/pages/Home.module.css */
 
 .container {
-  min-height: 100vh;
+  min-height: 100vh; /* height 대신 min-height 사용 */
+  max-height: 100vh; /* 최대 높이 설정 */
+  overflow: hidden; /* 내용이 넘칠 경우 스크롤 허용 */
   background: url('/dashboard/assets/bg_western.png') center/cover no-repeat,
     linear-gradient(to bottom, #6d3d47 0%, #ffb84d 100%);
   font-family: 'Pretendard', 'sans-serif';
-  padding: 100px;
+  padding: 110px 60px 80px; /* 상단 패딩 줄이고 하단 패딩 늘림 */
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 .mainContent {
-  padding: 40px 0 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center; /* 중앙 정렬 추가 */
+  flex: 1;
+  width: 100%;
+  padding: 0; /* 패딩 제거 */
+  margin: 0 auto; /* 중앙 정렬 */
+  max-width: 1200px; /* 최대 너비 설정 */
 }
 
 .topCards {
   display: flex;
   gap: 35px;
-  margin-bottom: 36px;
+  margin-bottom: 40px; /* 여백 늘림 */
   width: 100%;
   max-width: 1100px;
   justify-content: center;
@@ -31,31 +41,40 @@
   gap: 25px;
   width: 100%;
   max-width: 1100px;
-  margin-top: 10px;
+  margin-bottom: 20px; /* 하단 여백 추가 */
 }
 
 /* 반응형: 태블릿 */
 @media (max-width: 1100px) {
+  .container {
+    padding: 50px 40px 60px; /* 패딩 조정 */
+  }
+  
   .topCards,
   .bottomCards {
     max-width: 100%;
   }
+  
   .bottomCards {
     grid-template-columns: repeat(2, 1fr);
+    gap: 20px; /* 간격 줄임 */
   }
 }
 
 /* 반응형: 모바일 */
 @media (max-width: 700px) {
-  .mainContent {
-    padding: 16px 0 0 0;
+  .container {
+    padding: 30px 20px 50px; /* 패딩 조정 */
   }
+  
   .topCards {
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+    margin-bottom: 25px; /* 여백 조정 */
   }
+  
   .bottomCards {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 15px;
   }
 }

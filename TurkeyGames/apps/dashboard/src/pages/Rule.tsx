@@ -1,44 +1,43 @@
-// apps/dashboard/src/pages/Rule/Rule.tsx
+// apps/dashboard/src/pages/Rule.tsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styles from './Rule.module.css';
 import closeIcon from '../assets/images/close (1).png';
+import logo from '../assets/images/logo.png';
 import { getGameRule } from '../api/dashboardApi';
 import { GameRule } from '../api/types';
-
 
 interface RuleProps {
   isModal?: boolean;
 }
 
 export default function Rule({ isModal = false }: RuleProps) {
-  const { game_id } = useParams<{ game_id: string }>();
+  const { gameId } = useParams<{ gameId: string }>();
   const [gameRule, setGameRule] = useState<GameRule | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchGameRule = async () => {
-      if (!game_id) {
-        setError('게임 ID가 없습니다.');
-        setLoading(false);
-        return;
-      }
+    if (!gameId) {
+      
+      setError('게임 ID가 없습니다.');
+      setLoading(false);
+      return;
+    }
 
+    const fetchRule = async () => {
       try {
         setLoading(true);
-        const response = await getGameRule(game_id);
-        
-        if (response.code === 'SUCCESS') {
-          setGameRule(response.data);
+        const res = await getGameRule(gameId);
+        if (res.code === 'SUCCESS' && res.data) {
+          setGameRule(res.data);
           setError(null);
         } else {
-          setError(response.message || '게임 규칙을 불러오는데 실패했습니다.');
+          setError(res.message || '게임 규칙을 불러오는데 실패했습니다.');
           setGameRule(null);
         }
-      } catch (err) {
-        console.error('게임 규칙 조회 오류:', err);
+      } catch (e) {
         setError('서버 연결에 실패했습니다.');
         setGameRule(null);
       } finally {
@@ -46,8 +45,8 @@ export default function Rule({ isModal = false }: RuleProps) {
       }
     };
 
-    fetchGameRule();
-  }, [game_id]);
+    fetchRule();
+  }, [gameId]);
 
   if (loading) {
     return <div className={styles.loading}>로딩 중...</div>;
@@ -64,7 +63,6 @@ export default function Rule({ isModal = false }: RuleProps) {
     );
   }
 
-  // 데이터 없음 케이스
   if (!gameRule) {
     return (
       <div className={styles.container}>
@@ -76,13 +74,11 @@ export default function Rule({ isModal = false }: RuleProps) {
     );
   }
 
-  // 정상 데이터
   const { gameProfilePath, description, imagePath, descriptionVideoPath } = gameRule;
 
   return (
     <div className={isModal ? styles.modalOverlay : styles.container}>
       <div className={isModal ? styles.modalContent : undefined}>
-        {/* 닫기 버튼 (모달일 때만) */}
         {isModal && (
           <button
             className={styles.closeBtn}
@@ -93,27 +89,24 @@ export default function Rule({ isModal = false }: RuleProps) {
             <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
           </button>
         )}
-        
-        {/* 게임 프로필 섹션 */}
+
         <section className={styles.profileSection}>
-          <img 
-            src={gameProfilePath || logo} 
-            alt="게임 대표 이미지" 
+          <img
+            src={gameProfilePath || logo}
+            alt="게임 대표 이미지"
             className={styles.profileImage}
             onError={(e) => {
-              // 이미지 로드 실패 시 기본 이미지로 대체
               e.currentTarget.src = logo;
+              e.currentTarget.onerror = null;
             }}
           />
         </section>
 
-        {/* 설명 섹션 */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>📜 게임 규칙 설명</h2>
           <p className={styles.description}>{description}</p>
         </section>
 
-        {/* 규칙 이미지 */}
         {imagePath && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
@@ -122,14 +115,12 @@ export default function Rule({ isModal = false }: RuleProps) {
               alt="게임 규칙 이미지"
               className={styles.ruleImage}
               onError={(e) => {
-                // 이미지 로드 실패 시 숨김 처리
                 e.currentTarget.style.display = 'none';
               }}
             />
           </section>
         )}
 
-        {/* 규칙 동영상 */}
         {descriptionVideoPath && (
           <section className={styles.section}>
             <h2 className={styles.sectionTitle}>🎥 규칙 동영상</h2>
@@ -151,9 +142,9 @@ export default function Rule({ isModal = false }: RuleProps) {
             </Link>
           </div>
           <div className={styles.buttonGroup}>
-            <button 
+            <button
               className={styles.backButton}
-              onClick={() => navigate(`/game-options/${game_id}`)}
+              onClick={() => navigate(`/game-options/${gameId}`)}
             >
               ⚡ 게임 시작
             </button>

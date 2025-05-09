@@ -9,7 +9,7 @@ export interface ApiResponse<T> {
   
   // 게임 관련 타입
   export interface Game {
-    game_id: number;
+    gameId: number;
     title: string;
     description: string;
     gameProfilePath: string;
@@ -19,12 +19,12 @@ export interface ApiResponse<T> {
   
   // 게임 규칙 인터페이스 추가
 export interface GameRule {
-    game_id: number;
+    gameId: number;
     gameProfilePath: string;
     description: string;
     imagePath: string;
     descriptionVideoPath: string;
   }
-  
+
   // 다른 필요한 타입들 추가
   

@@ -1,0 +1,65 @@
+/* components/common/Logo.module.css */
+.logoContainer {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  
+  .logoContainer:hover {
+    transform: scale(1.05);
+  }
+  
+  .logoContainer:focus, 
+  .logoContainer:focus-visible {
+    outline: none;
+  }
+  
+  .logoImage {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+  }
+  
+  .small {
+    width: 60px;
+  }
+  
+  .medium {
+    width: 120px;
+  }
+  
+  .large {
+    width: 150px;
+  }
+  
+  /* 반응형 디자인 */
+  @media (max-width: 768px) {
+    .small {
+      width: 50px;
+    }
+    
+    .medium {
+      width: 80px;
+    }
+    
+    .large {
+      width: 100px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .small {
+      width: 40px;
+    }
+    
+    .medium {
+      width: 50px;
+    }
+    
+    .large {
+      width: 60px;
+    }
+  }
+  

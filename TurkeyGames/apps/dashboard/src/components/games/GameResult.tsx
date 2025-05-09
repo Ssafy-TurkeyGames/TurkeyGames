@@ -1,6 +1,6 @@
 // src/components/games/GameResult.tsx
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './GameResult.module.css';
 import logo from '../../assets/images/logo.png';
 
@@ -18,6 +18,7 @@ interface GameResultProps {
 
 const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   // 방어 코드 추가
   const arrPlayers = Array.isArray(players) ? players : [];
@@ -36,6 +37,7 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
   const handleHighlightClick = () => {
     navigate('/games/TurkeyDice/highlight', {
       state: {
+        backgroundLocation: location, // 현재 위치를 백그라운드로 설정
         qrValue: 'https://example.com/turkey-dice-highlight',
         title: 'QR코드를 인식하면 최고의 플레이 영상을 보실 수 있어요!'
       }

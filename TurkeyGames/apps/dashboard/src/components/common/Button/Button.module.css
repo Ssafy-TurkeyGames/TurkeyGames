@@ -1,4 +1,4 @@
-/* app/dashboard/src/components/common/Button/Button.module.css */
+/* apps/dashboard/src/components/common/Button/Button.module.css */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -37,3 +37,22 @@
     box-shadow: none;
   }
   
+  .startBtn {
+    width: 240px;
+    font-size: 1.2rem;
+    margin-top: 22px;
+    margin-bottom: 6px;
+    background: #ffb74d;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 13px 0;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(255,183,77,0.13);
+    transition: background 0.13s;
+  }
+  .startBtn:hover {
+    background: #e07b3c;
+  }

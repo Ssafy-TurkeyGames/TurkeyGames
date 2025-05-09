@@ -1,10 +1,14 @@
-// apps/dashboard/src/components/Header/Header.tsx
+// apps/dashboard/src/components/Header.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 import logo from '../assets/images/logo.png';
 
-const Header = ({ children }: { children?: React.ReactNode }) => {
+interface HeaderProps {
+  children?: React.ReactNode;
+}
+
+const Header: React.FC<HeaderProps> = ({ children }) => {
   const navigate = useNavigate();
 
   return (
