@@ -20,8 +20,8 @@ class YachtHighlightDetector:
         achieved_triggers = self.player_highlights[player_key]
 
         # 1순위: 야추(5개 동일)
-        if "yacht" not in achieved_triggers and self._is_yacht(dice_values):
-            await self._create_highlight(game_id, player_id, "yacht")
+        if "turkey" not in achieved_triggers and self._is_yacht(dice_values):
+            await self._create_highlight(game_id, player_id, "turkey")
             # 한 번의 game_state 업데이트에서 여러 조건이 동시에 만족될 수 있으나,
             # 우선순위가 가장 높은 하나만 선택하여 하이라이트를 생성하고 반환합니다.
             # 만약 한 번의 주사위 굴림으로 여러 하이라이트 조건(예: 야추와 동시에 보너스 달성)을

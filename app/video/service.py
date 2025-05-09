@@ -16,6 +16,7 @@ from app.video.buffer_manager import CircularBuffer
 from app.video.video_writer import VideoSaver
 # from .trigger_detector import TriggerDetector # TriggerDetector는 이 파일에서 직접 사용되지 않습니다.
 from app.config import load_config
+from datetime import datetime, timedelta
 
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0" # MSMF 하드웨어 변환 비활성화 (Windows용)
 
@@ -282,13 +283,21 @@ class VideoService:
             # QR 코드 생성
             # QR 코드에 포함될 다운로드 URL (새로운 API 엔드포인트 사용)
             # URL 인코딩된 MinIO 객체 이름 사용 고려
-            download_trigger_url = f"{self.minio_config['qr_code_base_url'].rstrip('/')}/{minio_object_name.replace('/', '%2F')}"
+            download_url = self.minio_client.presigned_get_object(
+                # "GET",
+                self.minio_config['bucket_name'],
+                minio_object_name,
+                # expires=timedelta(days=1)  
+            )
+
+            # download_trigger_url = f"{self.minio_config['qr_code_base_url'].rstrip('/')}/{minio_object_name.replace('/', '%2F')}"
             
-            qr_img = qrcode.make(download_trigger_url)
+            # qr_img = qrcode.make(download_trigger_url)
+            qr_img = qrcode.make(download_url)
             qr_filename = f"{base_filename}.png"
             qr_filepath = os.path.join(self.minio_config['qr_output_dir'], qr_filename)
             qr_img.save(qr_filepath)
-            print(f"📱 QR 코드 생성 완료: {qr_filepath} (URL: {download_trigger_url})")
+            print(f"📱 QR 코드 생성 완료: {qr_filepath} (URL: {download_url})")
 
         except S3Error as s3e:
             print(f"❌ MinIO S3 오류 발생: {s3e}")

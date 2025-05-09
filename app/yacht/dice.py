@@ -72,7 +72,8 @@ class DiceGame:
         # 주사위 굴리기
         for i in range(DICE_COUNT):
             if i not in keep_indices:
-                game["dice_values"][i] = random.randint(1, 6)
+                # game["dice_values"][i] = random.randint(1, 6)
+                game["dice_values"][i] = 5
 
         # 남은 굴림 횟수 감소
         game["rolls_left"] -= 1
