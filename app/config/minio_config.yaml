@@ -5,6 +5,3 @@ secure: false # MinIO 서버가 HTTPS를 사용하면 true로 설정
 qr_code_base_url: "http://localhost:8000/download/video/" # QR 코드 링크의 기본 URL (실제 앱 URL로 업데이트 필요)
 qr_output_dir: "/qr_codes" # 생성된 QR 코드를 저장할 디렉토리
 
-# 민감 정보 (Access Key, Secret Key)는 환경 변수에서 로드합니다:
-# MINIO_ACCESS_KEY
-# MINIO_SECRET_KEY
