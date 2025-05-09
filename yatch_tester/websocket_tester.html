@@ -65,6 +65,10 @@
         socket.on("connect_error", (error) => {
           log("연결 오류: " + error);
         });
+
+        socket.on("game_created", (data) => {
+          log("게임 생성됨: " + JSON.stringify(data));
+        });
       });
 
       // 게임 참가 버튼 - 처음에는 비활성화
