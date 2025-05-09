@@ -1,13 +1,13 @@
 /* apps/dashboard/src/pages/Home.module.css */
 
 .container {
-  min-height: 100vh; /* height 대신 min-height 사용 */
-  max-height: 100vh; /* 최대 높이 설정 */
-  overflow: hidden; /* 내용이 넘칠 경우 스크롤 허용 */
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
   background: url('/dashboard/assets/bg_western.png') center/cover no-repeat,
     linear-gradient(to bottom, #6d3d47 0%, #ffb84d 100%);
   font-family: 'Pretendard', 'sans-serif';
-  padding: 110px 60px 80px; /* 상단 패딩 줄이고 하단 패딩 늘림 */
+  padding: 10vh 5vw 8vh; /* vh, vw 단위 사용 */
   margin: 0;
   display: flex;
   flex-direction: column;
@@ -18,63 +18,37 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* 중앙 정렬 추가 */
+  justify-content: center;
   flex: 1;
   width: 100%;
-  padding: 0; /* 패딩 제거 */
-  margin: 0 auto; /* 중앙 정렬 */
-  max-width: 1200px; /* 최대 너비 설정 */
+  padding: 0;
+  margin: 0 auto;
+  width: 85vw; /* 뷰포트 너비 기준 */
 }
 
 .topCards {
   display: flex;
-  gap: 35px;
-  margin-bottom: 40px; /* 여백 늘림 */
+  flex-wrap: wrap; /* 자동 줄바꿈 */
+  gap: clamp(15px, 3vw, 35px); /* 반응형 간격 */
+  margin-bottom: clamp(20px, 4vh, 40px); /* 반응형 여백 */
   width: 100%;
-  max-width: 1100px;
   justify-content: center;
 }
 
 .bottomCards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 자동 조정 그리드 */
+  gap: clamp(15px, 2vw, 25px); /* 반응형 간격 */
   width: 100%;
-  max-width: 1100px;
-  margin-bottom: 20px; /* 하단 여백 추가 */
+  margin-bottom: 2vh;
 }
 
-/* 반응형: 태블릿 */
-@media (max-width: 1100px) {
-  .container {
-    padding: 50px 40px 60px; /* 패딩 조정 */
-  }
-  
-  .topCards,
-  .bottomCards {
-    max-width: 100%;
-  }
-  
-  .bottomCards {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px; /* 간격 줄임 */
-  }
+/* 카드 내부 요소들도 반응형으로 조정 */
+.topCards > * {
+  flex: 1 1 clamp(280px, 40%, 500px); /* 최소, 기본, 최대 너비 */
+  min-width: 0; /* 필요시 축소 허용 */
 }
 
-/* 반응형: 모바일 */
-@media (max-width: 700px) {
-  .container {
-    padding: 30px 20px 50px; /* 패딩 조정 */
-  }
-  
-  .topCards {
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 25px; /* 여백 조정 */
-  }
-  
-  .bottomCards {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
+.bottomCards > * {
+  min-width: 0; /* 필요시 축소 허용 */
 }
