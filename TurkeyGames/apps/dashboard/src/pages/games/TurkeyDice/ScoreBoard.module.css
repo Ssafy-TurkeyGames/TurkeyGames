@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   padding: 20px;
   background-color: #4e2e31;
   background-image: url('../../../assets/images/dice-bg.png');
@@ -52,7 +52,7 @@
 .title {
   font-size: 3rem;
   font-weight: bold;
-  margin: 90px 0 60px; /* 상단 여백 증가 (로고 공간 확보) */
+  margin: 70px 0 60px; /* 상단 여백 증가 (로고 공간 확보) */
   text-align: center;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
