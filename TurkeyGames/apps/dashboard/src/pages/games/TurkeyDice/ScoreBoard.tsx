@@ -77,6 +77,8 @@ const ScoreBoard: React.FC = () => {
           alt="Turkey Games" 
           className={styles.logo} 
           onClick={() => navigate('/')}
+          draggable="false"
+          tabIndex="-1" /* 포커스 방지 */
         />
       </div>
       
