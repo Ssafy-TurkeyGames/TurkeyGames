@@ -31,7 +31,7 @@ if __name__ == "__main__":
     screen_width = 800
     screen_height = 800
     
-    # 윈도우 창 크기 설정
+    # 윈도우 창 크기 설정uy
     cv2.namedWindow("Aruco Marker Board", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("Aruco Marker Board", screen_width, screen_height)
 

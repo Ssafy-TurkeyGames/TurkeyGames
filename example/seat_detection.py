@@ -9,6 +9,7 @@ def draw_aruco_markers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
     parameters = cv2.aruco.DetectorParameters()
+
     corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
 
     aruco_markers = {}
@@ -41,8 +42,11 @@ def sort_markers_based_on_position(markers):
     if len(markers) < 4:  # 마커가 4개 미만이면 정렬하지 않음
         return markers  # 4개 미만일 경우 그대로 반환
     
+    # markers의 내용을 출력하여 확인
+    print("Markers before sorting:", markers)
+    
     # 각 좌표를 튜플로 변환하여 정렬
-    markers = [tuple(marker) for marker in markers]  # 각 좌표를 튜플로 변환
+    markers = [tuple(marker[0]) for marker in markers]  # 각 좌표를 튜플로 변환
     
     # 마커들이 영상 내에서 변할 때마다 상대적인 위치를 바탕으로 순서를 결정
     # (왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서대로 정렬)
