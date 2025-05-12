@@ -79,12 +79,12 @@
 }
 
 .clearFilterBtn {
-  background: #f44336;
+  background: #d32f2f;
   color: #fff;
 }
 
 .clearFilterBtn:hover {
-  background: #d32f2f;
+  background: #a51d13;
 }
 
 .divider {
