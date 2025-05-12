@@ -24,12 +24,12 @@ def create_aruco_markers(board_type, marker_size, screen_width, screen_height, m
 
 if __name__ == "__main__":
     # 아루코 마커 크기 설정 (고정 크기)
-    board_type = cv2.aruco.DICT_4X4_250
+    board_type = cv2.aruco.DICT_6X6_250
     marker_size = 50  # 고정된 마커 크기
     
     # 기본 화면 크기 설정
-    screen_width = 800
-    screen_height = 800
+    screen_width = 600
+    screen_height = 600
     
     # 윈도우 창 크기 설정uy
     cv2.namedWindow("Aruco Marker Board", cv2.WINDOW_NORMAL)

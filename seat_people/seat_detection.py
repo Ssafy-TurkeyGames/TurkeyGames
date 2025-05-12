@@ -7,7 +7,7 @@ seat_state = {0: False, 1: False, 2: False, 3: False}  # 좌석 상태 (비어�
 # 아루코 마커 감지 및 좌석 매핑
 def draw_aruco_markers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
     parameters = cv2.aruco.DetectorParameters()
 
     corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
@@ -64,7 +64,15 @@ def sort_markers_based_on_position(markers):
         return markers  # 4개 미만일 경우 그대로 반환
     
     # 변경된 부분: 튜플 변환을 없앴습니다.
-    markers = [marker for marker in markers]  # 튜플로 변환할 필요가 없음
+    # markers = [marker for marker in markers]  # 튜플로 변환할 필요가 없음
+     # 중복 좌표 제거 (순서를 유지하면서 중복된 좌표를 제거)
+    seen = set()
+    unique_markers = []
+    for marker in markers:
+        marker_tuple = tuple(marker)  # 좌표를 튜플로 변환
+        if marker_tuple not in seen:
+            seen.add(marker_tuple)
+            unique_markers.append(marker)
 
     # 마커들이 영상 내에서 변할 때마다 상대적인 위치를 바탕으로 순서를 결정
     # (왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서대로 정렬)
@@ -78,7 +86,7 @@ def sort_markers_based_on_position(markers):
     return [top_left, top_right, bottom_left, bottom_right]
 
 # 사람 위치를 좌석에 맞게 할당하는 함수
-def get_seat_number(person_pos, aruco_markers, seat_threshold=20):
+def get_seat_number(person_pos, aruco_markers, seat_threshold=40):
     px, py = person_pos
     for seat_num, (cx, cy, r) in aruco_markers.items():
         # 원의 방정식: (px - cx)^2 + (py - cy)^2 <= r^2
