@@ -7,12 +7,10 @@
 # 데이터 처리 및 과학 계산
 numpy==1.26.4
 opencv-contrib-python==4.11.0.86
-opencv-python==4.11.0.86
 pandas==2.2.3
 scipy==1.15.2
 tqdm==4.67.1
 pillow==11.2.1
-
 # 기타 필요한 라이브러리
 requests==2.32.3
 protobuf==4.25.7
