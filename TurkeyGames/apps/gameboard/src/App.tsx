@@ -2,6 +2,7 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import DefaultRoute from './routes/defaultRoute/DefaultRoute';
 import TurkeyDiceRoute from './routes/turkeyDiceRoute/TurkeyDiceRoute';
+import TestRoute from './routes/testRoute/TestRoute';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <>
           <DefaultRoute />
           <TurkeyDiceRoute />
+          <TestRoute />
         </>
       }
       />

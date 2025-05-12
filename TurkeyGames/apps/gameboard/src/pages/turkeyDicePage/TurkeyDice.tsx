@@ -7,7 +7,7 @@ import turkeyDiceDefaultMap from '../../assets/images/turkey_default_map.png';
 import turkeyDuceDefaultScore from '../../assets/images/turkey_default_score.png';
 import turkeyDiceAcadeMap from '../../assets/images/turkey_acade_map.png';
 import turkeyDiceAcadeScore from '../../assets/images/turkey_acade_score.png';
-import TurkeyDiceScoreCard from '../../components/turkeyDice/TurkeyDiceScoreCard/TurkeyDiceScoreCard';
+import TurkeyDiceScoreCard from '../../components/turkeyDice/turkeyDiceScoreCard/TurkeyDiceScoreCard';
 import { SpriteAnimator } from 'react-sprite-animator'
 import test from '../../assets/effect/test.jpg';
 

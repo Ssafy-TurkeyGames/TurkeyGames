@@ -1,0 +1,180 @@
+.box {
+    box-sizing: border-box;
+    position: relative;
+    padding: 10px 50px 0px;
+    width: 450px;
+    height: 540px;
+}
+
+.box > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -99;
+    width: 100%;
+    height: 100%;
+}
+
+.block {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: gray;
+    opacity: 0.5;
+    width: 100%;
+    height: 100%;
+}
+
+.playerInfo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.playerInfo div {
+    box-sizing: border-box;
+    color: darkred;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.scoreLayout {
+    box-sizing: border-box;
+}
+
+.scoreBox {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 35px;
+}
+
+.scoreBox div:nth-child(1) {
+    box-sizing: border-box;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60%;
+    height: 100%;
+    font-weight: bold;
+    font-size: 18px;
+    border-right: 5px solid #710000;
+    border-bottom: 3px solid black;
+}
+
+.scoreBox div:nth-child(2) {
+    box-sizing: border-box;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    width: 40%;
+    height: 100%;
+    border-bottom: 3px solid black;
+}
+
+.hexa {
+    height: 35px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.hexa div:nth-child(1) {
+    box-sizing: border-box;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60%;
+    height: 100%;
+    font-weight: bold;
+    font-size: 18px;
+    border-bottom: 5px solid #A20000;
+    border-right: 5px solid #710000;
+}
+
+.hexa div:nth-child(2) {
+    box-sizing: border-box;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    width: 40%;
+    height: 100%;
+    border-bottom: 5px solid #A20000;
+}
+
+.turkey {
+    height: 35px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.turkey div:nth-child(1) {
+    box-sizing: border-box;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60%;
+    height: 100%;
+    font-weight: bold;
+    font-size: 18px;
+    border-right: 5px solid #710000;
+}
+
+.turkey div:nth-child(2) {
+    box-sizing: border-box;
+    padding: 5px 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    width: 40%;
+    height: 100%;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: center;
+    margin-top: 5px;
+    width: 100%;
+}
+
+.buttons div {
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+    width: 50%;
+    height: 40px;
+    background-color: #7B0606;
+    color: #F7C122;
+    border-radius: 10px;
+    box-shadow: 3px 3px 3px #4c0404;
+    transition: all 0.3s;
+}
+
+.buttons div:active {
+    box-shadow: none;
+}
