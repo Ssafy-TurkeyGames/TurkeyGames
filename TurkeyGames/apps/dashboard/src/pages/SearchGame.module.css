@@ -99,7 +99,7 @@
   max-width: 730px;
   background: #d96c4a;
   border-radius: clamp(20px, 2.5vw, 28px);
-  padding: clamp(15px, 2vh, 24px) clamp(20px, 3vw, 32px);
+  padding: clamp(20px, 2.2vh, 30px) clamp(20px, 3vw, 32px);
   display: flex;
   align-items: center;
   box-shadow: 0 4px 22px rgba(0,0,0,0.12);
@@ -155,7 +155,7 @@
   background: #fff;
   color: #d96c4a;
   border-radius: clamp(8px, 1vw, 12px);
-  padding: clamp(1px, 0.2vh, 2px) clamp(10px, 1.5vw, 16px);
+  padding: clamp(3px, 0.5vh, 6px) clamp(10px, 1.5vw, 16px);
   font-weight: 700;
   font-size: clamp(14px, 1.5vw, 17px);
 }
