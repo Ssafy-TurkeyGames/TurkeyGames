@@ -1,10 +1,11 @@
+// App.tsx
 import React from 'react';
 import { useLocation, Routes, Route } from 'react-router-dom';
 import AppRoutes from './routes/routes';
 import Rule from './pages/Rule';
 
 export default function App() {
-  return <AppRoutesWrapper />; // 올바른 방식
+  return <AppRoutesWrapper />;
 }
 
 function AppRoutesWrapper() {

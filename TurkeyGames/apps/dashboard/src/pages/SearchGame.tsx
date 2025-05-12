@@ -52,7 +52,7 @@ export default function SearchGame() {
 
   // 게임 목록 불러오기
   const fetchGames = async (searchTerm = search) => {
-    console.log('🔄 API 요청 시작');
+   // console.log('🔄 API 요청 시작');
     setLoading(true);
     try {
       let response;
@@ -69,23 +69,23 @@ export default function SearchGame() {
           ? [levelFilters.indexOf(selectedLevel) + 1] 
           : undefined;
         
-        console.log('🔎 필터 적용 검색:', { peopleFilter, levelFilter });
+       // console.log('🔎 필터 적용 검색:', { peopleFilter, levelFilter });
         response = await getFilteredGames(peopleFilter, levelFilter);
       } 
       // 검색어가 있는 경우
       else if (searchTerm.trim()) {
-        console.log('🔎 키워드 검색:', searchTerm);
+       // console.log('🔎 키워드 검색:', searchTerm);
         response = await searchGamesByKeyword(searchTerm);
       } 
       // 필터와 검색어가 모두 없는 경우
       else {
-        console.log('🔎 전체 게임 조회');
+       // console.log('🔎 전체 게임 조회');
         response = await getAllGames();
       }
 
       // 응답 처리
       if (response.code === 'SUCCESS') {
-        console.log('✅ 검색 성공:', response.data?.length);
+       // console.log('✅ 검색 성공:', response.data?.length);
         setGames(response.data || []);
         setError(null);
       } else {

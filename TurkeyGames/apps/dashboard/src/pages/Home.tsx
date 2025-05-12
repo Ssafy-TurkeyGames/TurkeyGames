@@ -30,7 +30,6 @@ export default function Home() {
             iconAlt="음식 아이콘"
             title="메뉴 주문하기"
             subText="Food & Drink"
-            onClick={() => console.log('메뉴 주문하기 클릭')}
           />
         </div>
         <div className={styles.bottomCards}>
@@ -39,28 +38,24 @@ export default function Home() {
             iconSrc={bookIcon}
             iconAlt="책 아이콘"
             title="매장 시설 안내"
-            onClick={() => console.log('시설 안내 클릭')}
           />
           <Card
             type="small"
             iconSrc={wifiIcon}
             iconAlt="와이파이 아이콘"
             title="와이파이"
-            onClick={() => console.log('와이파이 클릭')}
           />
           <Card
             type="small"
             iconSrc={playIcon}
             iconAlt="재생 아이콘"
             title="이용안내 영상"
-            onClick={() => console.log('영상 클릭')}
           />
           <Card
             type="small"
             iconSrc={messageIcon}
             iconAlt="메시지 아이콘"
             title="고객의 소리"
-            onClick={() => console.log('고객의 소리 클릭')}
           />
         </div>
       </div>

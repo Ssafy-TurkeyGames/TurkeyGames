@@ -1,5 +1,5 @@
 // components/common/games/VoiceOption.tsx
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import styles from './VoiceOption.module.css';
 import Button from '../common/Button/Button';
 import userIcon from '../../assets/images/user.png';
@@ -7,6 +7,12 @@ import boardIcon from '../../assets/images/board.png';
 import micIcon from '../../assets/images/mic.png';
 import turkeyIcon from '../../assets/images/turkey.png';
 import arcadeIcon from '../../assets/images/arcade.png';
+import { getSoundEnabled, playSound, onSoundSettingChange  } from '../../utils/soundUtils';
+
+// 오디오 파일 import
+import daegilGreeting from '../../assets/voice/daegil/인사.mp3';
+import gaenariGreeting from '../../assets/voice/flower/인사.mp3';
+import guriGreeting from '../../assets/voice/guri/인사.mp3';
 
 interface VoiceOptionProps {
   selectedVoice: string | null;
@@ -18,9 +24,7 @@ interface VoiceOptionProps {
 }
 
 const VOICE_OPTIONS = [
-  "카우보이", "치킨집 사장", "외계인",
-  "군인", "요정", "발키리",
-  "티모", "사코", "니코"
+  "대길", "개나리", "구리"
 ];
 
 export default function VoiceOption({
@@ -31,6 +35,35 @@ export default function VoiceOption({
   onConfirm,
   onCancel
 }: VoiceOptionProps) {
+  const [soundEnabled, setSoundEnabled] = useState(getSoundEnabled());
+  
+  // 소리 설정 변경 이벤트 리스너 등록
+  useEffect(() => {
+    const unsubscribe = onSoundSettingChange((enabled) => {
+      // console.log('VoiceOption received sound setting change:', enabled);
+      setSoundEnabled(enabled);
+    });
+    
+    return unsubscribe;
+  }, []);
+
+  const handleVoiceSelect = (voice: string) => {
+  //  console.log('Voice selected:', voice, 'Sound enabled:', soundEnabled);
+    
+    // 소리 재생 (소리 설정이 켜져 있을 때만)
+    if (soundEnabled) {
+      if (voice === "대길") {
+        playSound(daegilGreeting);
+      } else if (voice === "개나리") {
+        playSound(gaenariGreeting);
+      } else
+        playSound(guriGreeting);
+    }
+
+    // 선택 상태 업데이트
+    onSelect(voice);
+  };
+
   return (
     <div className={styles.voiceOptionContainer}>
       <div className={styles.iconRow}>
@@ -51,7 +84,7 @@ export default function VoiceOption({
           <Button
             key={voice}
             active={selectedVoice === voice}
-            onClick={() => onSelect(voice)}
+            onClick={() => handleVoiceSelect(voice)}
             className={styles.voiceBtn}
             style={{ width: 120, margin: 0 }}
           >

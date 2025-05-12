@@ -1,10 +1,11 @@
 // apps/dashboard/src/components/Header.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
 import logo from '../assets/images/logo.png';
-import soundOnIcon from '../assets/images/sound-on.png'; // 소리 켜기 아이콘
-import soundOffIcon from '../assets/images/sound-off.png'; // 소리 끄기 아이콘
+import soundOnIcon from '../assets/images/sound-on.png';
+import soundOffIcon from '../assets/images/sound-off.png';
+import { getSoundEnabled, setSoundEnabled } from '../utils/soundUtils';
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -12,11 +13,18 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ children }) => {
   const navigate = useNavigate();
-  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [isSoundOn, setIsSoundOn] = useState(getSoundEnabled());
+
+  // 소리 설정이 외부에서 변경될 경우를 대비해 상태 동기화
+  useEffect(() => {
+    setIsSoundOn(getSoundEnabled());
+  }, []);
 
   const toggleSound = () => {
-    setIsSoundOn(!isSoundOn);
-    // 실제 소리 켜고 끄는 로직 추가
+    const newState = !isSoundOn;
+    setIsSoundOn(newState);
+    setSoundEnabled(newState); // 전역 설정 업데이트
+    // console.log('Sound is now:', newState ? 'ON' : 'OFF'); // 디버깅용
   };
 
   return (
