@@ -32,6 +32,9 @@ export default function SearchGame() {
   const searchParams = new URLSearchParams(location.search);
   const keywordParam = searchParams.get('keyword');
 
+  // 필터가 적용되었는지 확인
+  const isFilterActive = selectedPlayers.length > 0 || selectedLevels.length > 0;
+
   // 검색 버튼/엔터 클릭 핸들러
   const handleSearch = () => {
     fetchGames();
@@ -48,44 +51,45 @@ export default function SearchGame() {
     fetchGames(effectiveSearch);
   }, [selectedPlayers, selectedLevels, search, keywordParam]);
   
-
+  // 모든 필터 초기화
+  const clearAllFilters = () => {
+    setSelectedPlayers([]);
+    setSelectedLevels([]);
+    setSearch('');
+    fetchGames('');
+  };
 
   // 게임 목록 불러오기
   const fetchGames = async (searchTerm = search) => {
-   // console.log('🔄 API 요청 시작');
     setLoading(true);
     try {
       let response;
       
       // 필터가 선택된 경우
-    if (selectedPlayers || selectedLevels) {
-      // 인원수 필터 변환
-      const peopleFilter = selectedPlayers.length > 0 
-      ? selectedPlayers.map(p => parseInt(p.replace('인', '')))
-      : undefined;
-      
-      // 난이도 필터 변환
-      const levelFilter = selectedLevels.length > 0
-      ? selectedLevels.map(l => levelFilters.indexOf(l) + 1)
-      : undefined;
+      if (selectedPlayers.length > 0 || selectedLevels.length > 0) {
+        // 인원수 필터 변환
+        const peopleFilter = selectedPlayers.length > 0 
+          ? selectedPlayers.map(p => parseInt(p.replace('인', '')))
+          : undefined;
         
-       // console.log('🔎 필터 적용 검색:', { peopleFilter, levelFilter });
-       response = await getFilteredGames(peopleFilter, levelFilter);
+        // 난이도 필터 변환
+        const levelFilter = selectedLevels.length > 0
+          ? selectedLevels.map(l => levelFilters.indexOf(l) + 1)
+          : undefined;
+        
+        response = await getFilteredGames(peopleFilter, levelFilter);
       } 
       // 검색어가 있는 경우
       else if (searchTerm.trim()) {
-       // console.log('🔎 키워드 검색:', searchTerm);
         response = await searchGamesByKeyword(searchTerm);
       } 
       // 필터와 검색어가 모두 없는 경우
       else {
-       // console.log('🔎 전체 게임 조회');
         response = await getAllGames();
       }
 
       // 응답 처리
       if (response.code === 'SUCCESS') {
-       // console.log('✅ 검색 성공:', response.data?.length);
         setGames(response.data || []);
         setError(null);
       } else {
@@ -102,25 +106,6 @@ export default function SearchGame() {
     }
   };
 
-  // // 초기 로딩 및 필터 변경 시 게임 목록 불러오기
-  // useEffect(() => {
-  //   fetchGames();
-  // }, [selectedPlayers, selectedLevels]);
-
-  // // 검색어 변경 시 디바운스 처리
-  // useEffect(() => {
-  //   if (search.trim() === '') {
-  //     fetchGames();
-  //     return;
-  //   }
-    
-  //   const timer = setTimeout(() => {
-  //     fetchGames();
-  //   }, 500);
-    
-  //   return () => clearTimeout(timer);
-  // }, [search]);
-
   // 페이지 이동 감지 및 검색어 초기화
   useEffect(() => {
     // 컴포넌트 마운트 시 검색어 초기화
@@ -130,7 +115,7 @@ export default function SearchGame() {
     return () => {
       setSearch('');
     };
-}, [location.pathname]); // 경로 변경 시 실행
+  }, [location.pathname]); // 경로 변경 시 실행
 
   // 인원수 표시 형식 변환
   const formatPlayerCount = (people: number[]) => {
@@ -191,14 +176,21 @@ export default function SearchGame() {
             {label}
           </button>
         ))}
+        
+        {/* 필터 초기화 버튼 */}
+        {isFilterActive && (
+          <>
+            <span className={styles.divider}>|</span>
+            <button
+              className={styles.clearFilterBtn}
+              onClick={clearAllFilters}
+              title="모든 필터 초기화"
+            >
+              필터 초기화
+            </button>
+          </>
+        )}
       </div>
-
-      {/* 로딩 상태 */}
-      {loading && (
-        <div className={styles.loadingContainer}>
-          <p>게임 목록을 불러오는 중...</p>
-        </div>
-      )}
 
       {/* 에러 상태 */}
       {error && !loading && (
