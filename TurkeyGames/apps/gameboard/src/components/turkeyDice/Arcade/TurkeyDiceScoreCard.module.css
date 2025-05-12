@@ -1,0 +1,136 @@
+/* src/components/turkeyDice/Arcade/TurkeyDiceScoreCard.module.css */
+.scoreCardContainer {
+    width: 320px;
+    height: 600px;
+    background-image: url('../../../assets/images/turkey_acade_score(2).png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .scoreCardInner {
+    width: 90%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 15px;
+    box-sizing: border-box;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .title {
+    color: #5DB9E0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    -webkit-text-stroke: 0.7px #A300B2;
+    text-shadow:
+      0 0 4px #A300B2,
+      0 0 8px #A300B2,
+  }
+  
+  .score {
+    color: #5DB9E0;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-top: 5px;
+    -webkit-text-stroke: 1px #A300B2;
+    text-shadow:
+      0 0 5px #A300B2,
+      0 0 10px #A300B2;
+  }
+  
+  .categoryList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+  }
+  
+  .categoryItem {
+    display: flex;
+    align-items: center;
+    padding-bottom: 5px;
+    position: relative;
+    border-bottom: 1px solid #10FFFF;
+  }
+  
+  .categoryName {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin-left: 20px;
+    padding-right: 10px;
+    text-shadow:
+      0 0 4px #10FFFF,
+      0 0 4px #10FFFF;
+  }
+  
+  .divider {
+    width: 1.3px;
+    height: 100%;
+    background-color: #F098F3;
+    box-shadow:
+      0 0 5px #F098F3,
+      0 0 10px #F098F3;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+  }
+  
+  .buttonArea {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    gap: 10px;
+  }
+  
+  .rerollButton, .nextTurnButton {
+    padding: 12px 10px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    color: white;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+  
+  .rerollButton {
+    background-color: #9c27b0;
+    box-shadow: 0 0 10px #F098F3;
+  }
+  
+  .rerollButton:hover {
+    background-color: #7b1fa2;
+    box-shadow: 0 0 15px #F098F3;
+  }
+  
+  .nextTurnButton {
+    background-color: #008888;
+    box-shadow: 0 0 10px #10FFFF;
+  }
+  
+  .nextTurnButton:hover {
+    background-color: #006666;
+    box-shadow: 0 0 15px #10FFFF;
+  }
+  
