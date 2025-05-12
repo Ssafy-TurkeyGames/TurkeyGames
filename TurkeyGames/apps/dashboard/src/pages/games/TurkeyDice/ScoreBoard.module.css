@@ -89,6 +89,26 @@
   transform: translateY(-2px);
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.gameIdBadge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+}
+
 /* 반응형 디자인 - 큰 화면 */
 @media (min-width: 1200px) {
   .logo {
@@ -152,3 +172,4 @@
     align-items: center;
   }
 }
+
