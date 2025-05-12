@@ -1,0 +1,77 @@
+.layout {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    background-color: #592E36;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+.spinBox {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -120.225px;
+    margin-left: -100px;
+    z-index: 9999;
+    opacity: 0.5;
+}
+
+.leftArea {
+    width: 420px;
+    height: 100%;
+    position: relative; 
+}
+
+.leftArea > div:nth-child(1) {
+    transform: rotate(180deg);
+    position: absolute;  /* 절대 위치 설정 */
+    top: 0;
+    left: 0;
+}
+
+.leftArea > div:nth-child(2) {
+    position: absolute;  /* 절대 위치 설정 */
+    bottom: 0;
+    left: 0;
+}
+
+.map {
+    width: 1080px;
+    height: 100%;
+}
+
+.map>img {
+    width: 100%;
+    height: 100%;
+}
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.rightArea {
+    width: 420px;
+    height: 100%;
+    position: relative; 
+}
+
+.rightArea > div:nth-child(1) {
+    transform: rotate(180deg);
+    position: absolute;  
+    top: 0;
+    right: 0;
+}
+
+.rightArea > div:nth-child(2) {
+    position: absolute; 
+    right: 0;
+    bottom: 0;
+}

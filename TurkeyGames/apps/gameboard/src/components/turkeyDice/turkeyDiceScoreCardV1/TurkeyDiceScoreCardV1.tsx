@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import styles from './TurkeyDiceScoreCardV1.module.css';
-import turkeyDefaultScore from '../../../assets/images/turkey_default_score.png';
 import daegilRerollFile1 from '../../../assets/sound/daegil/reroll/reroll_v1.mp3';
 import daegilRerollFile2 from '../../../assets/sound/daegil/reroll/reroll_v2.mp3';
 import daegilRerollFile3 from '../../../assets/sound/daegil/reroll/reroll_v3.mp3';
@@ -43,7 +42,6 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
 
   return (
     <div className={styles.box}>
-        <img src={turkeyDefaultScore} alt="" />
         {props.myTurn ? <></> : <div className={styles.block}></div>}
         <audio ref={audioRef}/>
 

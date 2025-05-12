@@ -11,7 +11,9 @@ import TurkeyDiceScoreCard from '../../components/turkeyDice/turkeyDiceScoreCard
 import { SpriteAnimator } from 'react-sprite-animator'
 import test from '../../assets/effect/test.jpg';
 
-export default function TurkeyDice() {
+
+
+export default function TurkeyDice({}) {
   return (
     <div className={styles.layout}>
       <div className={styles.spinBox}>
