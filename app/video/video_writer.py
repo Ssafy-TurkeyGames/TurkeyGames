@@ -32,22 +32,31 @@ class VideoSaver:
             'MJPG': 'avi',
             'MP4V': 'mp4'
         }
-        return codec_ext_map.get(self.codec, 'avi')
+        return codec_ext_map.get(self.codec.upper(), 'avi') # 코덱 이름을 대문자로 변환하여 맵에서 찾도록 보장
 
-    def save_clip(self, frames: List, resolution: tuple):
+    def save_clip(self, frames: List, resolution: tuple, base_filename_prefix: str | None = None) -> str | None:
         if not frames:
             print("⚠️ 저장할 프레임이 없습니다.")
-            return
+            return None
 
         try:
             self._create_output_dir()  # 저장 전 디렉토리 재확인
-            filename = os.path.abspath(  # 절대 경로 사용
-                f"{self.output_dir}/clip_{datetime.now().strftime('%Y%m%d_%H%M%S')}.{self._get_file_ext()}"
+            
+            if base_filename_prefix:
+                filename_part = base_filename_prefix
+            else:
+                filename_part = f"clip_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            filename = os.path.abspath(
+                f"{self.output_dir}/{filename_part}.{self._get_file_ext()}"
             )
+            
             out = self._get_writer(filename, resolution)
             for frame in frames:
                 out.write(frame)
-            print(f"✅ {filename} 저장 완료 ({len(frames)}프레임)")
+            print(f"✅ {filename} 저장 완료 ({len(frames)} 프레임)") # 공백 추가
+            return filename
         except Exception as e:
             print(f"❌ 저장 실패: {str(e)}")
-            raise  # 오류 상세 정보 출력
+            # raise  # 오류 상세 정보 출력 -> 오류 발생 시 None 반환으로 변경 (주석 유지)
+            return None

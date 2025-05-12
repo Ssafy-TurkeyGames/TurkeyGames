@@ -106,3 +106,5 @@ __pycache__/*
 
 #video 
 video_buffer.mmap
+
+.env

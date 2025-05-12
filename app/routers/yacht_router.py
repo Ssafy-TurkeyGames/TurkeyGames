@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.db import crud
 from app.yacht import schema
 from app.yacht.dice import DiceGame
-from app.websocket.manager import broadcast_scores
+from app.websocket.manager import broadcast_scores, game_rooms, sio
 
 # 요트 게임 라우터 초기화
 router = APIRouter(
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.post("/start", response_model=schema.GameState)
-async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db)):
+async def start_game(settings: schema.GameSettings, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """새 게임 시작"""
     # 게임 설정 저장
     db_setting = crud.create_game_setting(db, settings)
@@ -32,7 +32,8 @@ async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db
     # 게임 ID가 문자열인지 확인 (Pydantic 검증 통과를 위해)
     game_id_str = str(game_id) if game_id else "1"
 
-    return schema.GameState(
+    # 게임 상태 생성
+    game_state = schema.GameState(
         id=game_id_str,
         players=player_ids,
         current_player_idx=0,
@@ -41,6 +42,12 @@ async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db
         status="waiting"
     )
 
+    # 로비에 게임 생성 정보 전송
+    background_tasks.add_task(sio.emit, 'game_created', {
+        "game_id": game_id_str,
+        "settings": settings.dict()
+    })
+    return game_state
 
 @router.get("/{game_id}/status", response_model=schema.GameState)
 async def get_game_status(game_id: str):
@@ -76,6 +83,7 @@ async def select_score(
         game_id: str,
         selection: schema.ScoreSelection,
         background_tasks: BackgroundTasks,
+        request: Request, # 앱 상태 접근을 위함
         db: Session = Depends(get_db)
 ):
     """점수 선택 및 기록"""
@@ -90,6 +98,21 @@ async def select_score(
 
     # 점수 업데이트
     success = crud.update_player_score(db, selection.player_id, selection.category, selection.value)
+    if success :
+        game["turn_counts"][selection.player_id] += 1  # 턴 수 증가
+        remaining_turns = 12 - game["turn_counts"][selection.player_id]
+    
+        # 2. 하이라이트 트리거 호출 추가 (아래 코드 추가)
+        yacht_detector = request.app.state.yacht_highlight_detector
+        all_scores = await get_scores(game_id, db)  # 기존 코드 재사용
+        background_tasks.add_task(
+            yacht_detector.process_game_state,
+            game_id,
+            selection.player_id,
+            game["dice_values"],
+            {str(s.player_id): s.dict() for s in all_scores.scores},
+            remaining_turns
+        )
     if not success:
         raise HTTPException(status_code=400, detail="이미 선택한 카테고리이거나 점수를 업데이트할 수 없습니다")
 
@@ -119,6 +142,7 @@ async def select_score(
                     player_score.small_straight + player_score.large_straight +
                     player_score.turkey
             )
+            
 
             scores.append(schema.PlayerScore(
                 player_id=player_id,
