@@ -60,7 +60,7 @@
   padding: 0 clamp(10px, 2vw, 20px);
 }
 
-.filterBtn {
+.filterBtn, .clearFilterBtn {
   background: #fff;
   color: #6d3d47;
   border: none;
@@ -76,6 +76,15 @@
 .filterBtn.active, .filterBtn:hover {
   background: #ffb84d;
   color: #fff;
+}
+
+.clearFilterBtn {
+  background: #f44336;
+  color: #fff;
+}
+
+.clearFilterBtn:hover {
+  background: #d32f2f;
 }
 
 .divider {
@@ -204,4 +213,18 @@
 .playBtn:hover {
   background: #823333;
   color: #fff;
+}
+
+.loadingContainer, .errorContainer, .noResults {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 40px 20px;
+  font-size: 18px;
+  color: #6d3d47;
+}
+
+.errorContainer {
+  color: #f44336;
 }
