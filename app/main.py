@@ -13,7 +13,7 @@ from app.routers.video_router import create_video_router
 from app.video.yacht_highlight_detector import YachtHighlightDetector
 from app.websocket.manager import socket_app
 from app.video import VideoService
-from app.video.trigger_detector import TriggerDetector
+# from app.video.trigger_detector import TriggerDetector
 
 # ✅ Swagger 자동 docs 끔 → 직접 커스터마이징
 app = FastAPI(
@@ -54,13 +54,13 @@ async def startup_event():
     app.state.video_service = video_service
 
     current_loop = asyncio.get_event_loop()
-    trigger_detector = TriggerDetector(
-        config=video_service.config,
-        callback=video_service.on_trigger,
-        loop=current_loop
-    )
+    # trigger_detector = TriggerDetector(
+    #     config=video_service.config,
+    #     callback=video_service.on_trigger,
+    #     loop=current_loop
+    # )
     # app_instance.state.trigger_detector = trigger_detector
-    app.state.trigger_detector = trigger_detector
+    # app.state.trigger_detector = trigger_detector
 
     # 야추 하이라이트 디텍터 초기화.
     yacht_highlight_detector = YachtHighlightDetector(video_service)
@@ -68,7 +68,7 @@ async def startup_event():
     app.state.yacht_highlight_detector = yacht_highlight_detector
 
     # video_router만 의존성이 필요하므로 lifespan 내부에서 생성 및 등록
-    video_router_instance = create_video_router(video_service, trigger_detector)
+    video_router_instance = create_video_router(video_service) #,trigger_detector
     # app_instance.include_router(video_router_instance)
     # app.state.video_router = video_router_instance
     app.include_router(video_router_instance)

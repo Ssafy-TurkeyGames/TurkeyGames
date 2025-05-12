@@ -4,8 +4,8 @@ camera:
   height: 720
 
 buffer:
-  pre_seconds: 10 # 트리거 전 저장 시간
-  post_seconds: 5 # 트리거 후 저장 시간
+  pre_seconds: 13 # 트리거 전 저장 시간
+  post_seconds: 2 # 트리거 후 저장 시간
   max_frames: 900 # 30fps × 30초
 
 output:
