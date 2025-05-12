@@ -3,7 +3,7 @@ import mmap
 import os
 import cv2
 import numpy as np
-import collections, sounddevice as sd
+import collections
 
 class CircularBuffer:
     def __init__(self, max_frames: int, frame_width: int, frame_height: int):
@@ -75,13 +75,7 @@ class CircularBuffer:
 
 class AudioRingBuffer:
     def __init__(self, maxlen_frames):
+        
         self.buffer = collections.deque(maxlen=maxlen_frames)
     def callback(self, indata, frames, time, status):
         self.buffer.append(indata.copy())
-
-# 녹음 설정
-sr = 44100  # 샘플링 레이트
-pre_sec = 13 # 이전 녹음할 시간
-audio_buf = AudioRingBuffer(maxlen_frames=sr * pre_sec)
-stream = sd.RawInputStream(samplerate=sr, channels=1, callback=audio_buf.callback)
-stream.start()

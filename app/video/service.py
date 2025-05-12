@@ -12,7 +12,7 @@ from minio import Minio
 from minio.error import S3Error
 import qrcode # QR 코드 생성을 위함
 
-from app.video.buffer_manager import CircularBuffer
+from app.video.buffer_manager import AudioRingBuffer, CircularBuffer
 from app.video.video_writer import VideoSaver
 # from .trigger_detector import TriggerDetector # TriggerDetector는 이 파일에서 직접 사용되지 않습니다.
 from app.config import load_config
@@ -47,6 +47,52 @@ class VideoService:
         self.stop_event = Event()
         self.camera_ready_event = Event()
         self._start_camera_thread()
+        
+         # 오디오 버퍼 초기화
+        audio_sr = 44100
+        pre_sec = self.config['buffer']['pre_seconds']
+        maxlen = int(audio_sr * pre_sec)
+        self.audio_buffer = AudioRingBuffer(maxlen_frames=maxlen)
+        
+        # sounddevice or pyaudio 선택
+        try:
+            import sounddevice as sd
+            self.audio_stream = sd.RawInputStream(
+                samplerate=audio_sr,
+                channels=1,
+                dtype='int16',
+                callback=self.audio_buffer.callback
+            )
+            self.audio_stream.start()
+            self.audio_backend = "sounddevice"
+            print("✅ Sounddevice 오디오 스트림 시작됨.")
+        except Exception as e:
+            print(f"⚠️ Sounddevice 초기화 실패: {e}, PyAudio 사용")
+            try:
+                import pyaudio
+                self.audio_backend = "pyaudio"
+                self.pa = pyaudio.PyAudio()
+
+                def pyaudio_callback(in_data, frame_count, time_info, status):
+                    # NumPy 배열로 변환
+                    audio_data = np.frombuffer(in_data, dtype=np.int16)
+                    self.audio_buffer.callback(audio_data, frame_count, time_info, status)
+                    return (None, pyaudio.paContinue)
+
+                self.audio_stream = self.pa.open(
+                    format=pyaudio.paInt16,
+                    channels=1,
+                    rate=audio_sr,
+                    input=True,
+                    frames_per_buffer=1024,
+                    stream_callback=pyaudio_callback  # 수정된 콜백 함수 사용
+                )
+                self.audio_stream.start_stream()
+                print("✅ PyAudio 오디오 스트림 시작됨.")
+            except Exception as e_pa:
+                print(f"❌ PyAudio 초기화 실패: {e_pa}. 오디오 기능 사용 불가.")
+                self.audio_backend = None
+                self.audio_stream = None
 
     def _validate_config(self, config: dict) -> dict:
         """필수 설정 값 검증"""
@@ -344,4 +390,16 @@ class VideoService:
             self.camera_thread.join(timeout=5) # 스레드가 종료될 때까지 최대 5초 대기
             if self.camera_thread.is_alive():
                 print("⚠️ 카메라 스레드가 5초 내에 정상적으로 종료되지 않음.")
+        # 오디오 스트림 중지
+        if self.audio_backend == "sounddevice":
+            if self.audio_stream:
+                self.audio_stream.stop()
+                self.audio_stream.close()
+        elif self.audio_backend == "pyaudio":
+            if self.audio_stream:
+                self.audio_stream.stop_stream()
+                self.audio_stream.close()
+            if hasattr(self, 'pa'):  # pa가 초기화되었는지 확인
+                self.pa.terminate()
+
         print("⏹️ 서비스가 중지되었습니다.")
