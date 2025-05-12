@@ -17,19 +17,12 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
 
   // 소리 설정 변경 이벤트 리스너 등록
   useEffect(() => {
-    const unsubscribe = onSoundSettingChange((enabled) => {
-      console.log('Header received sound setting change:', enabled);
-      setIsSoundOn(enabled);
-    });
-    
-    return unsubscribe;
+    // 이벤트 리스너 등록 및 정리 함수 반환
+    return onSoundSettingChange(setIsSoundOn);
   }, []);
 
   const toggleSound = () => {
-    const newState = !isSoundOn;
-    // setIsSoundOn(newState); // 이제 이벤트 리스너에서 처리하므로 필요 없음
-    setSoundEnabled(newState); // 전역 설정 업데이트
-    // console.log('Sound is now:', newState ? 'ON' : 'OFF'); // 디버깅용
+    setSoundEnabled(!isSoundOn);
   };
 
   return (
@@ -62,4 +55,4 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);
