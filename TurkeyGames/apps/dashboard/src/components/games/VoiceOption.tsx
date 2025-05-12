@@ -12,6 +12,7 @@ import { getSoundEnabled, playSound, onSoundSettingChange  } from '../../utils/s
 // 오디오 파일 import
 import daegilGreeting from '../../assets/voice/daegil/인사.mp3';
 import gaenariGreeting from '../../assets/voice/flower/인사.mp3';
+import guriGreeting from '../../assets/voice/guri/인사.mp3';
 
 interface VoiceOptionProps {
   selectedVoice: string | null;
@@ -23,7 +24,7 @@ interface VoiceOptionProps {
 }
 
 const VOICE_OPTIONS = [
-  "대길", "개나리", "애니"
+  "대길", "개나리", "구리"
 ];
 
 export default function VoiceOption({
@@ -55,7 +56,8 @@ export default function VoiceOption({
         playSound(daegilGreeting);
       } else if (voice === "개나리") {
         playSound(gaenariGreeting);
-      }
+      } else
+        playSound(guriGreeting);
     }
 
     // 선택 상태 업데이트
