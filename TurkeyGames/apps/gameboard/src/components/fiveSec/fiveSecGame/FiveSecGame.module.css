@@ -1,0 +1,153 @@
+.layout {
+    display: flex;
+    justify-content: space-between;
+    height: 100vh;
+    background-color: #592E36;
+    overflow-y: hidden;
+    position: relative;
+  }
+  
+  .gameInfo {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 20px;
+    z-index: 100;
+  }
+  
+  .leftArea, .rightArea {
+    height: 100%;
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px;
+  }
+  
+  .centerArea {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  .questionBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .question, .questionReverse {
+    font-size: 32px;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    max-width: 600px;
+  }
+  
+  .questionReverse {
+    transform: rotate(180deg);
+  }
+  
+  .startButton, .endButton {
+    margin-top: 30px;
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .startButton:hover, .endButton:hover {
+    background-color: #45a049;
+  }
+  
+  .endButton {
+    background-color: #f44336;
+  }
+  
+  .endButton:hover {
+    background-color: #da190b;
+  }
+  
+  /* 게임 설정 화면 */
+  .setupContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #592E36;
+    color: white;
+  }
+  
+  .setupContainer h1 {
+    font-size: 48px;
+    margin-bottom: 40px;
+  }
+  
+  .setupForm {
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .setupForm div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .setupForm label {
+    font-size: 18px;
+  }
+  
+  .setupForm input {
+    width: 100px;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .setupForm button {
+    padding: 12px 24px;
+    font-size: 18px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .setupForm button:hover {
+    background-color: #45a049;
+  }
+  .setupForm button:hover {
+    background-color: #45a049;
+  }
+  
+  .waitingMessage {
+    font-size: 24px;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }

@@ -1,0 +1,111 @@
+.card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .card.current {
+    border: 3px solid #FFD700;
+    box-shadow: 0 6px 12px rgba(255, 215, 0, 0.4);
+    transform: scale(1.05);
+  }
+  
+  .playerInfo {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .playerInfo h3 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #333;
+  }
+  
+  .score {
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+  }
+  
+  .voteButtons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .voteButton {
+    flex: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+  }
+  
+  .voteButton:active {
+    transform: scale(0.95);
+  }
+  
+  .voteButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  .approve {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .approve:hover:not(:disabled) {
+    background-color: #45a049;
+  }
+  
+  .approve.selected {
+    background-color: #2e7d32;
+    border: 2px solid #1b5e20;
+  }
+  
+  .reject {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .reject:hover:not(:disabled) {
+    background-color: #da190b;
+  }
+  
+  .reject.selected {
+    background-color: #c62828;
+    border: 2px solid #8e0000;
+  }
+  
+  .readyButton {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    animation: pulse 1s infinite;
+  }
+  
+  .readyButton:hover {
+    background-color: #1976D2;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
