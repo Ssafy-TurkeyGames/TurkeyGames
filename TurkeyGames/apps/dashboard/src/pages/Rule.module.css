@@ -144,7 +144,10 @@
     font-weight: 700;
     font-size: 1.1rem;
     transition: all 0.2s;
+    cursor: pointer;
+    border: none;
   }
+  
   .backButton:hover {
     background: #ffa726;
     transform: translateY(-2px);
