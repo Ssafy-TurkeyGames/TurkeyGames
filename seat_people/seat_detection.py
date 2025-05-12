@@ -61,32 +61,59 @@ def draw_aruco_markers(frame):
 # 아루코 마커들의 위치를 좌석 번호에 맞게 정렬하는 함수
 def sort_markers_based_on_position(markers):
     if len(markers) < 4:  # 마커가 4개 미만이면 정렬하지 않음
-        return markers  # 4개 미만일 경우 그대로 반환
+        return markers
     
-    # 변경된 부분: 튜플 변환을 없앴습니다.
-    # markers = [marker for marker in markers]  # 튜플로 변환할 필요가 없음
-     # 중복 좌표 제거 (순서를 유지하면서 중복된 좌표를 제거)
-    seen = set()
-    unique_markers = []
+    # 모든 점들의 중심(centroid) 계산
+    x_coords = [marker[0] for marker in markers]
+    y_coords = [marker[1] for marker in markers]
+    
+    center_x = sum(x_coords) / len(x_coords)
+    center_y = sum(y_coords) / len(y_coords)
+    
+    # 각 점과 중심 사이의 각도 계산
+    sorted_markers = []
+    quadrants = {
+        0: [], # 왼쪽 위 (0번)
+        1: [], # 오른쪽 위 (1번)
+        2: [], # 왼쪽 아래 (2번)
+        3: []  # 오른쪽 아래 (3번)
+    }
+    
+    # 각 점을 적절한 사분면에 할당
     for marker in markers:
-        marker_tuple = tuple(marker)  # 좌표를 튜플로 변환
-        if marker_tuple not in seen:
-            seen.add(marker_tuple)
-            unique_markers.append(marker)
-
-    # 마커들이 영상 내에서 변할 때마다 상대적인 위치를 바탕으로 순서를 결정
-    # (왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서대로 정렬)
-    top_left = sorted(markers, key=lambda x: (x[1], x[0]))[0]  # 가장 위쪽, 가장 왼쪽
-    top_right = sorted(markers, key=lambda x: (x[1], -x[0]))[0]  # 가장 위쪽, 가장 오른쪽
-    bottom_left = sorted(markers, key=lambda x: (-x[1], x[0]))[0]  # 가장 아래쪽, 가장 왼쪽
-    bottom_right = sorted(markers, key=lambda x: (-x[1], -x[0]))[0]  # 가장 아래쪽, 가장 오른쪽
-
-    print(f"Sorted markers: {top_left}, {top_right}, {bottom_left}, {bottom_right}")
-
-    return [top_left, top_right, bottom_left, bottom_right]
+        x, y = marker
+        
+        # 중심을 기준으로 사분면 결정
+        if x <= center_x and y <= center_y:
+            quadrants[0].append(marker)  # 왼쪽 위
+        elif x > center_x and y <= center_y:
+            quadrants[1].append(marker)  # 오른쪽 위
+        elif x <= center_x and y > center_y:
+            quadrants[2].append(marker)  # 왼쪽 아래
+        else:
+            quadrants[3].append(marker)  # 오른쪽 아래
+    
+    # 각 사분면에서 중심에서 가장 멀리 있는 점 선택
+    for q in range(4):
+        if quadrants[q]:
+            # 중심으로부터의 거리 계산
+            distances = [(marker, (marker[0] - center_x)**2 + (marker[1] - center_y)**2) 
+                         for marker in quadrants[q]]
+            
+            # 가장 멀리 있는 점 선택
+            farthest_marker = max(distances, key=lambda x: x[1])[0]
+            sorted_markers.append(farthest_marker)
+        else:
+            # 사분면에 점이 없는 경우(드문 경우) 처리
+            print(f"사분면 {q}에 마커가 없습니다.")
+    
+    # print(f"중심점: ({center_x:.1f}, {center_y:.1f})")
+    # print(f"정렬된 마커: {sorted_markers}")
+    
+    return sorted_markers
 
 # 사람 위치를 좌석에 맞게 할당하는 함수
-def get_seat_number(person_pos, aruco_markers, seat_threshold=40):
+def get_seat_number(person_pos, aruco_markers, seat_threshold=70):
     px, py = person_pos
     for seat_num, (cx, cy, r) in aruco_markers.items():
         # 원의 방정식: (px - cx)^2 + (py - cy)^2 <= r^2
