@@ -4,7 +4,7 @@
   min-height: 100vh;
   width: 100%;
   overflow: hidden;
-  background: url('/dashboard/assets/bg_western.png') center/cover no-repeat,
+  background: url('../assets/images/background.png') center/cover no-repeat,
     linear-gradient(to bottom, #6d3d47 0%, #ffb84d 100%);
   font-family: 'Pretendard', 'sans-serif';
   padding: 10vh 5vw 8vh; /* vh, vw 단위 사용 */
