@@ -58,9 +58,9 @@ def detect_people(frame):
     return keypoints
 
 # 사람 여러명이 너무 가까이 붙어있다면 그중 한 사람은 제거
-# def filter_by_distance(persons, min_distance=100):
-#     result = []
-#     for i, p1 in enumerate(persons):
-#         if all(calculate_distance(p1, p2) >= min_distance for j, p2 in enumerate(persons) if i != j):
-#             result.append(p1)
-#     return result
+def filter_by_distance(persons, min_distance=100):
+    result = []
+    for i, p1 in enumerate(persons):
+        if all(calculate_distance(p1, p2) >= min_distance for j, p2 in enumerate(persons) if i != j):
+            result.append(p1)
+    return result
