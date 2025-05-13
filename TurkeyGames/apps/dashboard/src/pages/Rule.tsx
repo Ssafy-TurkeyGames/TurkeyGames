@@ -1,5 +1,5 @@
 // apps/dashboard/src/pages/Rule.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styles from './Rule.module.css';
 import closeIcon from '../assets/images/close (1).png';
@@ -18,9 +18,21 @@ export default function Rule({ isModal = false }: RuleProps) {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // 모달 닫기 핸들러
+  const handleClose = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
+  // 모달 오버레이 클릭 핸들러 - 모달 바깥 영역 클릭 시 닫기
+  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // 클릭된 요소가 오버레이 자체인 경우에만 닫기 (내부 콘텐츠 클릭 시 닫히지 않도록)
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  }, [handleClose]);
+
   useEffect(() => {
     if (!gameId) {
-      
       setError('게임 ID가 없습니다.');
       setLoading(false);
       return;
@@ -77,12 +89,15 @@ export default function Rule({ isModal = false }: RuleProps) {
   const { gameProfilePath, description, imagePath, descriptionVideoPath } = gameRule;
 
   return (
-    <div className={isModal ? styles.modalOverlay : styles.container}>
+    <div 
+      className={isModal ? styles.modalOverlay : styles.container}
+      onClick={isModal ? handleOverlayClick : undefined}
+    >
       <div className={isModal ? styles.modalContent : undefined}>
         {isModal && (
           <button
             className={styles.closeBtn}
-            onClick={() => navigate(-1)}
+            onClick={handleClose}
             aria-label="닫기"
             type="button"
           >
