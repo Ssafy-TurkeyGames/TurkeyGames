@@ -1,15 +1,12 @@
 from fastapi import APIRouter, Depends
 from app.video.service import VideoService
-from app.video.trigger_detector import TriggerDetector
-# No need to import load_config here if config comes from VideoService
+# from app.video.trigger_detector import TriggerDetector
 
 # Factory function to create the video router with dependencies
-def create_video_router(video_service_instance: VideoService, trigger_detector_instance: TriggerDetector):
+def create_video_router(video_service_instance: VideoService): #, trigger_detector_instance: TriggerDetector
     router = APIRouter(prefix="/video", tags=["video"])
 
-    # Include TriggerDetector's router
-    # The TriggerDetector instance passed here is already initialized with the correct callback
-    router.include_router(trigger_detector_instance.router)
+    # router.include_router(trigger_detector_instance.router)
 
     @router.post("/manual_trigger") # Renamed for clarity, or keep as /trigger if preferred
     async def manual_trigger_video():
