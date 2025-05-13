@@ -124,8 +124,8 @@
   }
   
   .iconSmall {
-    width: 32px;
-    height: 32px;
+    width: 110px;
+    height: 110px;
     margin-right: 7px;
   }
   
@@ -133,8 +133,8 @@
     background: #fff;
     color: #e07b3c;
     border-radius: 16px;
-    padding: 5px 20px;
-    font-size: 1.02rem;
+    padding: 10px 40px;
+    font-size: 1.5rem;
     font-weight: bold;
     margin-right: 8px;
     display: flex;
