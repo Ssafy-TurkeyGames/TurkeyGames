@@ -4,38 +4,39 @@ import os
 import cv2
 import numpy as np
 import collections
+import wave
 
 class CircularBuffer:
     def __init__(self, max_frames: int, frame_width: int, frame_height: int):
         self.max_frames = max_frames
         self.frame_width = frame_width
         self.frame_height = frame_height
-        self.frame_size = frame_width * frame_height * 3  # Assuming 3 bytes per pixel (BGR)
+        self.frame_size = frame_width * frame_height * 3  
         self.buffer_size = self.max_frames * self.frame_size
-        self.file_path = "video_buffer.mmap"  # You can specify a different path
+        self.file_path = "video_buffer.mmap"  
         
-        # Create or open the file
+        # 파일 생성 또는 열기
         self.fd = os.open(self.file_path, os.O_RDWR | os.O_CREAT)
         
-        # Resize the file to the buffer size
+        # 파일 크기를 버퍼 크기로 조정
         os.ftruncate(self.fd, self.buffer_size)
         
-        # Map the file into memory
+        # 파일을 메모리에 매핑
         self.mmap = mmap.mmap(self.fd, self.buffer_size, access=mmap.ACCESS_WRITE)
         
         self.lock = threading.Lock()
-        self.head = 0  # Index of the next frame to be written
+        self.head = 0  # 다음에 쓸 프레임의 인덱스
 
     def add_frame(self, frame):
         with self.lock:
-            # Resize the frame if necessary
+            # 필요한 경우 프레임 크기 조정
             if frame.shape[1] != self.frame_width or frame.shape[0] != self.frame_height:
                 frame = cv2.resize(frame, (self.frame_width, self.frame_height))
             
-            # Calculate the offset for writing the frame
+            # 프레임 쓰기를 위한 오프셋 계산
             offset = (self.head % self.max_frames) * self.frame_size
             
-            # Flatten the frame and write it to the mmap
+            # 프레임을 평탄화하여 mmap에 쓰기
             self.mmap[offset:offset + self.frame_size] = frame.flatten().tobytes()
             
             self.head += 1
@@ -75,8 +76,43 @@ class CircularBuffer:
 
 class AudioRingBuffer:
     def __init__(self, maxlen_frames):
-        
         self.buffer = collections.deque(maxlen=maxlen_frames)
+        self.lock = threading.Lock() # 스레드 안전성을 위한 잠금 추가
+
     def callback(self, indata, frames, time, status):
-        array = np.frombuffer(indata, dtype=np.int16).copy()
-        self.buffer.append(array)
+        """오디오 데이터를 버퍼에 추가하는 콜백 함수입니다."""
+        with self.lock:
+            
+            self.buffer.append(indata.copy()) # 잠재적인 dtype 문제를 피하기 위해 원시 바이트 저장
+
+    def get_all_audio_data(self) -> np.ndarray:
+        """버퍼에서 모든 오디오 데이터를 단일 NumPy 배열로 검색합니다."""
+        with self.lock:
+            if not self.buffer:
+                return np.array([], dtype=np.int16) # 버퍼가 비어 있으면 빈 배열 반환
+
+            # deque의 모든 바이트 청크 연결
+            all_data_bytes = b''.join(self.buffer)
+            # 연결된 바이트를 int16 NumPy 배열로 다시 변환
+            all_data_np = np.frombuffer(all_data_bytes, dtype=np.int16)
+            return all_data_np
+
+    def save_to_wav(self, filename: str, sample_rate: int, channels: int):
+        """버퍼링된 오디오 데이터를 WAV 파일로 저장합니다."""
+        audio_data = self.get_all_audio_data()
+
+        if audio_data.size == 0:
+            print("⚠️ 오디오 버퍼가 비어있어 WAV 파일을 저장할 수 없습니다.")
+            return False
+
+        try:
+            with wave.open(filename, 'wb') as wf:
+                wf.setnchannels(channels)
+                wf.setsampwidth(2)  # int16의 경우 2바이트
+                wf.setframerate(sample_rate)
+                wf.writeframes(audio_data.tobytes())
+            print(f"✅ 오디오 데이터 저장 완료: {filename} ({len(audio_data)} 샘플)")
+            return True
+        except Exception as e:
+            print(f"❌ 오디오 WAV 파일 저장 실패 ({filename}): {e}")
+            return False

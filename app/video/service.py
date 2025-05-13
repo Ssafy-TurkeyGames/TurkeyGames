@@ -39,7 +39,8 @@ class VideoService:
         self.saver = VideoSaver(
             output_dir=self.config['output']['dir'],
             codec=self.config['video']['codec'],
-            fps=self.config['video']['fps']
+            fps=self.config['video']['fps'],
+            audio_config=self.config['audio'] # Pass audio config
         )
         self.minio_client = self._init_minio_client()
         self._ensure_qr_output_dir()
@@ -311,12 +312,16 @@ class VideoService:
             player_id = metadata.get('player_id', 'unknown')
             timestamp_str = datetime.now().strftime('%Y%m%d_%H%M%S')
             base_filename = f"highlight_P{player_id}_{trigger_type}_{timestamp_str}"
-            
-            # VideoSaver의 반환된 로컬 파일 경로 사용
-            local_file_path = self.saver.save_clip(clip_frames, resolution, base_filename_prefix=base_filename)
+            # Pass audio_buffer to save_clip
+            local_file_path = self.saver.save_clip(
+                frames=clip_frames, 
+                resolution=resolution, 
+                audio_buffer=self.audio_buffer, # Pass the audio buffer
+                base_filename_prefix=base_filename
+            )
 
             if not local_file_path:
-                print("❌ 로컬 클립 저장 실패 (VideoSaver에서 None을 반환했습니다).")
+                print("❌ 로컬 클립 저장 실패 (VideoSaver에서 None 반환).")
                 return
             
             print(f"✅ 로컬 클립 저장 완료: {local_file_path}")
