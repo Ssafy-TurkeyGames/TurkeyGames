@@ -7,7 +7,7 @@ seat_state = {0: False, 1: False, 2: False, 3: False}  # 좌석 상태 (비어�
 # 아루코 마커 감지 및 좌석 매핑
 def draw_aruco_markers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
     parameters = cv2.aruco.DetectorParameters()
 
     corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
@@ -17,68 +17,68 @@ def draw_aruco_markers(frame):
     if ids is not None:
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
 
-        if len(corners) == 4:  # 아루코 마커 4개가 모두 감지되었을 경우
-            markers = [corners[i][0] for i in range(len(corners))]
-            
-            # 마커들을 정렬하여 각 마커의 좌석 번호를 결정
-            unique_markers = []
-            for marker in markers:
-                unique_markers.extend([tuple(marker[i]) for i in range(4)])
+        if len(corners) == 4:
+            # 사분면 기준 정렬
+            marker_id_order = sort_markers_by_spatial_position(corners, ids)
 
-            unique_markers = list(set(unique_markers))  # 중복 제거
+            if marker_id_order:
 
-            # 마커들을 정렬하여 각 마커의 좌석 번호를 결정
+                # 마커 정렬된 순서대로 좌석 번호 표시
+                for seat_num, marker_id in enumerate(marker_id_order):
+                    
+                    # 마커 ID에 해당하는 인덱스 찾음
+                    idx = np.where(ids == marker_id)[0][0]
+                    c = corners[idx][0]
 
-            sorted_markers = sort_markers_based_on_position(unique_markers)
+                    # 마커 중앙좌표 계산
+                    center_x = int(np.mean(c[:, 0]))
+                    center_y = int(np.mean(c[:, 1]))
 
-            # 각 좌석 번호에 맞는 좌석 범위 매핑
-            top_left = sorted_markers[0]  # 0번 좌석 (왼쪽 위)
-            top_right = sorted_markers[1]  # 1번 좌석 (오른쪽 위)
-            bottom_left = sorted_markers[2]  # 2번 좌석 (왼쪽 아래)
-            bottom_right = sorted_markers[3]  # 3번 좌석 (오른쪽 아래)
+                    # 원 반지름 계산
+                    radius = int(np.linalg.norm(c[0] - c[1]) / 2)
 
-            # 각 마커에 좌석 번호 표시
-            for i, corner in enumerate(corners):
-                
-                # 마커의 중앙 좌표 계산
-                center_x = int(np.mean(corner[0][:, 0]))
-                center_y = int(np.mean(corner[0][:, 1]))
+                    # 원 그리기
+                    cv2.circle(frame, (center_x, center_y), radius, (0, 255, 0), 2)
 
-                # 원 반지름 계산 (적절한 반지름을 설정할 필요 있음)
-                radius = int(np.linalg.norm(np.array(corner[0][0]) - np.array(corner[0][1])) / 2)
+                    cv2.putText(frame, f"Seat {seat_num}", (center_x, center_y),
+                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-                # 원 그리기
-                cv2.circle(frame, (center_x, center_y), radius, (0, 255, 0), 2)
+                    # 마커 정보 저장
+                    aruco_markers[seat_num] = (center_x, center_y, radius)
 
-                # 좌석 번호 텍스트로 표시
-                cv2.putText(frame, f"Seat {i}", (center_x, center_y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    # 마커가 없으면 빈 딕셔너리 반환
+    return aruco_markers
 
-                # 마커 정보 저장
-                aruco_markers[i] = (center_x, center_y, radius)  # (중심 x, 중심 y, 반지름)
-
-    return aruco_markers  # 마커가 없으면 빈 딕셔너리 반환
-
-# 아루코 마커들의 위치를 좌석 번호에 맞게 정렬하는 함수
-def sort_markers_based_on_position(markers):
-    if len(markers) < 4:  # 마커가 4개 미만이면 정렬하지 않음
-        return markers  # 4개 미만일 경우 그대로 반환
+# 아루코 마커들의 위치를 좌석 번호에 맞게 정렬. 4개 미만이면 정렬x
+def sort_markers_by_spatial_position(corners, ids):
+    if len(corners) != 4:
+        return None
     
-    # 변경된 부분: 튜플 변환을 없앴습니다.
-    markers = [marker for marker in markers]  # 튜플로 변환할 필요가 없음
+    centers = []
+    for i in range(4):
+        c = corners[i][0]
+        center_x = np.mean(c[:, 0])
+        center_y = np.mean(c[:, 1])
+        centers.append((ids[i][0], center_x, center_y)) 
 
-    # 마커들이 영상 내에서 변할 때마다 상대적인 위치를 바탕으로 순서를 결정
-    # (왼쪽 위, 오른쪽 위, 왼쪽 아래, 오른쪽 아래 순서대로 정렬)
-    top_left = sorted(markers, key=lambda x: (x[1], x[0]))[0]  # 가장 위쪽, 가장 왼쪽
-    top_right = sorted(markers, key=lambda x: (x[1], -x[0]))[0]  # 가장 위쪽, 가장 오른쪽
-    bottom_left = sorted(markers, key=lambda x: (-x[1], x[0]))[0]  # 가장 아래쪽, 가장 왼쪽
-    bottom_right = sorted(markers, key=lambda x: (-x[1], -x[0]))[0]  # 가장 아래쪽, 가장 오른쪽
+    avg_x = np.mean([c[1] for c in centers])
+    avg_y = np.mean([c[2] for c in centers])
 
-    print(f"Sorted markers: {top_left}, {top_right}, {bottom_left}, {bottom_right}")
+    quadrant = {}
+    for marker_id, x, y in centers:
+        if x <= avg_x and y <= avg_y:
+            quadrant[0] = marker_id  # 왼상
+        elif x > avg_x and y <= avg_y:
+            quadrant[1] = marker_id  # 오상
+        elif x <= avg_x and y > avg_y:
+            quadrant[2] = marker_id  # 왼하
+        else:
+            quadrant[3] = marker_id  # 오하
 
-    return [top_left, top_right, bottom_left, bottom_right]
+    return [quadrant[i] for i in range(4)]  # [0번좌석 ID, 1번, 2번, 3번]
 
 # 사람 위치를 좌석에 맞게 할당하는 함수
-def get_seat_number(person_pos, aruco_markers, seat_threshold=20):
+def get_seat_number(person_pos, aruco_markers, seat_threshold=70):
     px, py = person_pos
     for seat_num, (cx, cy, r) in aruco_markers.items():
         # 원의 방정식: (px - cx)^2 + (py - cy)^2 <= r^2
