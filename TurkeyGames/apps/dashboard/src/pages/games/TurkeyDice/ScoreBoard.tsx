@@ -7,7 +7,7 @@ import Logo from '../../../components/common/Logo';
 import axios from 'axios';
 import { useSocket } from '../../../hooks/useSocket';
 import { endYachtGame } from '../../../api/dashboardApi';
-import axiosInstance from '../../../api/axiosInstance';
+// import axiosInstance from '../../../api/axiosInstance';
 
 // 소켓 서버 URL
 const SOCKET_SERVER_URL = 'http://192.168.30.158:8000';
