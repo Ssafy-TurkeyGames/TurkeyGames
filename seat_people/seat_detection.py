@@ -149,9 +149,9 @@ def get_seat_occupancy(people_positions, aruco_markers):
                 avg_position = np.mean(recent_positions[seat_num], axis=0)
                 position_diff = np.linalg.norm(np.array(pos) - avg_position)
 
-                # 위치 변화가 미세하면 갱신x (안정화)
-                if position_diff < POSITION_THRESHOLD:
-                    continue
+                # # 위치 변화가 미세하면 갱신x (안정화)
+                # if position_diff < POSITION_THRESHOLD:
+                #     continue
             
             # 좌석 상태 업데이트
             last_seen_time[seat_num] = current_time
@@ -163,11 +163,12 @@ def get_seat_occupancy(people_positions, aruco_markers):
             
     # 현재 프레임에서 감지되지 않은 좌석 처리
     for seat_num in range(4):
-        if seat_num not in detected_seats and seat_num in last_seen_time:
-            time_diff = current_time - last_seen_time[seat_num]
-            if time_diff > LAST_SEEN_THRESHOLD:
-                log_with_throttle(f"좌석 {seat_num}이 비어 있습니다.", seat_num, 2.0)
-                seat_state[seat_num] = False
+        if seat_num not in detected_seats :
+            if seat_num in last_seen_time:
+                time_diff = current_time - last_seen_time[seat_num]
+                if time_diff > EMPTY_SEAT_TIMEOUT:
+                    log_with_throttle(f"좌석 {seat_num}이 비어 있습니다.", seat_num, 2.0)
+                    seat_state[seat_num] = False
 
     return seat_state
 
