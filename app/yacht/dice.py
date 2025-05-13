@@ -10,23 +10,14 @@ game_states = {}
 
 class DiceGame:
     """주사위 게임 로직을 처리하는 클래스"""
+    games = {}
 
     @staticmethod
     def create_game(setting_id: int, player_ids: List[int]) -> str:
         """새로운 게임 생성 (간단한 숫자 ID 사용)"""
-        # 현재 활성화된 모든 게임 ID 가져오기
-        current_games = list(game_states.keys())
+        game_id = str(setting_id)
 
-        # 숫자로 된 ID들만 필터링하고 최대값 찾기
-        numeric_ids = [int(game_id) for game_id in current_games if game_id.isdigit()]
-        next_id = 1
-        if numeric_ids:
-            next_id = max(numeric_ids) + 1
-
-        # 문자열로 변환된 간단한 ID 사용
-        game_id = str(next_id)
-
-        game_state = {
+        DiceGame.games[game_id] = {
             "id": game_id,
             "setting_id": setting_id,
             "players": player_ids,
@@ -34,18 +25,15 @@ class DiceGame:
             "dice_values": [0, 0, 0, 0, 0],
             "rolls_left": MAX_ROLL_PER_TURN,
             "status": "waiting",
-            "turn_counts" : {pid: 0 for pid in player_ids},  # 각 플레이어별 턴 수
+            "turn_counts": {str(pid): 0 for pid in player_ids},  # str로 변환
         }
-
-        # 인메모리 저장소에 게임 상태 저장
-        game_states[game_id] = game_state
 
         return game_id
 
     @staticmethod
     def get_game(game_id: str) -> Optional[Dict[str, Any]]:
         """게임 상태 조회"""
-        return game_states.get(game_id)
+        return DiceGame.games.get(game_id)
 
     @staticmethod
     def roll_dice(game_id: str, keep_indices: List[int]) -> Optional[Tuple[List[int], int]]:
@@ -58,7 +46,7 @@ class DiceGame:
         Returns:
             (주사위 값 리스트, 남은 굴림 횟수) 또는 None (에러 시)
         """
-        game = game_states.get(game_id)
+        game = DiceGame.games.get(game_id)
 
         if not game:
             return None
@@ -79,7 +67,7 @@ class DiceGame:
         game["rolls_left"] -= 1
 
         # 게임 상태 업데이트
-        game_states[game_id] = game
+        DiceGame.games[game_id] = game  # DiceGame.games 사용
 
         return game["dice_values"], game["rolls_left"]
 
@@ -164,7 +152,7 @@ class DiceGame:
         Returns:
             다음 플레이어 인덱스 또는 None (에러 시)
         """
-        game = game_states.get(game_id)
+        game = DiceGame.games.get(game_id)
 
         if not game:
             return None
@@ -178,28 +166,28 @@ class DiceGame:
         game["rolls_left"] = MAX_ROLL_PER_TURN
 
         # 게임 상태 업데이트
-        game_states[game_id] = game
+        DiceGame.games[game_id] = game
 
         return next_player_idx
 
     @staticmethod
     def end_game(game_id: str) -> bool:
         """게임 종료 및 상태 정리"""
-        game = game_states.get(game_id)
+        game = DiceGame.games.get(game_id)
 
         if not game:
             return False
 
         # 게임 상태를 종료로 변경
         game["status"] = "finished"
-        game_states[game_id] = game
+        DiceGame.games[game_id] = game
 
         return True
 
     @staticmethod
     def delete_game(game_id: str) -> bool:
         """게임 데이터 삭제"""
-        if game_id in game_states:
-            del game_states[game_id]
+        if game_id in DiceGame.games:
+            del DiceGame.games[game_id]
             return True
         return False

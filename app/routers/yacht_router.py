@@ -26,15 +26,22 @@ async def start_game(settings: schema.GameSettings, background_tasks: Background
         player_score = crud.create_player_score(db)
         player_ids.append(player_score.id)
 
-    # 게임 세션 생성 (인메모리 저장)
-    game_id = DiceGame.create_game(db_setting.id, player_ids)
+    game_id = str(db_setting.id)
 
-    # 게임 ID가 문자열인지 확인 (Pydantic 검증 통과를 위해)
-    game_id_str = str(game_id) if game_id else "1"
+    DiceGame.games[game_id] = {
+        "id": game_id,
+        "setting_id": db_setting.id,
+        "players": player_ids,
+        "current_player_idx": 0,
+        "dice_values": [0, 0, 0, 0, 0],
+        "rolls_left": 3,
+        "status": "waiting",
+        "turn_counts": {player_id: 0 for player_id in player_ids}
+    }
 
     # 게임 상태 생성
     game_state = schema.GameState(
-        id=game_id_str,
+        id=game_id,
         players=player_ids,
         current_player_idx=0,
         dice_values=[0, 0, 0, 0, 0],
@@ -44,7 +51,7 @@ async def start_game(settings: schema.GameSettings, background_tasks: Background
 
     # 로비에 게임 생성 정보 전송
     background_tasks.add_task(sio.emit, 'game_created', {
-        "game_id": game_id_str,
+        "game_id": game_id,
         "settings": settings.dict()
     })
     return game_state
