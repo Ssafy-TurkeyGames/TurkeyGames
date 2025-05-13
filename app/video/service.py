@@ -7,6 +7,7 @@ from threading import Event
 from typing import Dict, Optional
 import uuid
 import pathlib # 디렉토리 생성을 위함
+import numpy as np
 
 from minio import Minio
 from minio.error import S3Error
@@ -49,15 +50,26 @@ class VideoService:
         self._start_camera_thread()
         
          # 오디오 버퍼 초기화
-        audio_sr = 44100
+        self.audio_cfg = self.config['audio']
+        audio_sr   = self.audio_cfg['sample_rate']
+        channels   = self.audio_cfg['channels']
+        buf_size   = self.audio_cfg['frames_per_buffer']
+        wav_dir    = self.audio_cfg['wav_dir']
+        # audio_sr = 44100
         pre_sec = self.config['buffer']['pre_seconds']
         maxlen = int(audio_sr * pre_sec)
+        os.makedirs(wav_dir, exist_ok=True)
+        print(f"✅ 오디오 WAV 저장 디렉토리 확인: {wav_dir}")   
         self.audio_buffer = AudioRingBuffer(maxlen_frames=maxlen)
         
         # sounddevice or pyaudio 선택
+        print("🔊 [Audio Init] 시작")    
         try:
             import sounddevice as sd
-            self.audio_stream = sd.RawInputStream(
+            print("🔊 sounddevice import 성공") 
+            self.audio_stream = sd.InputStream(
+                device=1,  # 기본 오디오 장치 사용 (0은 기본 장치)
+                
                 samplerate=audio_sr,
                 channels=1,
                 dtype='int16',
@@ -289,6 +301,7 @@ class VideoService:
             if not clip_frames:
                 print("⚠️ 클립 생성 실패 (get_clip에서 빈 리스트 반환). 버퍼에 프레임이 부족하거나 기타 문제가 발생.")
                 return
+            print(f"🔊 오디오 버퍼 길이: {len(self.audio_buffer.buffer)}")
 
             print(f"🎞️ 클립 프레임 ({len(clip_frames)}개) 검색 완료. 저장 시작...")
             resolution = (int(self.config['camera']['width']), int(self.config['camera']['height']))

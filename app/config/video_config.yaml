@@ -15,14 +15,20 @@ video:
   codec: "mp4v" # H264 대신 mp4v 시도 (XVID, MJPG 등도 가능)
   fps: 30.0 # 실제 카메라 FPS와 일치 필요
 
-server:
-  host: 0.0.0.0
-  port: 8000
+audio:
+  sample_rate: 44100      # 샘플링 레이트
+  channels: 1             # 오디오 채널 수
+  frames_per_buffer: 1024 # 버퍼 크기
+  wav_dir: "/audio_clips"  # WAV 파일 저장 디렉토리
 
-triggers:
-  api:
-    enabled: true
-    endpoint: "/video/trigger"
-  keyboard:
-    enabled: true
-    key: "space"
+# server:
+#   host: 0.0.0.0
+#   port: 8000
+
+# triggers:
+#   api:
+#     enabled: true
+#     endpoint: "/video/trigger"
+#   keyboard:
+#     enabled: true
+#     key: "space"

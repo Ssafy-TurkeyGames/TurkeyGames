@@ -78,4 +78,5 @@ class AudioRingBuffer:
         
         self.buffer = collections.deque(maxlen=maxlen_frames)
     def callback(self, indata, frames, time, status):
-        self.buffer.append(indata.copy())
+        array = np.frombuffer(indata, dtype=np.int16).copy()
+        self.buffer.append(array)
