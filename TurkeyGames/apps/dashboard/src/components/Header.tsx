@@ -5,7 +5,7 @@ import styles from './Header.module.css';
 import logo from '../assets/images/logo.png';
 import soundOnIcon from '../assets/images/sound-on.png';
 import soundOffIcon from '../assets/images/sound-off.png';
-import { getSoundEnabled, setSoundEnabled } from '../utils/soundUtils';
+import { getSoundEnabled, setSoundEnabled, onSoundSettingChange } from '../utils/soundUtils';
 
 interface HeaderProps {
   children?: React.ReactNode;
@@ -15,16 +15,14 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
   const navigate = useNavigate();
   const [isSoundOn, setIsSoundOn] = useState(getSoundEnabled());
 
-  // 소리 설정이 외부에서 변경될 경우를 대비해 상태 동기화
+  // 소리 설정 변경 이벤트 리스너 등록
   useEffect(() => {
-    setIsSoundOn(getSoundEnabled());
+    // 이벤트 리스너 등록 및 정리 함수 반환
+    return onSoundSettingChange(setIsSoundOn);
   }, []);
 
   const toggleSound = () => {
-    const newState = !isSoundOn;
-    setIsSoundOn(newState);
-    setSoundEnabled(newState); // 전역 설정 업데이트
-    // console.log('Sound is now:', newState ? 'ON' : 'OFF'); // 디버깅용
+    setSoundEnabled(!isSoundOn);
   };
 
   return (
@@ -57,4 +55,4 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);

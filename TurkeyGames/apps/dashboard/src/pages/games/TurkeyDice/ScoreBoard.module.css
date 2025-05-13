@@ -69,6 +69,32 @@
 
 .buttonContainer {
   margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.endGameButton {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 15px 50px;
+  border-radius: 25px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.endGameButton:hover {
+  background-color: #b71c1c;
+  transform: translateY(-2px);
+}
+
+.endGameButton:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .resultButton {
@@ -87,6 +113,26 @@
 .resultButton:hover {
   background-color: #f4a261;
   transform: translateY(-2px);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.gameIdBadge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
 }
 
 /* 반응형 디자인 - 큰 화면 */
@@ -152,3 +198,4 @@
     align-items: center;
   }
 }
+
