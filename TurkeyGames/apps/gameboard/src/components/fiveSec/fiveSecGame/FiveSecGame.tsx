@@ -3,6 +3,7 @@ import styles from './FiveSecGame.module.css';
 import FiveSecPlayerCard from '../fiveSecPlayerCard/FiveSecPlayerCard';
 import FiveSecTimer from '../fiveSecTimer/FiveSecTimer';
 import { fiveSecApi, GameState } from '../../../api/fiveSecApi';
+import { socketService } from '../../../api/socketService';
 
 // 예시 질문들
 const sampleQuestions: string[] = [
@@ -35,12 +36,51 @@ export default function FiveSecGame(): JSX.Element {
   const [isFirstRound, setIsFirstRound] = useState<boolean>(true);
   const [showQuestion, setShowQuestion] = useState<boolean>(false);
 
+  // Socket.IO 초기화
+  useEffect(() => {
+    socketService.connect();
+
+    // 컴포넌트 언마운트 시 Socket 연결 해제
+    return () => {
+      socketService.disconnect();
+    };
+  }, []);
+
+  // 점수 업데이트 이벤트 리스너
+  useEffect(() => {
+    const handleScoreUpdate = (event: CustomEvent) => {
+      const data = event.detail;
+      console.log('Score update in component:', data);
+      
+      // 현재 게임과 일치하는 업데이트인지 확인
+      if (gameState && data.game_id === gameState.id) {
+        // 게임 상태 업데이트
+        setGameState(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            scores: data.scores
+          };
+        });
+      }
+    };
+
+    window.addEventListener('scoreUpdate', handleScoreUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('scoreUpdate', handleScoreUpdate as EventListener);
+    };
+  }, [gameState?.id]);
+
   // 게임 시작
   const startGame = async (): Promise<void> => {
     try {
       const newGameState = await fiveSecApi.startGame(playerCount, roundCount);
       setGameState(newGameState);
       setIsGameStarted(true);
+      
+      // Socket.IO 룸 참여
+      socketService.joinGame(newGameState.id);
       
       // 질문은 숨김
       setShowQuestion(false);
@@ -110,11 +150,12 @@ export default function FiveSecGame(): JSX.Element {
       }
       
       // 게임 상태 업데이트
-      const updatedState = await fiveSecApi.getGameState(gameState.id);
-      setGameState(updatedState);
+      // const updatedState = await fiveSecApi.getGameState(gameState.id);
+      // setGameState(updatedState);
       
     } catch (error) {
       alert('점수 업데이트 중 오류가 발생했습니다: ' + (error as Error).message);
+      setHasScoreProcessed(false); // 오류 시 재시도 가능하도록
     }
   }, [gameState, playerVotes, checkAllVoted, hasScoreProcessed]);
 
@@ -191,6 +232,9 @@ export default function FiveSecGame(): JSX.Element {
     if (!gameState) return;
 
     try {
+      // Socket 룸 나가기
+      socketService.leaveGame();
+      
       await fiveSecApi.endGame(gameState.id);
       const finalScores = await fiveSecApi.getFinalScores(gameState.id);
       
