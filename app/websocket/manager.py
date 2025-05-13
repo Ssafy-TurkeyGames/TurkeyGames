@@ -4,7 +4,7 @@ from typing import Dict, List, Any
 # Socket.IO 서버 인스턴스 생성 시 CORS 설정
 sio = socketio.AsyncServer(
     async_mode='asgi',
-    cors_allowed_origins=["http://localhost:8000", "http://127.0.0.1:5500", "*"]
+    cors_allowed_origins=["http://localhost:8000", "http://localhost:5173", "http://127.0.0.1:5500", "*"]
 )
 
 socket_app = socketio.ASGIApp(
@@ -67,7 +67,10 @@ async def leave_game(sid, data):
 
 async def broadcast_scores(game_id: str, scores_data: Any):
     """특정 게임의 스코어 업데이트를 모든 참여자에게 브로드캐스트"""
-    if game_id in game_rooms and game_rooms[game_id]:
-        await sio.emit('score_update', scores_data, room=game_rooms[game_id])
-        return True
-    return False
+    print(f"Broadcasting scores for game {game_id}: {scores_data}")
+
+    # 모든 연결된 클라이언트에게 브로드캐스트
+    await sio.emit('score_update', scores_data)
+
+    print(f"Broadcasted to all connected clients")
+    return True
