@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styles from './ScoreBoard.module.css';
 import ScoreCard from '../../../components/games/TurkeyDice/ScoreCard';
-import Logo from '../../../components/common/logo';
+import Logo from '../../../components/common/Logo';
 import axios from 'axios';
 import { useSocket } from '../../../hooks/useSocket';
 import { endYachtGame } from '../../../api/dashboardApi';
