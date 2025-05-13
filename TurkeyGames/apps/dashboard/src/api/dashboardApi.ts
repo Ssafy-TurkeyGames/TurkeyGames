@@ -1,5 +1,5 @@
 // apps/dashboard/src/api/dashboardApi.ts
-
+import axios from 'axios';
 import axiosInstance from './axiosInstance';
 import { ApiResponse, Game } from './types';
 
@@ -53,4 +53,25 @@ export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse
 export const getGameRule = async (gameId: string | number): Promise<ApiResponse<GameRule>> => {
     const response = await axiosInstance.get<ApiResponse<GameRule>>(`/dashb/detail/${gameId}`);
     return response.data;
+  };
+
+  // 게임 종료 API
+  export const endYachtGame = async (gameId: string | number): Promise<any> => {
+    try {
+      console.log('게임 종료 API 호출 시작');
+      console.log('axiosInstance baseURL:', axiosInstance.defaults.baseURL);
+      console.log('요청 URL:', `${axiosInstance.defaults.baseURL}/yacht/${gameId}`);
+      const SOCKET_SERVER_URL = 'http://192.168.30.158:8000';
+      const response = await axios.delete(`${SOCKET_SERVER_URL}/yacht/${gameId}`);
+      console.log('게임 종료 API 응답:', response.data);
+    return response.data;
+    } catch (error) {
+      console.error('게임 종료 오류:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('에러 상태 코드:', error.response?.status);
+        console.error('에러 데이터:', error.response?.data);
+        console.error('에러 URL:', error.config?.url);
+      }
+      throw error;
+    }
   };
