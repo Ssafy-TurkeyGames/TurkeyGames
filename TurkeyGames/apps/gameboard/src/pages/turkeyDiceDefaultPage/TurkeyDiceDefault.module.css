@@ -57,6 +57,46 @@
   transition: background-color 0.3s;
 }
 
+.seat {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-image: url('../../assets/images/turkey_default_score.png');
+    background-size: cover;
+    background-position: center;
+    color: #592E36;
+    font-weight: bold;
+    font-size: 32px;
+    animation: shine 1.2s infinite ease-in-out;
+
+}
+
+@keyframes shine {
+  0% {
+    opacity: 0.8;
+    text-shadow:
+      0 0 6px #ffffff,
+      0 0 12px #ffe4b5,
+      0 0 18px #ffd700;
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 10px #ffffff,
+      0 0 20px #ffecb3,
+      0 0 30px #ffd700;
+  }
+  100% {
+    opacity: 0.8;
+    text-shadow:
+      0 0 6px #ffffff,
+      0 0 12px #ffe4b5,
+      0 0 18px #ffd700;
+  }
+}
+
 .rightArea {
     width: 420px;
     height: 100%;
