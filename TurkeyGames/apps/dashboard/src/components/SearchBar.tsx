@@ -12,7 +12,7 @@ interface SearchBarProps {
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
   value, 
-  onChange, 
+  onChange,
   onSearch, 
   placeholder 
 }) => (
