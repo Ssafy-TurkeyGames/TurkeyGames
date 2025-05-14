@@ -1,0 +1,90 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100vh;
+  background-color: #000;
+  color: #fff;
+}
+
+.CardContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 20%;
+  padding: 10px;
+}
+
+.upside {
+  height: 50%;
+  border: 2px solid #8a2be2;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  box-shadow: 0 0 10px #8a2be2;
+  transform: rotate(180deg);
+}
+
+/* upside 내부 콘텐츠도 함께 회전시켜야 텍스트가 올바르게 보입니다 */
+.upside > * {
+  transform: rotate(180deg);
+}
+
+.downside {
+  height: 48%;
+  border: 2px solid #8a2be2;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  box-shadow: 0 0 10px #8a2be2;
+}
+
+.container > div:nth-child(2) {
+  width: 60%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.container > div:nth-child(2) img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 2px solid #00ffff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #00ffff;
+}
+
+/* 점수판 내부 스타일링 */
+:global(.scoreCard) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 10px;
+  color: #00ffff;
+  font-family: 'Arial', sans-serif;
+}
+
+:global(.scoreTitle) {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #00ffff;
+}
+
+:global(.scoreList) {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+:global(.scoreItem) {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+  padding: 3px 0;
+}

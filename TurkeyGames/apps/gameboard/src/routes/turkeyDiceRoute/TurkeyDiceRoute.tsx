@@ -2,6 +2,7 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import TurkeyDice from '../../pages/turkeyDicePage/TurkeyDice'
 import TurkeyDiceDefault from '../../pages/turkeyDiceDefaultPage/TurkeyDiceDefault'
+import TurkeyDiceAcadePage from '../../pages/turkeyDiceAcadePage/TurkeyDiceAcadePage'
 
 interface propsType {
   gameId: number,
@@ -14,6 +15,7 @@ export default function TurkeyDiceRoute(props: propsType) {
     <Routes>
         <Route path='/turkey_dice' element={<TurkeyDice />} />
         <Route path='/turkey_dice/default' element={<TurkeyDiceDefault gameId={props.gameId} people={props.people} voice={props.voice}/>} />
+        <Route path='/turkey_dice/acade' element={<TurkeyDiceAcadePage/>} />
     </Routes>
   )
 }
