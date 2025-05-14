@@ -39,7 +39,7 @@ function createWindow() {
     });
     // IPC 핸들러 추가 예시
     electron_1.ipcMain.handle('start-game', (event, gameData) => {
-        console.log('게임 시작 데이터:', gameData);
+        // console.log('게임 시작 데이터:', gameData);
         return { status: 'success' };
     });
     // 개발 모드
