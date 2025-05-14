@@ -24,7 +24,6 @@ interface propsType {
 export default function TurkeyDiceDefault(props: propsType) {
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
   
   // 1) 최초 자리 안내 mp3 파일 실행
   useEffect(() => {
@@ -64,41 +63,47 @@ export default function TurkeyDiceDefault(props: propsType) {
     buttonOnClick();
   };
 
-useEffect(() => {
-  if (playerCount === props.people && audioRef.current) {
-    const audioEl = audioRef.current;
+  useEffect(() => {
+    console.log(areaPlayers);
+  }, [areaPlayers])
 
-    // 첫 번째 사운드 재생
-    audioEl.src = gameStartFile;
-    audioEl.play();
+  useEffect(() => {
+    if (playerCount === props.people && audioRef.current) {
+      const audioEl = audioRef.current;
 
-    // 첫 번째 사운드가 끝났을 때
-    const handleFirstEnded = () => {
-      // 두 번째 사운드 설정
-      if (props.voice === 1) {
-        audioEl.src = daegilStartFile;
-      } else if (props.voice === 2) {
-        audioEl.src = flowerStartFile;
-      } else if (props.voice === 3) {
-        audioEl.src = guriStartFile;
-      }
-
+      // 첫 번째 사운드 재생
+      audioEl.src = gameStartFile;
       audioEl.play();
 
-      // 두 번째 사운드가 끝났을 때
-      const handleSecondEnded = () => {
-        setGameStartFinished(true); // ✅ 최종 작업 실행
-        audioEl.onended = null; // 이벤트 제거
+      // 첫 번째 사운드가 끝났을 때
+      const handleFirstEnded = () => {
+        // 두 번째 사운드 설정
+        if (props.voice === 1) {
+          audioEl.src = daegilStartFile;
+        } else if (props.voice === 2) {
+          audioEl.src = flowerStartFile;
+        } else if (props.voice === 3) {
+          audioEl.src = guriStartFile;
+        }
+
+        audioEl.play();
+
+        // 두 번째 사운드가 끝났을 때
+        const handleSecondEnded = () => {
+          setGameStartFinished(true); // ✅ 최종 작업 실행
+          audioEl.onended = null; // 이벤트 제거
+        };
+
+        audioEl.onended = handleSecondEnded; // 두 번째 사운드 끝나면 실행
       };
 
-      audioEl.onended = handleSecondEnded; // 두 번째 사운드 끝나면 실행
-    };
+      setGameStarted(true);
+      getScores();
 
-    setGameStarted(true);
-
-    audioEl.onended = handleFirstEnded;
-  }
-}, [playerCount, props.people, props.voice]);
+      audioEl.onended = handleFirstEnded;
+      
+    }
+  }, [playerCount, props.people, props.voice]);
   // 자리 선택 클릭 효과음
   const buttonOnClick = () => {
     if(audioRef.current && !gameStarted) {
@@ -114,15 +119,20 @@ useEffect(() => {
   const [turnCount, setTurnCount] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState(false);
 
+  const [scoreData, setScoreData] = useState([]);
+
   const getScores = async() => {
     try {
       const gameId = props.gameId;
       const data = await yachtService.getScores(gameId.toString());
+      setScoreData(data.scores);
       console.log('데이터:', data);
     } catch (error) {
-      
+      console.log('에러:', error);
     }
   }
+
+  useEffect((() =>console.log(scoreData)), [scoreData]);
 
   // 버튼 클릭: 턴 증가 + 다음 플레이어
   const nextTurnButtonClick = () => {
@@ -132,6 +142,7 @@ useEffect(() => {
 
   // turnCount가 바뀔 때마다 round 갱신
   useEffect(() => {
+
     const newRound = Math.floor(turnCount / playerCount) + 1;
 
     // 최대 12라운드까지만
@@ -149,15 +160,16 @@ useEffect(() => {
 
   useEffect(() => {
     console.log("round : " + round);
-    getScores();
   }, [round])
 
   useEffect(() => {
     // 게임 결과 팟지 하이라이트???
   }, [isGameOver])
   
-  
-  
+  useEffect(() => {
+    console.log('scoreData', scoreData);
+    console.log(scoreData[0]);
+  }, [scoreData])
 
   return (
     <div className={styles.layout}>
@@ -181,18 +193,18 @@ useEffect(() => {
                     myTurn={areaPlayers[0] === currentTurnIndex + 1}
                     aiVoice={props.voice}
                     gameStartFinished={gameStartFinished}
-                    ace={1}
-                    dual={2}
-                    triple={3}
-                    quad={4}
-                    penta={5}
-                    hexa={6}
-                    chance={7}
-                    poker={8}
-                    fullHouse={9}
-                    smallStraight={10}
-                    largeStraight={10}
-                    turkey={10}
+                    ace={scoreData[areaPlayers[0] - 1]?.scorecard.ace ?? 0}
+                    dual={scoreData[areaPlayers[0] - 1]?.scorecard.dual ?? 0}
+                    triple={scoreData[areaPlayers[0] - 1]?.scorecard.triple ?? 0}
+                    quad={scoreData[areaPlayers[0] - 1]?.scorecard.quad ?? 0}
+                    penta={scoreData[areaPlayers[0] - 1]?.scorecard.penta ?? 0}
+                    hexa={scoreData[areaPlayers[0] - 1]?.scorecard.hexa ?? 0}
+                    chance={scoreData[areaPlayers[0] - 1]?.scorecard.chance ?? 0}
+                    poker={scoreData[areaPlayers[0] - 1]?.scorecard.poker ?? 0}
+                    fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard.full_house ?? 0}
+                    smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard.small_straight ?? 0}
+                    largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard.large_straight ?? 0}
+                    turkey={scoreData[areaPlayers[0] - 1]?.scorecard.turkey ?? 0}
                     nextTurnButtonClick={nextTurnButtonClick}
                   />
             )}
@@ -213,18 +225,18 @@ useEffect(() => {
                     myTurn={areaPlayers[1] === currentTurnIndex + 1}
                     aiVoice={props.voice}
                     gameStartFinished={gameStartFinished}
-                    ace={1}
-                    dual={2}
-                    triple={3}
-                    quad={4}
-                    penta={5}
-                    hexa={6}
-                    chance={7}
-                    poker={8}
-                    fullHouse={9}
-                    smallStraight={10}
-                    largeStraight={10}
-                    turkey={10}
+                    ace={scoreData[areaPlayers[1] - 1]?.scorecard.ace ?? 0}
+                    dual={scoreData[areaPlayers[1] - 1]?.scorecard.dual ?? 0}
+                    triple={scoreData[areaPlayers[1] - 1]?.scorecard.triple ?? 0}
+                    quad={scoreData[areaPlayers[1] - 1]?.scorecard.quad ?? 0}
+                    penta={scoreData[areaPlayers[1] - 1]?.scorecard.penta ?? 0}
+                    hexa={scoreData[areaPlayers[1] - 1]?.scorecard.hexa ?? 0}
+                    chance={scoreData[areaPlayers[1] - 1]?.scorecard.chance ?? 0}
+                    poker={scoreData[areaPlayers[1] - 1]?.scorecard.poker ?? 0}
+                    fullHouse={scoreData[areaPlayers[1] - 1]?.scorecard.full_house ?? 0}
+                    smallStraight={scoreData[areaPlayers[1] - 1]?.scorecard.small_straight ?? 0}
+                    largeStraight={scoreData[areaPlayers[1] - 1]?.scorecard.large_straight ?? 0}
+                    turkey={scoreData[areaPlayers[1] - 1]?.scorecard.turkey ?? 0}
                     nextTurnButtonClick={nextTurnButtonClick}
                   />
             )}
@@ -250,18 +262,18 @@ useEffect(() => {
                     myTurn={areaPlayers[2] === currentTurnIndex + 1}
                     aiVoice={props.voice}
                     gameStartFinished={gameStartFinished}
-                    ace={1}
-                    dual={2}
-                    triple={3}
-                    quad={4}
-                    penta={5}
-                    hexa={6}
-                    chance={7}
-                    poker={8}
-                    fullHouse={9}
-                    smallStraight={10}
-                    largeStraight={10}
-                    turkey={10}
+                    ace={scoreData[areaPlayers[2] - 1]?.scorecard.ace ?? 0}
+                    dual={scoreData[areaPlayers[2] - 1]?.scorecard.dual ?? 0}
+                    triple={scoreData[areaPlayers[2] - 1]?.scorecard.triple ?? 0}
+                    quad={scoreData[areaPlayers[2] - 1]?.scorecard.quad ?? 0}
+                    penta={scoreData[areaPlayers[2] - 1]?.scorecard.penta ?? 0}
+                    hexa={scoreData[areaPlayers[2] - 1]?.scorecard.hexa ?? 0}
+                    chance={scoreData[areaPlayers[2] - 1]?.scorecard.chance ?? 0}
+                    poker={scoreData[areaPlayers[2] - 1]?.scorecard.poker ?? 0}
+                    fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard.full_house ?? 0}
+                    smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard.small_straight ?? 0}
+                    largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard.large_straight ?? 0}
+                    turkey={scoreData[areaPlayers[2] - 1]?.scorecard.turkey ?? 0}
                     nextTurnButtonClick={nextTurnButtonClick}
                   />
             )}
@@ -280,18 +292,18 @@ useEffect(() => {
                     myTurn={areaPlayers[3] === currentTurnIndex + 1}
                     aiVoice={props.voice}
                     gameStartFinished={gameStartFinished}
-                    ace={1}
-                    dual={2}
-                    triple={3}
-                    quad={4}
-                    penta={5}
-                    hexa={6}
-                    chance={7}
-                    poker={8}
-                    fullHouse={9}
-                    smallStraight={10}
-                    largeStraight={10}
-                    turkey={10}
+                    ace={scoreData[areaPlayers[3] - 1]?.scorecard.ace ?? 0}
+                    dual={scoreData[areaPlayers[3] - 1]?.scorecard.dual ?? 0}
+                    triple={scoreData[areaPlayers[3] - 1]?.scorecard.triple ?? 0}
+                    quad={scoreData[areaPlayers[3] - 1]?.scorecard.quad ?? 0}
+                    penta={scoreData[areaPlayers[3] - 1]?.scorecard.penta ?? 0}
+                    hexa={scoreData[areaPlayers[3] - 1]?.scorecard.hexa ?? 0}
+                    chance={scoreData[areaPlayers[3] - 1]?.scorecard.chance ?? 0}
+                    poker={scoreData[areaPlayers[3] - 1]?.scorecard.poker ?? 0}
+                    fullHouse={scoreData[areaPlayers[3] - 1]?.scorecard.full_house ?? 0}
+                    smallStraight={scoreData[areaPlayers[3] - 1]?.scorecard.small_straight ?? 0}
+                    largeStraight={scoreData[areaPlayers[3] - 1]?.scorecard.large_straight ?? 0}
+                    turkey={scoreData[areaPlayers[3] - 1]?.scorecard.turkey ?? 0}
                     nextTurnButtonClick={nextTurnButtonClick}
                   />
             )}
