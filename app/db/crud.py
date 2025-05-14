@@ -91,8 +91,6 @@ def update_player_score(db: Session, player_id: int, category: str, value: int) 
 
 def delete_game(db: Session, setting_id: int, player_ids: List[int]) -> bool:
     """게임 데이터 삭제"""
-    prepare_new_game(db)
-
     # 게임 설정 삭제
     db.query(models.TurkeyDiceSetting).filter(models.TurkeyDiceSetting.id == setting_id).delete()
 
@@ -103,26 +101,25 @@ def delete_game(db: Session, setting_id: int, player_ids: List[int]) -> bool:
         db.query(models.ScoreTableYachtAvailable).filter(models.ScoreTableYachtAvailable.id == player_id).delete()
 
     db.commit()
+
+    reset_all_sequences_after_delete(db)
     return True
 
+def reset_all_sequences_after_delete(db: Session):
+    """모든 관련 시퀀스를 최대값+1로 리셋"""
+    tables_and_sequences = [
+        ('turkey_dice_setting', 'turkey_dice_setting_id_seq'),
+        ('turkey_dice_score', 'turkey_dice_score_id_seq'),
+        ('turkey_dice_score_available', 'turkey_dice_score_available_id_seq')
+    ]
 
-def reset_sequence_to_max(db: Session, table_name: str, sequence_name: str):
-    """시퀀스를 현재 테이블의 최대값+1로 설정"""
-    # 현재 최대 ID 찾기
-    result = db.execute(text(f"SELECT COALESCE(MAX(id), 0) FROM {table_name}"))
-    max_id = result.scalar()
+    for table_name, sequence_name in tables_and_sequences:
+        result = db.execute(text(f"SELECT COALESCE(MAX(id), 0) FROM {table_name}"))
+        max_id = result.scalar()
+        db.execute(text(f"ALTER SEQUENCE {sequence_name} RESTART WITH {max_id + 1}"))
 
-    # 시퀀스를 최대값+1로 설정
-    db.execute(text(f"ALTER SEQUENCE {sequence_name} RESTART WITH {max_id + 1}"))
     db.commit()
 
-
-# 게임 시작할 때마다 실행
-def prepare_new_game(db: Session):
-    """새 게임 시작 전 시퀀스 정리"""
-    reset_sequence_to_max(db, 'turkey_dice_setting', 'turkey_dice_setting_id_seq')
-    reset_sequence_to_max(db, 'turkey_dice_score', 'turkey_dice_score_id_seq')
-    reset_sequence_to_max(db, 'turkey_dice_score_available', 'turkey_dice_score_available_id_seq')
 
 def check_game_finished(db: Session, player_ids: List[int]) -> bool:
     """모든 플레이어의 점수표가 채워졌는지 확인"""
