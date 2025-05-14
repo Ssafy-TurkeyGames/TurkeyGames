@@ -28,7 +28,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 20px 15px;
+    padding: 10px 15px;
     box-sizing: border-box;
     z-index: 1;
   }
@@ -42,7 +42,7 @@
     color: #5DB9E0;
     font-size: 1.3rem;
     font-weight: 700;
-    margin-top: 22px;
+    margin-top: 40px;
     font-family: 'Arial', sans-serif;
     -webkit-text-stroke: 0.7px #A300B2;
     text-shadow:
@@ -70,13 +70,14 @@
     gap: 8px;
     flex-grow: 1;
     width: 72%; /* 가로 길이를 80%로 줄임 */
+    height: 60%;
     max-width: 300px; /* 최대 너비 설정 */
   }
   
   .categoryItem {
     display: flex;
     align-items: center;
-    padding-bottom: 5px;
+    padding-bottom: 4px;
     position: relative;
     border-bottom: 1px solid #10FFFF;
   }
