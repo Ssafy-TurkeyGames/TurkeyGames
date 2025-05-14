@@ -1,8 +1,8 @@
 # 김가현이 추가한 라이브러리
 
 # YOLO 모델 및 관련 라이브러리
-# ultralytics==8.3.119
-# ultralytics-thop==2.0.14
+ultralytics==8.3.119
+ultralytics-thop==2.0.14
 
 # 데이터 처리 및 과학 계산
 numpy==1.26.4
