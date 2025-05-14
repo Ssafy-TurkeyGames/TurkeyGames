@@ -5,7 +5,7 @@ import * as path from 'path';
 function createWindow() {
   // 게임보드 창 생성
   const gameboard = new BrowserWindow({
-    width: 1920,
+    width: 1920, 
     height: 1080,
     webPreferences: {
       nodeIntegration: false, // 보안 강화
