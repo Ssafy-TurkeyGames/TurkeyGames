@@ -17,7 +17,7 @@ if not cap.isOpened():
 # 좌석 상태 추적 및 감지
 def detect_seat_status():
     seat_status = {}
-    last_log_time = time.time()
+    # last_log_time = time.time()
 
     while True:
         ret, frame = cap.read()

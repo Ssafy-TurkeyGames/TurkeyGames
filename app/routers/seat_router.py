@@ -3,7 +3,10 @@ from fastapi.responses import StreamingResponse
 from app.seat.seat_people_service import detect_seat_status, video_stream
 from fastapi import HTTPException
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/seat",
+    tags=["seat"]
+    )
 
 @router.get("/detect_seat_status/")
 async def detect_seat_status_api():

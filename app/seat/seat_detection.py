@@ -95,7 +95,14 @@ def sort_markers_by_spatial_position(corners, ids):
         else:
             quadrant[3] = marker_id  # 오하
 
-    return [quadrant[i] for i in range(4)]  # [0번좌석 ID, 1번, 2번, 3번]
+    # return [quadrant[i] for i in range(4)]  # [0번좌석 ID, 1번, 2번, 3번]
+    # 모든 4분면 키가 있으면 반환, 아니면 None 또는 부분 리스트 반환
+    if all(i in quadrant for i in range(4)):
+        return [quadrant[i] for i in range(4)]
+    else:
+        # 없으면 None 또는 quadrant에 존재하는 키 순서대로 반환 (선택)
+        # 예시: None 반환
+        return None
 
 # 사람 위치를 좌석에 맞게 할당하는 함수
 def get_seat_number(person_pos, aruco_markers, seat_threshold=100):
@@ -152,6 +159,14 @@ def get_seat_occupancy(people_positions, aruco_markers):
             if not seat_state[seat_num]:
                 log_with_throttle(f"사람이 좌석 {seat_num}에 앉았습니다.", seat_num, 2.0)
                 seat_state[seat_num] = True
+
+    # 사람이 하나도 감지되지 않은 경우 모든 좌석 False 처리
+    if len(people_positions) == 0:
+        for seat_num in seat_state:
+            if seat_state[seat_num]:
+                log_with_throttle(f"좌석 {seat_num}이 비어 있습니다.", seat_num, 2.0)
+            seat_state[seat_num] = False
+        return seat_state
 
     # 현재 프레임에서 감지되지 않은 좌석 처리
     for seat_num in range(4):
