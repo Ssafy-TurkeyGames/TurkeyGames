@@ -4,6 +4,7 @@ import time
 
 # 좌석 상태 추적을 위한 변수
 seat_state = {0: False, 1: False, 2: False, 3: False}  # 좌석 상태 (비어있으면 False, 앉아있으면 True)
+confirmed_occupied_time = {}
 
 # 시간 기반 텀 설정 (몇 초 동안 사람 위치가 변하지 않으면 갱신하지 않음)
 LAST_SEEN_THRESHOLD = 2  # 2초 동안 변하지 않으면 무시
@@ -142,6 +143,7 @@ def get_seat_occupancy(people_positions, aruco_markers):
 
         if seat_num is not None:
             detected_seats.add(seat_num)
+            now = time.time()
 
             # 위치 안정화 위한 최근 위치 기록
             recent_positions[seat_num].append(pos)
@@ -153,12 +155,19 @@ def get_seat_occupancy(people_positions, aruco_markers):
                 avg_position = np.mean(recent_positions[seat_num], axis=0)
                 position_diff = np.linalg.norm(np.array(pos) - avg_position)
 
-            # 좌석 상태 업데이트
-            last_seen_time[seat_num] = current_time
-            
-            if not seat_state[seat_num]:
-                log_with_throttle(f"사람이 좌석 {seat_num}에 앉았습니다.", seat_num, 2.0)
+            # 3초 이상 지속 로직 (초기 감지 시간 기록 및 duration 계산)
+            if seat_num not in confirmed_occupied_time:
+                confirmed_occupied_time[seat_num] = now
+            duration = now - confirmed_occupied_time[seat_num]
+
+            if duration >= EMPTY_SEAT_TIMEOUT:  # 3초 이상 유지된 경우만 True
+                if not seat_state[seat_num]:
+                    log_with_throttle(f"사람이 좌석 {seat_num}에 앉았습니다.", seat_num, 2.0)
                 seat_state[seat_num] = True
+            else:
+                seat_state[seat_num] = False
+
+            last_seen_time[seat_num] = now
 
     # 사람이 하나도 감지되지 않은 경우 모든 좌석 False 처리
     if len(people_positions) == 0:
@@ -185,3 +194,18 @@ def update_seat_status(current_occupancy):
         occupied = current_occupancy.get(seat_num, False)
         seat_state[seat_num] = occupied
     return seat_state
+
+
+# occupied 좌석들에 대해 순서대로 1, 2, 3... 번호 부여해서 반환
+def get_ordered_seat_mapping():
+    occupied_seats = [seat_num for seat_num, occupied in seat_state.items() if occupied]
+    occupied_seats.sort()  # 순서 보장: 0, 1, 2, 3
+
+    result = []
+    for idx, seat_num in enumerate(occupied_seats):
+        result.append({
+            "original": seat_num,
+            "assigned": idx + 1
+        })
+    return result
+
