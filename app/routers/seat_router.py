@@ -17,6 +17,6 @@ async def detect_seat_status_api():
 async def video_feed():
     try:
         # 실시간 비디오 스트리밍
-        return StreamingResponse(video_stream(), media_type="video/mp4")
+        return StreamingResponse(video_stream(), media_type="multipart/x-mixed-replace; boundary=frame")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in video stream: {str(e)}")
