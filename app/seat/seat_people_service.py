@@ -30,8 +30,11 @@ def detect_seat_status():
         # 사람 인식
         keypoints = detect_people(undistorted)
 
-        # 아루코 마커 감지 및 동적 좌석 매핑
-        aruco_markers = draw_aruco_markers(undistorted)
+        # 왜곡 보정 후 아루코마커커
+        # aruco_markers = draw_aruco_markers(undistorted)
+
+        # 왜곡 보정 전 아루코마커커
+        aruco_markers = draw_aruco_markers(frame) 
 
         # 좌석 상태 추적
         seat_occupancy = get_seat_occupancy(keypoints, aruco_markers)

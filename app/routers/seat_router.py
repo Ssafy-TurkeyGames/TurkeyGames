@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from app.seat.seat_people_service import detect_seat_status, video_stream, get_seat_occupancy
+from app.seat.seat_people_service import detect_seat_status, video_stream
+from app.seat.seat_detection import get_ordered_seat_mapping
 from fastapi import HTTPException
 
 router = APIRouter(
@@ -25,12 +26,12 @@ async def detect_seat_status_api():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error in detecting seat status: {str(e)}")
 
-# 착석여부 안정화 및 번호 부여    
-@router.get("/seats/assigned")
-def get_assigned_seats():
-    """
-    현재 앉은 좌석에 대해 1번부터 순서대로 부여된 매핑을 반환
-    """
-    assigned = get_ordered_seat_mapping()
-    return {"seats": assigned}
+# 착석 번호 부여    
+@router.get("/assigned/")
+async def get_assigned_seats():
+    try:
+        assigned = get_ordered_seat_mapping()
+        return assigned
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error in 좌석번호 부여: {str(e)}")
 

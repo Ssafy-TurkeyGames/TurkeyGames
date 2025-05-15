@@ -22,99 +22,94 @@ recent_positions = {i: [] for i in range(4)}  # 각 좌석에 대해 최근 위�
 last_log_time = {i: 0 for i in range(4)}
 general_log_time = 0  # 일반 로그용
 
+aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+parameters = cv2.aruco.DetectorParameters()
+detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+
+id_to_corner = {0: 0, 1: 1, 2: 2, 3: 3}  # 지웅 코드 기준 좌표 맵핑
+
+# id 기반으로 중심점 정렬
+def order_points_by_id(centers, ids):
+    full_rect = [None, None, None, None]
+    for pt, id_ in zip(centers, ids):
+        idx = id_to_corner.get(int(id_[0]), -1)
+        if idx >= 0:
+            full_rect[idx] = pt
+    return full_rect
+
+# 4번째 마커 추정
+def estimate_missing_point(rect):
+    idx_missing = rect.index(None)
+    if idx_missing == 0:  # 좌상
+        pt = np.array(rect[1]) + np.array(rect[3]) - np.array(rect[2])
+    elif idx_missing == 1:  # 우상
+        pt = np.array(rect[0]) + np.array(rect[2]) - np.array(rect[3])
+    elif idx_missing == 2:  # 우하
+        pt = np.array(rect[1]) + np.array(rect[3]) - np.array(rect[0])
+    elif idx_missing == 3:  # 좌하
+        pt = np.array(rect[0]) + np.array(rect[2]) - np.array(rect[1])
+    return pt.astype(int)
 
 # 아루코 마커 감지 및 좌석 매핑
 def draw_aruco_markers(frame):
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-    parameters = cv2.aruco.DetectorParameters()
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 흑백으로 받아오기
+    gray = cv2.equalizeHist(gray)  # 명암 대비 조정
 
     corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
 
     aruco_markers = {}
 
-    if ids is not None:
+    if ids is not None and len(ids) > 0:
         cv2.aruco.drawDetectedMarkers(frame, corners, ids)
 
-        if len(corners) == 4:
-            # 사분면 기준 정렬
-            marker_id_order = sort_markers_by_spatial_position(corners, ids)
+        centers = []
+        for i, corner in enumerate(corners):
+            pts = corner[0].astype(int)
+            center_x = int(pts[:, 0].mean())
+            center_y = int(pts[:, 1].mean())
+            centers.append([center_x, center_y])
 
-            if marker_id_order:
+        if len(ids) >= 3:
+            rect = order_points_by_id(centers, ids)
 
-                # 마커 정렬된 순서대로 좌석 번호 표시
-                for seat_num, marker_id in enumerate(marker_id_order):
-                    
-                    # 마커 ID에 해당하는 인덱스 찾음
-                    idx = np.where(ids == marker_id)[0][0]
-                    c = corners[idx][0]
+            if None in rect and rect.count(None) == 1:
+                missing_pt = estimate_missing_point(rect)
+                idx_missing = rect.index(None)
+                rect[idx_missing] = missing_pt
 
-                    # 마커 중앙좌표 계산
-                    center_x = int(np.mean(c[:, 0]))
-                    center_y = int(np.mean(c[:, 1]))
+            if all(x is not None for x in rect):
+                for seat_num, (cx, cy) in enumerate(rect):
+                    radius = 30  # 고정 반지름, 필요 시 조정 가능
 
-                    # 원 반지름 계산
-                    radius = int(np.linalg.norm(c[0] - c[1]) / 2)
+                    color = (0, 255, 0) if not seat_state.get(seat_num, False) else (0, 0, 255)
+                    cv2.circle(frame, (cx, cy), radius, color, 2)
 
-                    # 원 그리기
-                    color = (0, 255, 0) if not seat_state[seat_num] else (0, 0, 255)
-                    cv2.circle(frame, (center_x, center_y), radius, (0, 255, 0), 2)
-
-                    status = "Occupied" if seat_state[seat_num] else "Empty"
-                    cv2.putText(frame, f"Seat {seat_num}: {status}", (center_x, center_y),
+                    status = "Occupied" if seat_state.get(seat_num, False) else "Empty"
+                    cv2.putText(frame, f"Seat {seat_num}: {status}", (cx, cy),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
 
-                    # 마커 정보 저장
-                    aruco_markers[seat_num] = (center_x, center_y, radius)
+                    aruco_markers[seat_num] = (cx, cy, radius)
+            else:
+                return {}
+        else:
+            return {}
+
+    else:
+        return {}
 
     # 마커가 없으면 빈 딕셔너리 반환
     return aruco_markers
 
-# 아루코 마커들의 위치를 좌석 번호에 맞게 정렬. 4개 미만이면 정렬x
-def sort_markers_by_spatial_position(corners, ids):
-    if len(corners) != 4:
-        return None
-    
-    centers = []
-    for i in range(4):
-        c = corners[i][0]
-        center_x = np.mean(c[:, 0])
-        center_y = np.mean(c[:, 1])
-        centers.append((ids[i][0], center_x, center_y)) 
-
-    avg_x = np.mean([c[1] for c in centers])
-    avg_y = np.mean([c[2] for c in centers])
-
-    quadrant = {}
-    for marker_id, x, y in centers:
-        if x <= avg_x and y <= avg_y:
-            quadrant[0] = marker_id  # 왼상
-        elif x > avg_x and y <= avg_y:
-            quadrant[1] = marker_id  # 오상
-        elif x <= avg_x and y > avg_y:
-            quadrant[2] = marker_id  # 왼하
-        else:
-            quadrant[3] = marker_id  # 오하
-
-    # return [quadrant[i] for i in range(4)]  # [0번좌석 ID, 1번, 2번, 3번]
-    # 모든 4분면 키가 있으면 반환, 아니면 None 또는 부분 리스트 반환
-    if all(i in quadrant for i in range(4)):
-        return [quadrant[i] for i in range(4)]
-    else:
-        # 없으면 None 또는 quadrant에 존재하는 키 순서대로 반환 (선택)
-        # 예시: None 반환
-        return None
 
 # 사람 위치를 좌석에 맞게 할당하는 함수
-def get_seat_number(person_pos, aruco_markers, seat_threshold=100):
+def get_seat_number(person_pos, aruco_markers, seat_threshold=130):
     if not aruco_markers:  # 마커가 없으면 None 반환
         return None
 
     px, py = person_pos
     for seat_num, (cx, cy, r) in aruco_markers.items():
         # 원의 방정식: (px - cx)^2 + (py - cy)^2 <= r^2
-        distance_squared = (px - cx) ** 2 + (py - cy) ** 2
-        distance = np.sqrt(distance_squared)
+        distance = np.linalg.norm(np.array([px, py]) - np.array([cx, cy]))
 
         if distance <= r + seat_threshold:
             return seat_num  # 해당 좌석 번호 반환
