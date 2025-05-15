@@ -24,7 +24,7 @@ export default function AppRoutes() {
           <Route path="search" element={<SearchGame />} />
           <Route path="/rule/:gameId" element={<Rule />} />
           {/* 게임 옵션 라우트 */}
-          <Route path="game-options/:gameId" element={<TurkeyDiceOptions />} />
+          <Route path="game-options" element={<TurkeyDiceOptions />} />
           {/* 터키다이스 게임 라우트 */}
           <Route path="games/TurkeyDice">
             <Route path="score" element={<ScoreBoard />} />

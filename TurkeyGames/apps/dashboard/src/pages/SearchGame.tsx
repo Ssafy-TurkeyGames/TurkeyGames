@@ -235,7 +235,7 @@ export default function SearchGame() {
                   </button>
                   <button
                     className={styles.playBtn}
-                    onClick={() => navigate(`/game-options/${game.gameId}`)}
+                    onClick={() => navigate(`/game-options/`)}
                   >
                     ⚡ 게임 하기
                   </button>
