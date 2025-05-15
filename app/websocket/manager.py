@@ -1,6 +1,8 @@
 import socketio
 from typing import Dict, List, Any
 
+from app.yacht.dice import DiceGame
+
 # Socket.IO 서버 인스턴스 생성 시 CORS 설정
 sio = socketio.AsyncServer(
     async_mode='asgi',
@@ -64,7 +66,6 @@ async def leave_game(sid, data):
 
     return {"success": True, "message": f"게임 {game_id}에서 나갔습니다."}
 
-
 async def broadcast_scores(game_id: str, scores_data: Any):
     """특정 게임의 스코어 업데이트를 모든 참여자에게 브로드캐스트"""
     print(f"Broadcasting scores for game {game_id}: {scores_data}")
@@ -74,3 +75,18 @@ async def broadcast_scores(game_id: str, scores_data: Any):
 
     print(f"Broadcasted to all connected clients")
     return True
+
+
+async def on_dice_change(game_id: str, dice_values: List[int]):
+    """주사위 값이 변경되었을 때 웹소켓으로 브로드캐스트"""
+    game = DiceGame.get_game(game_id)
+    if game:
+        # 게임 상태 업데이트
+        game["dice_values"] = dice_values
+
+        # 모든 연결된 클라이언트에게 브로드캐스트
+        await sio.emit('dice_update', {
+            'game_id': game_id,
+            'dice_values': dice_values,
+            'rolls_left': game["rolls_left"]
+        })

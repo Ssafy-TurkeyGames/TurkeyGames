@@ -10,9 +10,9 @@ class GameSettings(BaseModel):
 
 
 class DiceRoll(BaseModel):
-    """주사위 굴림 요청 모델"""
-    keep_indices: List[int] = Field(default_factory=list, description="유지할 주사위 인덱스")
-
+    """주사위 굴리기 요청"""
+    keep_indices: List[bool] = Field(default_factory=lambda: [False, False, False, False, False])
+    use_webcam: bool = Field(default=False, description="웹캠 인식 사용 여부")
 
 class DiceResult(BaseModel):
     """주사위 굴림 결과 모델"""
@@ -59,3 +59,13 @@ class GameEndResult(BaseModel):
     """게임 종료 결과 모델"""
     success: bool = Field(..., description="성공 여부")
     message: str = Field(..., description="결과 메시지")
+
+class DiceUpdateMessage(BaseModel):
+    game_id: str
+    dice_values: List[int]
+    rolls_left: int
+
+class MonitoringStatusMessage(BaseModel):
+    game_id: str
+    status: str
+    message: str

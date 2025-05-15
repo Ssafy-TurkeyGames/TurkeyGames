@@ -8,7 +8,7 @@ from object_detection.utils import visualization_utils as vis_util
 # Path to the exported model and label map
 PATH_TO_SAVED_MODEL = os.path.join('exported_model', 'saved_model')
 PATH_TO_LABELS = os.path.join('exported_model', 'dice_label_map.pbtxt')
-
+tf.gfile = tf.io.gfile
 # Load the model
 print('Loading model...')
 detect_fn = tf.saved_model.load(PATH_TO_SAVED_MODEL)
@@ -18,7 +18,7 @@ print('Model loaded.')
 category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
 # Open webcam
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)
 
 if not cap.isOpened():
     print("Error: Could not open webcam.")

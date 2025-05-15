@@ -5,7 +5,9 @@ from app.db.database import get_db
 from app.db import crud
 from app.yacht import schema
 from app.yacht.dice import DiceGame
-from app.websocket.manager import broadcast_scores, game_rooms, sio
+from app.yacht.dice_monitor import dice_monitor
+from app.websocket.manager import broadcast_scores, game_rooms, sio, on_dice_change
+from app.config.detaction_config import settings
 
 # 요트 게임 라우터 초기화
 router = APIRouter(
@@ -48,6 +50,22 @@ async def start_game(settings: schema.GameSettings, background_tasks: Background
         rolls_left=3,
         status="waiting"
     )
+
+    if settings.AUTO_DICE_DETECTION_ENABLED:
+        try:
+            # 모니터링 시작
+            dice_monitor.start_monitoring(game_id)
+            # 콜백 설정
+            dice_monitor.set_callback(game_id, on_dice_change)
+
+            # 웹소켓으로 모니터링 시작 알림 (room 없이)
+            background_tasks.add_task(sio.emit, 'monitoring_started', {
+                "game_id": game_id,
+                "message": "주사위 자동 인식이 시작되었습니다"
+            })
+
+        except Exception as e:
+            print(f"주사위 모니터링 시작 실패: {e}")
 
     # 로비에 게임 생성 정보 전송
     background_tasks.add_task(sio.emit, 'game_created', {
@@ -96,6 +114,10 @@ async def select_score(
     """점수 선택 및 기록"""
     # 게임 상태 조회
     game = DiceGame.get_game(game_id)
+    if game:
+        game["dice_values"] = [0, 0, 0, 0, 0]
+        game["rolls_left"] = 3
+
     if not game:
         raise HTTPException(status_code=404, detail="게임을 찾을 수 없습니다")
 
@@ -239,6 +261,8 @@ async def end_game(game_id: str, background_tasks: BackgroundTasks, db: Session 
     if not game:
         raise HTTPException(status_code=404, detail="게임을 찾을 수 없습니다")
 
+    dice_monitor.stop_monitoring(game_id)
+
     # DB에서 게임 설정 및 플레이어 점수 삭제
     crud.delete_game(db, game["setting_id"], game["players"])
 
@@ -253,3 +277,21 @@ async def end_game(game_id: str, background_tasks: BackgroundTasks, db: Session 
     DiceGame.delete_game(game_id)
 
     return schema.GameEndResult(success=True, message="게임이 종료되었습니다")
+
+
+@router.get("/{game_id}/dice/current")
+async def get_current_dice(game_id: str):
+    """현재 인식된 주사위 값 조회"""
+    values = dice_monitor.get_current_values(game_id)
+    return {"game_id": game_id, "dice_values": values}
+
+@router.post("/{game_id}/monitoring/toggle")
+async def toggle_monitoring(game_id: str, enable: bool):
+    """게임의 모니터링 켜기/끄기"""
+    if enable:
+        dice_monitor.start_monitoring(game_id)
+        dice_monitor.set_callback(game_id, on_dice_change)
+        return {"message": "모니터링이 시작되었습니다"}
+    else:
+        dice_monitor.stop_monitoring(game_id)
+        return {"message": "모니터링이 중지되었습니다"}
