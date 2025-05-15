@@ -1,11 +1,11 @@
 // apps/dashboard/src/pages/SearchGame.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './SearchGame.module.css';
 import logo from '../assets/images/logo.png';
 import { getAllGames, getFilteredGames, searchGamesByKeyword } from '../api/dashboardApi';
 import { Game } from '../api/types';
-import SearchBar from '../components/SearchBar';
+import searchIcon from '../assets/images/search (1).png';
 
 // 필터 버튼 데이터
 const playerFilters = ['2인', '3인', '4인'];
@@ -31,6 +31,7 @@ export default function SearchGame() {
   // URL 파라미터에서 검색어 읽기 추가
   const searchParams = new URLSearchParams(location.search);
   const keywordParam = searchParams.get('keyword');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   // 필터가 적용되었는지 확인
   const isFilterActive = selectedPlayers.length > 0 || selectedLevels.length > 0;
@@ -43,6 +44,51 @@ export default function SearchGame() {
       navigate(`/search?keyword=${encodeURIComponent(search)}`, { replace: true });
     }
   };
+
+  // 1. 필터/URL 파라미터 변경 시 검색
+  useEffect(() => {
+    const effectiveSearch = keywordParam !== null ? keywordParam : search;
+    fetchGames(effectiveSearch);
+  }, [selectedPlayers, selectedLevels, keywordParam]);
+
+  // 2. // 실시간 검색 핸들링
+  useEffect(() => {
+    if (selectedPlayers.length > 0 || selectedLevels.length > 0) return;
+    if (keywordParam !== null) return;
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      fetchGames(search);
+    }, 300);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [search]);
+
+  // 필터/URL 파라미터 변경 시
+  useEffect(() => {
+    const effectiveSearch = keywordParam !== null ? keywordParam : search;
+    fetchGames(effectiveSearch);
+  }, [selectedPlayers, selectedLevels, keywordParam]);
+
+  // 검색창 JSX
+  const SearchInput = () => (
+    <div className={styles.searchBar}>
+      {/* ... 기존 코드 ... */}
+      <button 
+        className={styles.iconBtn} 
+        onClick={() => fetchGames(search)}
+        aria-label="검색"
+      >
+        <img 
+          src={searchIcon}  // ✅ require() 대신 임포트한 변수 사용
+          alt="검색" 
+          className={styles.icon} 
+        />
+      </button>
+    </div>
+  );
 
   // 컴포넌트 마운트 시 URL 파라미터 검색어 적용
   useEffect(() => {
@@ -147,15 +193,32 @@ export default function SearchGame() {
 
   return (
     <div className={styles.container}>
-      {/* SearchBar 컴포넌트 사용 - onSearch prop 전달 필수 */}
-      <SearchBar
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onSearch={handleSearch}
-        placeholder="게임을 검색해보세요"
-      />
+      {/* 고정 검색창 */}
+      <div className={styles.fixedSearchBar}>
+        <div className={styles.searchBarInner}>
+          <input
+            className={styles.input}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="게임을 검색해보세요"
+            onKeyDown={(e) => e.key === 'Enter' && fetchGames(search)}
+          />
+          <button 
+            className={styles.iconBtn} 
+            onClick={() => fetchGames(search)}
+            aria-label="검색"
+          >
+            <img 
+              src={searchIcon}
+              alt="검색" 
+              className={styles.icon} 
+            />
+          </button>
+        </div>
+      </div>
 
-      {/* 필터 버튼 */}
+      {/* 아래는 기존 paste.txt와 동일하게 필터, 결과 등 렌더링 */}
       <div className={styles.filterRow}>
         {playerFilters.map(label => (
           <button
@@ -176,8 +239,6 @@ export default function SearchGame() {
             {label}
           </button>
         ))}
-        
-        {/* 필터 초기화 버튼 */}
         {isFilterActive && (
           <>
             <span className={styles.divider}>|</span>
@@ -191,15 +252,11 @@ export default function SearchGame() {
           </>
         )}
       </div>
-
-      {/* 에러 상태 */}
       {error && !loading && (
         <div className={styles.errorContainer}>
           <p>{error}</p>
         </div>
       )}
-
-      {/* 게임 카드 리스트 */}
       {!loading && !error && (
         <div className={styles.cardList}>
           {games.length > 0 ? (
