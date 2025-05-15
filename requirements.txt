@@ -33,3 +33,4 @@ opencv-python~=4.11.0.86
 # pynput~=1.8.1
 # pip install sounddevice
 # pip install pyaudio
+# pip install ffmpeg
