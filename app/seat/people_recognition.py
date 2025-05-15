@@ -1,5 +1,8 @@
 import math
 from ultralytics import YOLO
+import cv2
+import numpy as np
+import torch
 
 model = YOLO("yolov8n-pose.pt")
 
@@ -51,8 +54,68 @@ def extract_valid_persons(results):
 
     return persons
 
-def detect_people(frame):
-    results = model(frame, verbose=False)
-    keypoints = extract_valid_persons(results)
+def rotate_image(image, angle):
+    h, w = image.shape[:2]
+    center = (w // 2, h // 2)
+    rot_mat = cv2.getRotationMatrix2D(center, angle, 1.0)
+    rotated = cv2.warpAffine(image, rot_mat, (w, h), flags=cv2.INTER_LINEAR)
+    return rotated
 
-    return keypoints
+def rotate_point(x, y, w, h, angle):
+    if angle == 0:
+        return x, y
+    elif angle == 90:
+        return y, w - x
+    elif angle == 270:
+        return h - y, x
+    else:
+        raise ValueError("Angle must be 0, 90, or 270")
+
+
+def detect_people(frame):
+    angles = [0, 90, 270]
+    h, w = frame.shape[:2]
+    best_keypoints = None
+    best_score = -float('inf')
+
+    for angle in angles:
+        rotated_frame = rotate_image(frame, angle)  # 프레임 자체를 회전 (아루코는 건드리지 말 것)
+        results = model(rotated_frame, verbose=False)
+        keypoints = extract_valid_persons(results)
+
+        if not keypoints:
+            continue
+
+        # 신뢰도 계산 (예: keypoints 개수 * 평균 confidence)
+        confs = results[0].keypoints.conf if results and hasattr(results[0], 'keypoints') else []
+        if len(confs) == 0:
+            continue
+
+        # torch.Tensor인지 확인 후 numpy 변환
+        conf_means = []
+        for conf in confs:
+            if isinstance(conf, torch.Tensor):
+                conf_np = conf.cpu().numpy()
+            else:
+                conf_np = np.array(conf)
+            conf_means.append(np.mean(conf_np))
+
+        avg_conf = np.mean(conf_means)
+        score = len(keypoints) * avg_conf
+
+        if score > best_score:
+            best_score = score
+            # keypoints 좌표 원본 프레임 기준으로 역변환
+            corrected_keypoints = []
+            for kp in keypoints:
+                x_corr, y_corr = rotate_point(kp[0], kp[1], w, h, (360 - angle) % 360)
+                corrected_keypoints.append((x_corr, y_corr))
+            best_keypoints = corrected_keypoints
+
+    if best_keypoints is None:
+        return []
+
+    return best_keypoints
+
+
+
