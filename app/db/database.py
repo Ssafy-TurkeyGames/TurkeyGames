@@ -3,9 +3,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
 # ..env 파일에서 환경 변수 로드
-load_dotenv()
+BASE_DIR    = Path(__file__).resolve().parent.parent.parent  
+dotenv_path = BASE_DIR / ".env"
+load_dotenv(dotenv_path=dotenv_path, override=True)
 
 # 데이터베이스 URL 가져오기
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://username:password@localhost/dbname")
