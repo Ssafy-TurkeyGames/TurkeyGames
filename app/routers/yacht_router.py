@@ -92,16 +92,34 @@ async def get_game_status(game_id: str):
 
 
 @router.post("/{game_id}/roll", response_model=schema.DiceResult)
-async def roll_dice(game_id: str, roll_request: schema.DiceRoll):
-    """주사위 굴리기"""
-    result = DiceGame.roll_dice(game_id, roll_request.keep_indices)
-    if not result:
-        raise HTTPException(status_code=404, detail="게임을 찾을 수 없거나 주사위를 굴릴 수 없습니다")
+async def roll_dice(game_id: str, background_tasks: BackgroundTasks):
+    """주사위 굴리기 시작 (자동 인식 모드)"""
+    # 게임 상태 조회
+    game = DiceGame.get_game(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="게임을 찾을 수 없습니다")
 
-    dice_values, rolls_left = result
+    # 주사위를 굴릴 수 있는지 확인
+    if game["rolls_left"] <= 0:
+        raise HTTPException(status_code=400, detail="더 이상 주사위를 굴릴 수 없습니다")
 
-    return schema.DiceResult(dice_values=dice_values, rolls_left=rolls_left)
+    # 롤 카운트 감소
+    game["rolls_left"] -= 1
 
+    # 주사위 인식 초기화 (기존 인식 값 리셋)
+    monitor = dice_monitor.game_monitors.get(game_id)
+    if monitor:
+        monitor["last_stable_values"] = None
+        monitor["value_history"].clear()
+
+    # WebSocket으로 주사위 굴리기 시작 알림
+    background_tasks.add_task(sio.emit, 'dice_rolling', {
+        "game_id": game_id,
+        "message": "주사위를 굴려주세요",
+        "rolls_left": game["rolls_left"]
+    })
+
+    return schema.DiceResult(dice_values=[0, 0, 0, 0, 0], rolls_left=game["rolls_left"])
 
 @router.post("/{game_id}/select", response_model=schema.ScoreResult)
 async def select_score(

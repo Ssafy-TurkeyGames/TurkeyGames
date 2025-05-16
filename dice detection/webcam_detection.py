@@ -18,7 +18,7 @@ print('Model loaded.')
 category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
 
 # Open webcam
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 if not cap.isOpened():
     print("Error: Could not open webcam.")

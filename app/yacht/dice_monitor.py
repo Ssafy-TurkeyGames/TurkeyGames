@@ -147,7 +147,7 @@ class DiceMonitor:
             })
 
             # 안정적인 값 확인
-            stable_values = self._check_stability(monitor["value_history"])
+            stable_values = self._check_stability(game_id, monitor["value_history"])
 
             if stable_values is not None:
                 # 이전 값과 다른 경우에만 업데이트
@@ -178,7 +178,7 @@ class DiceMonitor:
                 detections['detection_scores'],
                 self.category_index,
                 use_normalized_coordinates=True,
-                max_boxes_to_draw=10,
+                max_boxes_to_draw=5,
                 min_score_thresh=self.CONFIDENCE_THRESHOLD,
                 agnostic_mode=False)
 
@@ -231,39 +231,39 @@ class DiceMonitor:
                           for key, value in detections.items()}
             detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
 
-            # 높은 신뢰도의 주사위 값만 추출
+            # 1. 주사위 클래스(1-6)만 필터링하고 신뢰도 점수 획득
+            dice_indices = []
+            for i in range(num_detections):
+                if (1 <= detections['detection_classes'][i] <= 6 and
+                        detections['detection_scores'][i] > self.CONFIDENCE_THRESHOLD):
+                    dice_indices.append(i)
+
+            # 2. 신뢰도 순으로 정렬
+            dice_indices.sort(key=lambda i: -detections['detection_scores'][i])
+
+            # 3. 상위 N개(MIN_DICE_COUNT)만 선택
+            top_indices = dice_indices[:self.MIN_DICE_COUNT]
+
+            # 정확히 필요한 개수만큼 발견되었는지 확인
+            if len(top_indices) != self.MIN_DICE_COUNT:
+                return None, detections
+
+            # 4. 값과 위치 추출
             dice_values = []
             dice_positions = []
 
-            for i in range(num_detections):
-                if detections['detection_scores'][i] > self.CONFIDENCE_THRESHOLD:
-                    class_id = detections['detection_classes'][i]
-                    if 1 <= class_id <= 6:  # 주사위 값 (1-6)
-                        dice_values.append(class_id)
-                        # 박스 중심점 계산
-                        box = detections['detection_boxes'][i]
-                        center_x = (box[1] + box[3]) / 2
-                        dice_positions.append(center_x)
+            for i in top_indices:
+                class_id = detections['detection_classes'][i]
+                box = detections['detection_boxes'][i]
+                center_x = (box[1] + box[3]) / 2
+                dice_positions.append(center_x)
+                dice_values.append(class_id)
 
-            # 주사위 개수가 정확히 맞는 경우만 처리
-            if len(dice_values) >= self.MIN_DICE_COUNT and len(dice_values) <= self.MAX_DICE_COUNT:
-                # 위치에 따라 정렬 (왼쪽에서 오른쪽으로)
-                sorted_pairs = sorted(zip(dice_positions[:self.MAX_DICE_COUNT], dice_values[:self.MAX_DICE_COUNT]))
-                sorted_values = [value for _, value in sorted_pairs]
+            # 5. 위치에 따라 정렬 (왼쪽에서 오른쪽으로)
+            sorted_pairs = sorted(zip(dice_positions, dice_values))
+            sorted_values = [value for _, value in sorted_pairs]
 
-                # 미리보기에 인식 개수 표시 (디버깅용)
-                if self.show_preview:
-                    total_detected = len(dice_values)
-                    # if total_detected > self.MAX_DICE_COUNT:
-                    #     print(f"인식된 주사위: {total_detected}개 (최대 {self.MAX_DICE_COUNT}개만 사용)")
-
-                return sorted_values, detections
-
-            # 개수가 맞지 않으면 미리보기에만 표시
-            # if self.show_preview and len(dice_values) > 0:
-            #     print(f"인식된 주사위: {len(dice_values)}개 (필요: {self.MIN_DICE_COUNT}-{self.MAX_DICE_COUNT}개)")
-
-            return None, detections
+            return sorted_values, detections
 
         except Exception as e:
             print(f"주사위 인식 오류: {e}")
@@ -271,7 +271,45 @@ class DiceMonitor:
             traceback.print_exc()
             return None, None
 
-    def _check_stability(self, history: deque) -> Optional[List[int]]:
+    def _check_stability(self, game_id: str, history: deque) -> Optional[List[int]]:
+        """주사위 값이 안정적인지 확인"""
+        monitor = self.game_monitors.get(game_id)
+        if not monitor:
+            return None
+
+        # 기존 안정성 확인 로직
+        stable_values = self._check_normal_stability(history)
+
+        # 검출 윈도우가 활성화된 경우
+        if "detection_window" in monitor and monitor["detection_window"]["active"]:
+            window = monitor["detection_window"]
+            current_time = time.time()
+
+            # 안정적인 값을 찾았거나 시간이 초과된 경우
+            if stable_values is not None or (current_time - window["start_time"] >= window["duration"]):
+                window["active"] = False
+                window["found_stable"] = stable_values is not None
+
+                # 결과 알림 (타임아웃 또는 검출 성공)
+                if window["found_stable"]:
+                    print(f"게임 {game_id}: 안정적인 주사위 값 검출 - {stable_values}")
+                else:
+                    print(f"게임 {game_id}: 주사위 인식 시간 초과")
+
+                # 타임아웃 시 WebSocket 알림
+                if not window["found_stable"] and monitor["callback"]:
+                    try:
+                        loop = asyncio.get_event_loop()
+                        asyncio.run_coroutine_threadsafe(
+                            monitor["callback"](game_id, None, True),  # timeout=True
+                            loop
+                        )
+                    except RuntimeError:
+                        asyncio.run(monitor["callback"](game_id, None, True))
+
+        return stable_values
+
+    def _check_normal_stability(self, history: deque) -> Optional[List[int]]:
         """주사위 값이 안정적인지 확인"""
         if len(history) < 5:  # 최소 5프레임 필요
             return None

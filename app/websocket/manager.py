@@ -77,16 +77,28 @@ async def broadcast_scores(game_id: str, scores_data: Any):
     return True
 
 
-async def on_dice_change(game_id: str, dice_values: List[int]):
+async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = False):
     """주사위 값이 변경되었을 때 웹소켓으로 브로드캐스트"""
     game = DiceGame.get_game(game_id)
     if game:
-        # 게임 상태 업데이트
-        game["dice_values"] = dice_values
+        if timeout:
+            # 타임아웃 알림
+            await sio.emit('dice_detection_timeout', {
+                'game_id': game_id,
+                'message': '주사위를 인식할 수 없습니다. 다시 시도해주세요.',
+                'rolls_left': game["rolls_left"]
+            })
+        else:
 
-        # 모든 연결된 클라이언트에게 브로드캐스트
-        await sio.emit('dice_update', {
-            'game_id': game_id,
-            'dice_values': dice_values,
-            'rolls_left': game["rolls_left"]
-        })
+            dice_values = [int(val) for val in dice_values]
+
+            # 게임 상태 업데이트
+            game["dice_values"] = dice_values
+
+            # 안정적인 주사위 값 감지 알림
+            await sio.emit('dice_update', {
+                'game_id': game_id,
+                'dice_values': dice_values,
+                'rolls_left': game["rolls_left"],
+                'status': 'detected'
+            })
