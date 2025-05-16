@@ -8,7 +8,7 @@ from object_detection.utils import visualization_utils as vis_util
 # Path to the exported model and label map
 PATH_TO_SAVED_MODEL = os.path.join('exported_model', 'saved_model')
 PATH_TO_LABELS = os.path.join('exported_model', 'dice_label_map.pbtxt')
-
+tf.gfile = tf.io.gfile
 # Load the model
 print('Loading model...')
 detect_fn = tf.saved_model.load(PATH_TO_SAVED_MODEL)
