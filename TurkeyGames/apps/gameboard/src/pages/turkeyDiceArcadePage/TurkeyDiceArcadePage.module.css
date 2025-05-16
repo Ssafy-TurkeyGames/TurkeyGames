@@ -1,7 +1,134 @@
+/* TurkeyDiceAcadePage.module.css */
+.container {
+  display: flex;
+  height: 100vh;
+  background: #000;
+}
+
+/* 좌/우측 카드 컨테이너 */
+.CardContainer {
+  width: 20%;
+  height: 100vh;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 상단 카드 영역 - 컴포넌트는 회전하지만 내용은 회전하지 않음 */
+.upside {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #8a2be2;
+  border-radius: 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 15px #8a2be2;
+  transform: rotate(180deg);
+}
+
+/* 하단 카드 영역 */
+.downside {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #8a2be2;
+  border-radius: 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 15px #8a2be2;
+}
+
+/* 중앙 맵 영역 */
+.centerMap {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.centerMap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 1px solid #00ffff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #00ffff;
+}
+
+/* 자리 선택 영역 스타일 업데이트 */
+.seat {
+  font-size: 35px;
+  color: #fff;
+  background-color: transparent;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+  transform: rotate(180deg);
+  text-shadow:
+    0 0 4px #fff,
+    0 0 40px #10FFFF;
+  animation: neonPulse 1.5s infinite alternate;
+}
+
+/* 네온 텍스트 효과를 위한 애니메이션 */
+@keyframes neonPulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px #10FFFF;
+  }
+  50% {
+    text-shadow:
+      0 0 2px #fff,
+      0 0 20px #10FFFF,
+      0 0 40px #10FFFF;
+  }
+}
+
+/* 선택되지 않은 영역의 깜빡임 효과 */
+@keyframes areaFlicker {
+  0%, 100% {
+    border-color: #fa5fe2;
+    box-shadow: 0 0 15px #fa5fe2;
+  }
+  50% {
+    border-color: #10FFFF;
+    box-shadow: 0 0 8px #10FFFF;
+  }
+}
+
+/* upside의 seat는 회전시키지 않음 */
+.upside .seat {
+  transform: none;
+}
+
+/* 빈 영역 스타일 - 자리 선택 안된 카드만 애니메이션 적용 */
+.emptyArea {
+  animation: areaFlicker 2s infinite alternate;
+}
+
+/* 준비 완료 텍스트 스타일 */
+.ready {
+  color: #F098F3;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 11px #fff,
+    0 0 19px #fff,
+    0 0 40px #F098F3,
+    0 0 80px #F098F3;
+  animation: none; /* 애니메이션 제거 */
+}
+
 /* src/components/turkeyDice/Arcade/TurkeyDiceScoreCard.module.css */
 .scoreCardWrapper {
-  width: 420px;
-  height: 530px;
+  width: 100%;
+  height: 100%;
   position: relative;
   display: flex;
   justify-content: center;
