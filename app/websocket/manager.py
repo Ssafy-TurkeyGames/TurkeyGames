@@ -80,7 +80,8 @@ async def broadcast_scores(game_id: str, scores_data: Any):
 async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = False):
     """주사위 값이 변경되었을 때 웹소켓으로 브로드캐스트"""
     game = DiceGame.get_game(game_id)
-    if game:
+    from app.yacht.dice_monitor import dice_monitor
+    if game and dice_monitor.game_monitors.get(game_id):
         if timeout:
             # 타임아웃 알림
             await sio.emit('dice_detection_timeout', {
@@ -89,11 +90,13 @@ async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = F
                 'rolls_left': game["rolls_left"]
             })
         else:
-
+            # NumPy int64를 Python int로 변환
             dice_values = [int(val) for val in dice_values]
 
             # 게임 상태 업데이트
             game["dice_values"] = dice_values
+
+            print(f"게임 {game_id}: 주사위 값 전송 - {dice_values}")
 
             # 안정적인 주사위 값 감지 알림
             await sio.emit('dice_update', {
@@ -102,3 +105,6 @@ async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = F
                 'rolls_left': game["rolls_left"],
                 'status': 'detected'
             })
+
+            # 값을 전송한 후 플래그 비활성화 (중복 전송 방지)
+            dice_monitor.game_monitors[game_id]["waiting_for_roll"] = False

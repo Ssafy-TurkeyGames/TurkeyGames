@@ -51,21 +51,20 @@ async def start_game(settings: schema.GameSettings, background_tasks: Background
         status="waiting"
     )
 
-    if settings.AUTO_DICE_DETECTION_ENABLED:
-        try:
-            # 모니터링 시작
-            dice_monitor.start_monitoring(game_id)
-            # 콜백 설정
-            dice_monitor.set_callback(game_id, on_dice_change)
+    try:
+        # 모니터링 시작
+        dice_monitor.start_monitoring(game_id)
+        # 콜백 설정
+        dice_monitor.set_callback(game_id, on_dice_change)
 
-            # 웹소켓으로 모니터링 시작 알림 (room 없이)
-            background_tasks.add_task(sio.emit, 'monitoring_started', {
-                "game_id": game_id,
-                "message": "주사위 자동 인식이 시작되었습니다"
-            })
+        # 웹소켓으로 모니터링 시작 알림 (room 없이)
+        background_tasks.add_task(sio.emit, 'monitoring_started', {
+            "game_id": game_id,
+            "message": "주사위 자동 인식이 시작되었습니다"
+        })
 
-        except Exception as e:
-            print(f"주사위 모니터링 시작 실패: {e}")
+    except Exception as e:
+        print(f"주사위 모니터링 시작 실패: {e}")
 
     # 로비에 게임 생성 정보 전송
     background_tasks.add_task(sio.emit, 'game_created', {
@@ -111,6 +110,7 @@ async def roll_dice(game_id: str, background_tasks: BackgroundTasks):
     if monitor:
         monitor["last_stable_values"] = None
         monitor["value_history"].clear()
+        monitor["waiting_for_roll"] = True
 
     # WebSocket으로 주사위 굴리기 시작 알림
     background_tasks.add_task(sio.emit, 'dice_rolling', {

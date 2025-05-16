@@ -76,9 +76,16 @@ class DiceMonitor:
             self.game_monitors[game_id] = {
                 "active": True,
                 "last_stable_values": None,
-                "value_history": deque(maxlen=10),  # 최근 10프레임 저장
+                "value_history": deque(maxlen=10),
                 "last_update_time": 0,
-                "callback": None
+                "callback": None,
+                "waiting_for_roll": False,  # 리롤 요청 후 값 전송 대기 상태
+                "detection_window": {
+                    "active": False,
+                    "start_time": 0,
+                    "duration": 0,
+                    "found_stable": False
+                }
             }
 
         # 카메라 매니저에 구독
@@ -150,13 +157,13 @@ class DiceMonitor:
             stable_values = self._check_stability(game_id, monitor["value_history"])
 
             if stable_values is not None:
-                # 이전 값과 다른 경우에만 업데이트
+                # 이전 값과 다른 경우만 처리
                 if stable_values != monitor["last_stable_values"]:
                     monitor["last_stable_values"] = stable_values
                     monitor["last_update_time"] = time.time()
 
-                    # 콜백 실행
-                    if monitor["callback"]:
+                    # waiting_for_roll이 True일 때만 콜백 실행
+                    if monitor["waiting_for_roll"] and monitor["callback"]:
                         try:
                             loop = asyncio.get_event_loop()
                             asyncio.run_coroutine_threadsafe(
@@ -166,6 +173,9 @@ class DiceMonitor:
                         except RuntimeError:
                             # 이벤트 루프가 없는 경우 새로 생성
                             asyncio.run(monitor["callback"](game_id, stable_values))
+
+                        # 콜백을 실행한 후에는 플래그를 False로 설정하여 중복 전송 방지
+                        monitor["waiting_for_roll"] = False
 
     def _show_preview(self, display_frame, dice_values, detections):
         """미리보기 창 표시"""
@@ -296,16 +306,19 @@ class DiceMonitor:
                 else:
                     print(f"게임 {game_id}: 주사위 인식 시간 초과")
 
-                # 타임아웃 시 WebSocket 알림
-                if not window["found_stable"] and monitor["callback"]:
-                    try:
-                        loop = asyncio.get_event_loop()
-                        asyncio.run_coroutine_threadsafe(
-                            monitor["callback"](game_id, None, True),  # timeout=True
-                            loop
-                        )
-                    except RuntimeError:
-                        asyncio.run(monitor["callback"](game_id, None, True))
+                    # 타임아웃 시 WebSocket 알림 (waiting_for_roll이 True일 때만)
+                    if monitor["waiting_for_roll"] and monitor["callback"]:
+                        try:
+                            loop = asyncio.get_event_loop()
+                            asyncio.run_coroutine_threadsafe(
+                                monitor["callback"](game_id, None, True),  # timeout=True
+                                loop
+                            )
+                        except RuntimeError:
+                            asyncio.run(monitor["callback"](game_id, None, True))
+
+                        # 콜백을 실행한 후 플래그 비활성화
+                        monitor["waiting_for_roll"] = False
 
         return stable_values
 

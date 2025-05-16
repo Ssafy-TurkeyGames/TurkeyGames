@@ -7,8 +7,6 @@ class GameSettings(BaseModel):
     people: int = Field(..., ge=1, le=4, description="플레이어 수")
     map: int = Field(0, description="맵 설정")
     voice: int = Field(0, description="음성 사용 여부")
-    AUTO_DICE_DETECTION_ENABLED: bool = Field(True, description="주사위 자동 인식 사용 여부")
-
 
 class DiceRoll(BaseModel):
     """주사위 굴리기 요청"""
