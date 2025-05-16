@@ -7,7 +7,8 @@ import threading
 from threading import Event
 from typing import Dict, Optional
 import uuid
-import pathlib
+from pathlib import Path
+import pathlib # 디렉토리 생성을 위함
 import numpy as np
 
 from minio import Minio
@@ -19,6 +20,7 @@ from app.video.video_writer import VideoSaver
 from app.video.camera_manager import camera_manager  # 추가
 from app.config import load_config
 from datetime import datetime, timedelta
+from app.video.shared_state import highlight_data_store # Import the shared state
 
 os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 
@@ -274,6 +276,24 @@ class VideoService:
             qr_filepath = os.path.join(self.minio_config['qr_output_dir'], qr_filename)
             qr_img.save(qr_filepath)
             print(f"📱 QR 코드 생성 완료: {qr_filepath} (URL: {download_url})")
+
+            # Store the highlight data in the shared state
+            game_id = metadata.get('game_id', 'unknown')
+            player_id = metadata.get('player_id', 'unknown')
+            key = f"{game_id}_{player_id}"
+            normalized_local = Path(local_file_path).as_posix() 
+            normalized_qr    = Path(qr_filepath).as_posix()
+            # Store the paths in the shared state
+            highlight_data_store[key] = {
+                # "local_path": local_file_path,
+                "local_path": normalized_local, 
+                "minio_path": minio_object_name, 
+                "qr_code": download_url, 
+                # "local_qr_path": qr_filepath 
+                "local_qr_path": normalized_qr
+            }
+            print(f"✅ 하이라이트 데이터 공유 상태에 저장됨: 키 '{key}', 데이터: {highlight_data_store[key]}")
+
 
         except S3Error as s3e:
             print(f"❌ MinIO S3 오류 발생: {s3e}")
