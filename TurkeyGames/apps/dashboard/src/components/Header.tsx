@@ -1,4 +1,3 @@
-// apps/dashboard/src/components/Header.tsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
@@ -7,17 +6,11 @@ import soundOnIcon from '../assets/images/sound-on.png';
 import soundOffIcon from '../assets/images/sound-off.png';
 import { getSoundEnabled, setSoundEnabled, onSoundSettingChange } from '../utils/soundUtils';
 
-interface HeaderProps {
-  children?: React.ReactNode;
-}
-
-const Header: React.FC<HeaderProps> = ({ children }) => {
+const Header: React.FC = () => {
   const navigate = useNavigate();
   const [isSoundOn, setIsSoundOn] = useState(getSoundEnabled());
 
-  // 소리 설정 변경 이벤트 리스너 등록
   useEffect(() => {
-    // 이벤트 리스너 등록 및 정리 함수 반환
     return onSoundSettingChange(setIsSoundOn);
   }, []);
 
@@ -35,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ children }) => {
       >
         <img src={logo} alt="logo" className={styles.logoImg} />
       </span>
-      {children && <div className={styles.headerCenter}>{children}</div>}
+      
       <div className={styles.soundToggleContainer}>
         <img 
           src={isSoundOn ? soundOnIcon : soundOffIcon} 

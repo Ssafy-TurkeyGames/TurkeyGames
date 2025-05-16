@@ -6,7 +6,7 @@ import styles from './GameResult.module.css';
 import axios from 'axios';
 
 // API 서버 URL
-const API_URL = 'http://192.168.30.158:8000';
+const API_URL = 'http://localhost:8000';
 
 interface PlayerResult {
   id: number;
