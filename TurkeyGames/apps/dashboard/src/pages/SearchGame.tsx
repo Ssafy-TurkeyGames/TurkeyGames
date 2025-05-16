@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './SearchGame.module.css';
 import logo from '../assets/images/logo.png';
-import { getAllGames, getFilteredGames, searchGamesByKeyword } from '../api/dashboardApi';
+import { getAllGames, getFilteredGames, searchGamesByKeyword, clearGameCache } from '../api/dashboardApi';
 import { Game } from '../api/types';
 import searchIcon from '../assets/images/search (1).png';
 
@@ -68,12 +68,36 @@ export default function SearchGame() {
   }, [search]);
   
   // 모든 필터 초기화
-  const clearAllFilters = () => {
-    setSelectedPlayers([]);
-    setSelectedLevels([]);
-    setSearch('');
-    fetchGames('');
-  };
+const clearAllFilters = async () => {
+  setSelectedPlayers([]);
+  setSelectedLevels([]);
+  setSearch('');
+  
+  // 캐시 초기화 및 강제 새로고침으로 전체 게임 목록 불러오기
+  setLoading(true);
+  try {
+    // 캐시 초기화
+    clearGameCache();
+    
+    // 강제 새로고침으로 전체 게임 목록 불러오기
+    const response = await getAllGames(true);
+    
+    if (response.code === 'SUCCESS') {
+      setGames(response.data || []);
+      setError(null);
+    } else {
+      console.error('❌ API 오류:', response.message);
+      setError(response.message || '게임 목록을 불러오는데 실패했습니다.');
+      setGames([]);
+    }
+  } catch (err) {
+    console.error('❌ 네트워크 오류:', err);
+    setError('서버 연결에 실패했습니다.');
+    setGames([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 게임 목록 불러오기
   const fetchGames = async (searchTerm = search) => {
