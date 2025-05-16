@@ -173,3 +173,14 @@
 .buttons div:active {
     box-shadow: none;
 }
+
+.abled:active {
+    box-shadow: none;
+}
+
+.disabled {
+    pointer-events: none;       /* 클릭 차단 */
+    opacity: 0.5;               /* 흐릿하게 표시 */
+    box-shadow: none;           /* 눌림 효과 제거 */
+    cursor: not-allowed;        /* 마우스 커서 변경 */
+}

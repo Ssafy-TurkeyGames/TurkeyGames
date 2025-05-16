@@ -38,7 +38,7 @@ export interface ScoreUpdate {
 
 // 점수 선택 요청 인터페이스
 export interface ScoreSelectRequest {
-  player_id: string;
+  player_id: number;
   category: string;
   value: number;
 }

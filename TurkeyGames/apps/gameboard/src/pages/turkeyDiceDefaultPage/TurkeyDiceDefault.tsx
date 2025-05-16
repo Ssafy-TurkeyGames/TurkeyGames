@@ -3,16 +3,12 @@ import turkey from '../../assets/images/turkey.png'
 import turkeyDiceDefaultMap from '../../assets/images/turkey_default_map.png';
 import styles from './TurkeyDiceDefault.module.css';
 import SpinTurkey from '../../components/common/spinTurkey/SpinTurkey';
-import daegilSeatFile from '../../assets/sound/daegil/seat/seat.mp3';
-import flowerSeatFile from '../../assets/sound/flower/seat/seat.mp3';
-import guriSeatFile from '../../assets/sound/guri/seat/seat.mp3';
-import daegilStartFile from '../../assets/sound/daegil/start/start.mp3';
-import flowerStartFile from '../../assets/sound/flower/start/start.mp3';
-import guriStartFile from '../../assets/sound/guri/start/start.mp3';
 import gameStartFile from '../../assets/sound/default/start/start.mp3';
 import TurkeyDiceScoreCardV1 from '../../components/turkeyDice/turkeyDiceScoreCardV1/TurkeyDiceScoreCardV1';
 import buttonClickFile from '../../assets/sound/default/button/button.mp3';
 import yachtService from '../../api/yachtService';
+import { calcYachtDice, checkYachtDice } from '../../utils/checkYachtDice';
+import { gameBoardSoundFiles } from '../../constant/soundFiles';
 
 
 interface propsType {
@@ -27,15 +23,16 @@ export default function TurkeyDiceDefault(props: propsType) {
   
   // 1) 최초 자리 안내 mp3 파일 실행
   useEffect(() => {
+    console.log('최초 자리 안내 mp3 파일 실행');
     if (audioRef.current) {
       if (props.voice === 1) {
-        audioRef.current.src = daegilSeatFile;
+        audioRef.current.src = gameBoardSoundFiles.daegil.seat;
         audioRef.current.play();
       } else if (props.voice === 2) {
-        audioRef.current.src = flowerSeatFile;
+        audioRef.current.src = gameBoardSoundFiles.flower.seat;
         audioRef.current.play();
       } else if (props.voice === 3) {
-        audioRef.current.src = guriSeatFile;
+        audioRef.current.src = gameBoardSoundFiles.guri.seat;
         audioRef.current.play();
       }
     }
@@ -69,38 +66,38 @@ export default function TurkeyDiceDefault(props: propsType) {
 
   useEffect(() => {
     if (playerCount === props.people && audioRef.current) {
-      const audioEl = audioRef.current;
+      const audio = audioRef.current;
 
       // 첫 번째 사운드 재생
-      audioEl.src = gameStartFile;
-      audioEl.play();
+      audio.src = gameStartFile;
+      audio.play();
 
       // 첫 번째 사운드가 끝났을 때
       const handleFirstEnded = () => {
         // 두 번째 사운드 설정
         if (props.voice === 1) {
-          audioEl.src = daegilStartFile;
+          audio.src = gameBoardSoundFiles.daegil.start;
         } else if (props.voice === 2) {
-          audioEl.src = flowerStartFile;
+          audio.src = gameBoardSoundFiles.flower.start;
         } else if (props.voice === 3) {
-          audioEl.src = guriStartFile;
+          audio.src = gameBoardSoundFiles.guri.start;
         }
 
-        audioEl.play();
+        audio.play();
 
         // 두 번째 사운드가 끝났을 때
         const handleSecondEnded = () => {
-          setGameStartFinished(true); // ✅ 최종 작업 실행
-          audioEl.onended = null; // 이벤트 제거
+          setGameStartFinished(true); // 최종 작업 실행
+          audio.onended = null; // 이벤트 제거
         };
 
-        audioEl.onended = handleSecondEnded; // 두 번째 사운드 끝나면 실행
+        audio.onended = handleSecondEnded; // 두 번째 사운드 끝나면 실행
       };
 
       setGameStarted(true);
       getScores();
 
-      audioEl.onended = handleFirstEnded;
+      audio.onended = handleFirstEnded;
       
     }
   }, [playerCount, props.people, props.voice]);
@@ -118,9 +115,11 @@ export default function TurkeyDiceDefault(props: propsType) {
   const [round, setRound] = useState<number>(1);
   const [turnCount, setTurnCount] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [diceValue, setDiceValue] = useState<object | undefined>();
 
   const [scoreData, setScoreData] = useState([]);
 
+  // 점수 조회 API
   const getScores = async() => {
     try {
       const gameId = props.gameId;
@@ -132,12 +131,102 @@ export default function TurkeyDiceDefault(props: propsType) {
     }
   }
 
+  
+
+  // 주사위 던지기 API
+  const throwDices = async() => {
+    try {
+      const gameId = props.gameId;
+      const data = await yachtService.rollDice(gameId.toString(), {keep_indices: []});
+      console.log('데이터:', data);
+      setDiceValue(data);
+
+      let soundFiles: string | any[] = [];
+
+      // 주사위 조합(poker, fh, ss, ls, turkey) 확인
+      switch(checkYachtDice(data.dice_values)) {
+        case "poker":
+          if (props.voice === 1) {
+            soundFiles = gameBoardSoundFiles.daegil.poker;
+          } else if (props.voice === 2) {
+            soundFiles = gameBoardSoundFiles.flower.poker;
+          } else if (props.voice === 3) {
+            soundFiles = gameBoardSoundFiles.guri.poker
+          }
+          break;
+        case "fh":
+          if (props.voice === 1) {
+            soundFiles = gameBoardSoundFiles.daegil.fh;
+          } else if (props.voice === 2) {
+            soundFiles = gameBoardSoundFiles.flower.fh;
+          } else if (props.voice === 3) {
+            soundFiles = gameBoardSoundFiles.guri.fh
+          }
+          break;
+        case "ss":
+          if (props.voice === 1) {
+            soundFiles = gameBoardSoundFiles.daegil.ss;
+          } else if (props.voice === 2) {
+            soundFiles = gameBoardSoundFiles.flower.ss;
+          } else if (props.voice === 3) {
+            soundFiles = gameBoardSoundFiles.guri.ss
+          }
+          break;
+        case "ls":
+          if (props.voice === 1) {
+            soundFiles = gameBoardSoundFiles.daegil.ls;
+          } else if (props.voice === 2) {
+            soundFiles = gameBoardSoundFiles.flower.ls;
+          } else if (props.voice === 3) {
+            soundFiles = gameBoardSoundFiles.guri.ls
+          }
+          break;
+        case "turkey":
+          if (props.voice === 1) {
+            soundFiles = gameBoardSoundFiles.daegil.turkey;
+          } else if (props.voice === 2) {
+            soundFiles = gameBoardSoundFiles.flower.turkey;
+          } else if (props.voice === 3) {
+            soundFiles = gameBoardSoundFiles.guri.turkey
+          }
+          break;
+      }
+
+      if (audioRef.current) {
+        const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+        audioRef.current.src = randomSound;
+        audioRef.current.play();
+      }
+
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
+  // 점수 선택 API
+  const selectScore = async(playerId : number, category : string, value: number) => {
+    try {
+      const gameId = props.gameId;
+      const data = await yachtService.selectScore(gameId.toString(), {player_id: playerId, category: category, value: value});
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // useEffect(() => {
+  //   console.log("diceValue: 상태", diceValue, "타입 - ", typeof(diceValue));
+  //   console.log(calcYachtDice(diceValue.dice_values).turkey);
+  // }, [diceValue]);
+
+
   useEffect((() =>console.log(scoreData)), [scoreData]);
 
   // 버튼 클릭: 턴 증가 + 다음 플레이어
   const nextTurnButtonClick = () => {
     setTurnCount(prev => prev + 1);
     setCurrentTurnIndex(prev => (prev + 1) % playerCount);
+    getScores();
   };
 
   // turnCount가 바뀔 때마다 round 갱신
@@ -146,14 +235,43 @@ export default function TurkeyDiceDefault(props: propsType) {
     const newRound = Math.floor(turnCount / playerCount) + 1;
 
     // 최대 12라운드까지만
-    if (newRound <= 12) {
+    if (newRound <= 3) {
       setRound(newRound);
     }
 
-    if (newRound > 12) {
-    alert("🎮 게임 종료!");
-    // 필요 시: 게임 종료 상태 설정 등도 가능
-    setIsGameOver(true);
+    if (newRound > 1) {
+      
+      
+      // 우승자
+      const winner = scoreData.reduce((best, current) => {
+        if (
+          current.total_score > best.total_score || 
+          (current.total_score === best.total_score && current.player_id < best.player_id)
+        ) {
+          return current;
+        }
+        return best;
+      });
+      // alert("🎮 게임 종료!");
+      alert(winner.player_id);
+      let soundFiles: string | any[] = [];
+
+      if(audioRef.current) {
+        if(props.voice === 1) {
+          soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+        }else if(props.voice === 2) {
+          soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+        }else if(props.voice === 3) {
+          soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
+        }
+      }
+
+      const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+        audioRef.current.src = randomSound;
+        audioRef.current.play();
+      
+      // 필요 시: 게임 종료 상태 설정 등도 가능
+      setIsGameOver(true);
   }
     
   }, [turnCount, playerCount]);
@@ -168,147 +286,158 @@ export default function TurkeyDiceDefault(props: propsType) {
   
   useEffect(() => {
     console.log('scoreData', scoreData);
-    console.log(scoreData[0]);
+    console.log(scoreData);
   }, [scoreData])
 
   return (
     <div className={styles.layout}>
-      <div className={styles.spinBox}>
-       <SpinTurkey image={turkey} />
+      <audio ref={audioRef}/>
+      <div className={styles.leftArea}>
+        <div className={styles.cell} onClick={() => handleCellClick(0)}>
+          {!gameStarted ? (
+            <div className={styles.seat}>
+              {areaPlayers[0] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[0]} 준비완료!`}
+            </div>
+          ) : (
+            areaPlayers[0] == null 
+              ? <></> 
+              : <TurkeyDiceScoreCardV1
+                  playerId={areaPlayers[0]}
+                  myTurn={areaPlayers[0] === currentTurnIndex + 1}
+                  aiVoice={props.voice}
+                  gameStartFinished={gameStartFinished}
+                  ace={scoreData[areaPlayers[0] - 1]?.scorecard.ace ?? 0}
+                  dual={scoreData[areaPlayers[0] - 1]?.scorecard.dual ?? 0}
+                  triple={scoreData[areaPlayers[0] - 1]?.scorecard.triple ?? 0}
+                  quad={scoreData[areaPlayers[0] - 1]?.scorecard.quad ?? 0}
+                  penta={scoreData[areaPlayers[0] - 1]?.scorecard.penta ?? 0}
+                  hexa={scoreData[areaPlayers[0] - 1]?.scorecard.hexa ?? 0}
+                  chance={scoreData[areaPlayers[0] - 1]?.scorecard.chance ?? 0}
+                  poker={scoreData[areaPlayers[0] - 1]?.scorecard.poker ?? 0}
+                  fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard.full_house ?? 0}
+                  smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard.small_straight ?? 0}
+                  largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard.large_straight ?? 0}
+                  turkey={scoreData[areaPlayers[0] - 1]?.scorecard.turkey ?? 0}
+                  totalScore={scoreData[areaPlayers[1] - 1]?.total_score ?? 0}
+                  diceValue={diceValue}
+                  nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
+                />
+          )}
+          {/* {areaPlayers[0] || 'Area 1'} */}
+          
+        </div>
+        <div className={styles.cell} onClick={() => handleCellClick(1)}>
+          {/* {areaPlayers[1] || 'Area 2'} */}
+          {!gameStarted ? (
+            <div className={styles.seat} onClick={buttonOnClick}>
+              {areaPlayers[1] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[1]} 준비완료!`}
+            </div>
+          ) : (
+            areaPlayers[1] == null 
+              ? <></> 
+              : <TurkeyDiceScoreCardV1
+                  playerId={areaPlayers[1]}
+                  myTurn={areaPlayers[1] === currentTurnIndex + 1}
+                  aiVoice={props.voice}
+                  gameStartFinished={gameStartFinished}
+                  ace={scoreData[areaPlayers[1] - 1]?.scorecard.ace ?? 0}
+                  dual={scoreData[areaPlayers[1] - 1]?.scorecard.dual ?? 0}
+                  triple={scoreData[areaPlayers[1] - 1]?.scorecard.triple ?? 0}
+                  quad={scoreData[areaPlayers[1] - 1]?.scorecard.quad ?? 0}
+                  penta={scoreData[areaPlayers[1] - 1]?.scorecard.penta ?? 0}
+                  hexa={scoreData[areaPlayers[1] - 1]?.scorecard.hexa ?? 0}
+                  chance={scoreData[areaPlayers[1] - 1]?.scorecard.chance ?? 0}
+                  poker={scoreData[areaPlayers[1] - 1]?.scorecard.poker ?? 0}
+                  fullHouse={scoreData[areaPlayers[1] - 1]?.scorecard.full_house ?? 0}
+                  smallStraight={scoreData[areaPlayers[1] - 1]?.scorecard.small_straight ?? 0}
+                  largeStraight={scoreData[areaPlayers[1] - 1]?.scorecard.large_straight ?? 0}
+                  turkey={scoreData[areaPlayers[1] - 1]?.scorecard.turkey ?? 0}
+                  totalScore={scoreData[areaPlayers[1] - 1]?.total_score ?? 0}
+                  diceValue={diceValue}
+                  nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
+                />
+          )}
+        </div>
+      </div>
+        
+      <div className={styles.map}>
+        <img src={turkeyDiceDefaultMap} alt="turkeyDice Map" />
       </div>
 
-      <audio ref={audioRef}/>
-
-        <div className={styles.leftArea}>
-          <div className={styles.cell} onClick={() => handleCellClick(0)}>
-            {!gameStarted ? (
-              <div className={styles.seat}>
-                {areaPlayers[0] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[0]} 준비완료!`}
-              </div>
-            ) : (
-              areaPlayers[0] == null 
-                ? <></> 
-                : <TurkeyDiceScoreCardV1
-                    playerId={areaPlayers[0]}
-                    myTurn={areaPlayers[0] === currentTurnIndex + 1}
-                    aiVoice={props.voice}
-                    gameStartFinished={gameStartFinished}
-                    ace={scoreData[areaPlayers[0] - 1]?.scorecard.ace ?? 0}
-                    dual={scoreData[areaPlayers[0] - 1]?.scorecard.dual ?? 0}
-                    triple={scoreData[areaPlayers[0] - 1]?.scorecard.triple ?? 0}
-                    quad={scoreData[areaPlayers[0] - 1]?.scorecard.quad ?? 0}
-                    penta={scoreData[areaPlayers[0] - 1]?.scorecard.penta ?? 0}
-                    hexa={scoreData[areaPlayers[0] - 1]?.scorecard.hexa ?? 0}
-                    chance={scoreData[areaPlayers[0] - 1]?.scorecard.chance ?? 0}
-                    poker={scoreData[areaPlayers[0] - 1]?.scorecard.poker ?? 0}
-                    fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard.full_house ?? 0}
-                    smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard.small_straight ?? 0}
-                    largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard.large_straight ?? 0}
-                    turkey={scoreData[areaPlayers[0] - 1]?.scorecard.turkey ?? 0}
-                    nextTurnButtonClick={nextTurnButtonClick}
-                  />
-            )}
-            {/* {areaPlayers[0] || 'Area 1'} */}
-            
-          </div>
-          <div className={styles.cell} onClick={() => handleCellClick(1)}>
-            {/* {areaPlayers[1] || 'Area 2'} */}
-            {!gameStarted ? (
-              <div className={styles.seat} onClick={buttonOnClick}>
-                {areaPlayers[1] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[1]} 준비완료!`}
-              </div>
-            ) : (
-              areaPlayers[1] == null 
-                ? <></> 
-                : <TurkeyDiceScoreCardV1
-                    playerId={areaPlayers[1]}
-                    myTurn={areaPlayers[1] === currentTurnIndex + 1}
-                    aiVoice={props.voice}
-                    gameStartFinished={gameStartFinished}
-                    ace={scoreData[areaPlayers[1] - 1]?.scorecard.ace ?? 0}
-                    dual={scoreData[areaPlayers[1] - 1]?.scorecard.dual ?? 0}
-                    triple={scoreData[areaPlayers[1] - 1]?.scorecard.triple ?? 0}
-                    quad={scoreData[areaPlayers[1] - 1]?.scorecard.quad ?? 0}
-                    penta={scoreData[areaPlayers[1] - 1]?.scorecard.penta ?? 0}
-                    hexa={scoreData[areaPlayers[1] - 1]?.scorecard.hexa ?? 0}
-                    chance={scoreData[areaPlayers[1] - 1]?.scorecard.chance ?? 0}
-                    poker={scoreData[areaPlayers[1] - 1]?.scorecard.poker ?? 0}
-                    fullHouse={scoreData[areaPlayers[1] - 1]?.scorecard.full_house ?? 0}
-                    smallStraight={scoreData[areaPlayers[1] - 1]?.scorecard.small_straight ?? 0}
-                    largeStraight={scoreData[areaPlayers[1] - 1]?.scorecard.large_straight ?? 0}
-                    turkey={scoreData[areaPlayers[1] - 1]?.scorecard.turkey ?? 0}
-                    nextTurnButtonClick={nextTurnButtonClick}
-                  />
-            )}
-          </div>
+      <div className={styles.rightArea}>
+        <div className={styles.cell} onClick={() => handleCellClick(2)}>
+          {/* {areaPlayers[2] || 'Area 3'} */}
+          {!gameStarted ? (
+            <div className={styles.seat} onClick={buttonOnClick}>
+              {areaPlayers[2] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[2]} 준비완료!`}
+            </div>
+          ) : (
+            areaPlayers[2] == null 
+              ? <></> 
+              : <TurkeyDiceScoreCardV1
+                  playerId={areaPlayers[2]}
+                  myTurn={areaPlayers[2] === currentTurnIndex + 1}
+                  aiVoice={props.voice}
+                  gameStartFinished={gameStartFinished}
+                  ace={scoreData[areaPlayers[2] - 1]?.scorecard.ace ?? 0}
+                  dual={scoreData[areaPlayers[2] - 1]?.scorecard.dual ?? 0}
+                  triple={scoreData[areaPlayers[2] - 1]?.scorecard.triple ?? 0}
+                  quad={scoreData[areaPlayers[2] - 1]?.scorecard.quad ?? 0}
+                  penta={scoreData[areaPlayers[2] - 1]?.scorecard.penta ?? 0}
+                  hexa={scoreData[areaPlayers[2] - 1]?.scorecard.hexa ?? 0}
+                  chance={scoreData[areaPlayers[2] - 1]?.scorecard.chance ?? 0}
+                  poker={scoreData[areaPlayers[2] - 1]?.scorecard.poker ?? 0}
+                  fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard.full_house ?? 0}
+                  smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard.small_straight ?? 0}
+                  largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard.large_straight ?? 0}
+                  turkey={scoreData[areaPlayers[2] - 1]?.scorecard.turkey ?? 0}
+                  totalScore={scoreData[areaPlayers[2] - 1]?.total_score ?? 0}
+                  diceValue={diceValue}
+                  nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
+                />
+          )}
         </div>
-        
-        <div className={styles.map}>
-          <img src={turkeyDiceDefaultMap} alt="turkeyDice Map" />
+        <div className={styles.cell} onClick={() => handleCellClick(3)}>
+          {/* {areaPlayers[3] || 'Area 4'} */}
+          {!gameStarted ? (
+            <div className={styles.seat} onClick={buttonOnClick}>
+              {areaPlayers[3] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[3]} 준비완료!`}
+            </div>
+          ) : (
+            areaPlayers[3] == null 
+              ? <></> 
+              : <TurkeyDiceScoreCardV1
+                  playerId={areaPlayers[3]}
+                  myTurn={areaPlayers[3] === currentTurnIndex + 1}
+                  aiVoice={props.voice}
+                  gameStartFinished={gameStartFinished}
+                  ace={scoreData[areaPlayers[3] - 1]?.scorecard.ace ?? 0}
+                  dual={scoreData[areaPlayers[3] - 1]?.scorecard.dual ?? 0}
+                  triple={scoreData[areaPlayers[3] - 1]?.scorecard.triple ?? 0}
+                  quad={scoreData[areaPlayers[3] - 1]?.scorecard.quad ?? 0}
+                  penta={scoreData[areaPlayers[3] - 1]?.scorecard.penta ?? 0}
+                  hexa={scoreData[areaPlayers[3] - 1]?.scorecard.hexa ?? 0}
+                  chance={scoreData[areaPlayers[3] - 1]?.scorecard.chance ?? 0}
+                  poker={scoreData[areaPlayers[3] - 1]?.scorecard.poker ?? 0}
+                  fullHouse={scoreData[areaPlayers[3] - 1]?.scorecard.full_house ?? 0}
+                  smallStraight={scoreData[areaPlayers[3] - 1]?.scorecard.small_straight ?? 0}
+                  largeStraight={scoreData[areaPlayers[3] - 1]?.scorecard.large_straight ?? 0}
+                  turkey={scoreData[areaPlayers[3] - 1]?.scorecard.turkey ?? 0}
+                  totalScore={scoreData[areaPlayers[3] - 1]?.total_score ?? 0}
+                  diceValue={diceValue}
+                  nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
+                />
+          )}
         </div>
-
-        <div className={styles.rightArea}>
-          <div className={styles.cell} onClick={() => handleCellClick(2)}>
-            {/* {areaPlayers[2] || 'Area 3'} */}
-            {!gameStarted ? (
-              <div className={styles.seat} onClick={buttonOnClick}>
-                {areaPlayers[2] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[2]} 준비완료!`}
-              </div>
-            ) : (
-              areaPlayers[2] == null 
-                ? <></> 
-                : <TurkeyDiceScoreCardV1
-                    playerId={areaPlayers[2]}
-                    myTurn={areaPlayers[2] === currentTurnIndex + 1}
-                    aiVoice={props.voice}
-                    gameStartFinished={gameStartFinished}
-                    ace={scoreData[areaPlayers[2] - 1]?.scorecard.ace ?? 0}
-                    dual={scoreData[areaPlayers[2] - 1]?.scorecard.dual ?? 0}
-                    triple={scoreData[areaPlayers[2] - 1]?.scorecard.triple ?? 0}
-                    quad={scoreData[areaPlayers[2] - 1]?.scorecard.quad ?? 0}
-                    penta={scoreData[areaPlayers[2] - 1]?.scorecard.penta ?? 0}
-                    hexa={scoreData[areaPlayers[2] - 1]?.scorecard.hexa ?? 0}
-                    chance={scoreData[areaPlayers[2] - 1]?.scorecard.chance ?? 0}
-                    poker={scoreData[areaPlayers[2] - 1]?.scorecard.poker ?? 0}
-                    fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard.full_house ?? 0}
-                    smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard.small_straight ?? 0}
-                    largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard.large_straight ?? 0}
-                    turkey={scoreData[areaPlayers[2] - 1]?.scorecard.turkey ?? 0}
-                    nextTurnButtonClick={nextTurnButtonClick}
-                  />
-            )}
-          </div>
-          <div className={styles.cell} onClick={() => handleCellClick(3)}>
-            {/* {areaPlayers[3] || 'Area 4'} */}
-            {!gameStarted ? (
-              <div className={styles.seat} onClick={buttonOnClick}>
-                {areaPlayers[3] == null ? '자리를 선택해주세요!' : `Player${areaPlayers[3]} 준비완료!`}
-              </div>
-            ) : (
-              areaPlayers[3] == null 
-                ? <></> 
-                : <TurkeyDiceScoreCardV1
-                    playerId={areaPlayers[3]}
-                    myTurn={areaPlayers[3] === currentTurnIndex + 1}
-                    aiVoice={props.voice}
-                    gameStartFinished={gameStartFinished}
-                    ace={scoreData[areaPlayers[3] - 1]?.scorecard.ace ?? 0}
-                    dual={scoreData[areaPlayers[3] - 1]?.scorecard.dual ?? 0}
-                    triple={scoreData[areaPlayers[3] - 1]?.scorecard.triple ?? 0}
-                    quad={scoreData[areaPlayers[3] - 1]?.scorecard.quad ?? 0}
-                    penta={scoreData[areaPlayers[3] - 1]?.scorecard.penta ?? 0}
-                    hexa={scoreData[areaPlayers[3] - 1]?.scorecard.hexa ?? 0}
-                    chance={scoreData[areaPlayers[3] - 1]?.scorecard.chance ?? 0}
-                    poker={scoreData[areaPlayers[3] - 1]?.scorecard.poker ?? 0}
-                    fullHouse={scoreData[areaPlayers[3] - 1]?.scorecard.full_house ?? 0}
-                    smallStraight={scoreData[areaPlayers[3] - 1]?.scorecard.small_straight ?? 0}
-                    largeStraight={scoreData[areaPlayers[3] - 1]?.scorecard.large_straight ?? 0}
-                    turkey={scoreData[areaPlayers[3] - 1]?.scorecard.turkey ?? 0}
-                    nextTurnButtonClick={nextTurnButtonClick}
-                  />
-            )}
-          </div>
-        </div>
+      </div>
     </div>
   )
 }

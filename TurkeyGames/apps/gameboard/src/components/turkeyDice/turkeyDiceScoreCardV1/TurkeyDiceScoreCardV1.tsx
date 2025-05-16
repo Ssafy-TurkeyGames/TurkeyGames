@@ -1,54 +1,7 @@
-import React, { useEffect, useRef } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import styles from './TurkeyDiceScoreCardV1.module.css';
-
-import daegilRerollFile1 from '../../../assets/sound/daegil/reroll/reroll_v1.mp3';
-import daegilRerollFile2 from '../../../assets/sound/daegil/reroll/reroll_v2.mp3';
-import daegilRerollFile3 from '../../../assets/sound/daegil/reroll/reroll_v3.mp3';
-import flowerRerollFile1 from '../../../assets/sound/flower/reroll/reroll_v1.mp3';
-import flowerRerollFile2 from '../../../assets/sound/flower/reroll/reroll_v2.mp3';
-import flowerRerollFile3 from '../../../assets/sound/flower/reroll/reroll_v3.mp3';
-import guriRerollFile1 from '../../../assets/sound/guri/reroll/reroll_v3.mp3';
-import guriRerollFile2 from '../../../assets/sound/guri/reroll/reroll_v3.mp3';
-import guriRerollFile3 from '../../../assets/sound/guri/reroll/reroll_v3.mp3';
-
-import daegilMyturnPlayer1V1 from '../../../assets/sound/daegil/myturn/player1_v1.mp3';
-import daegilMyturnPlayer1V2 from '../../../assets/sound/daegil/myturn/player1_v2.mp3';
-import daegilMyturnPlayer1V3 from '../../../assets/sound/daegil/myturn/player1_v3.mp3';
-import daegilMyturnPlayer2V1 from '../../../assets/sound/daegil/myturn/player2_v1.mp3';
-import daegilMyturnPlayer2V2 from '../../../assets/sound/daegil/myturn/player2_v2.mp3';
-import daegilMyturnPlayer2V3 from '../../../assets/sound/daegil/myturn/player2_v3.mp3';
-import daegilMyturnPlayer3V1 from '../../../assets/sound/daegil/myturn/player3_v1.mp3';
-import daegilMyturnPlayer3V2 from '../../../assets/sound/daegil/myturn/player3_v2.mp3';
-import daegilMyturnPlayer3V3 from '../../../assets/sound/daegil/myturn/player3_v3.mp3';
-import daegilMyturnPlayer4V1 from '../../../assets/sound/daegil/myturn/player4_v1.mp3';
-import daegilMyturnPlayer4V2 from '../../../assets/sound/daegil/myturn/player4_v2.mp3';
-import daegilMyturnPlayer4V3 from '../../../assets/sound/daegil/myturn/player4_v3.mp3';
-
-import flowerMyturnPlayer1V1 from '../../../assets/sound/flower/myturn/player1_v1.mp3';
-import flowerMyturnPlayer1V2 from '../../../assets/sound/flower/myturn/player1_v2.mp3';
-import flowerMyturnPlayer1V3 from '../../../assets/sound/flower/myturn/player1_v3.mp3';
-import flowerMyturnPlayer2V1 from '../../../assets/sound/flower/myturn/player2_v1.mp3';
-import flowerMyturnPlayer2V2 from '../../../assets/sound/flower/myturn/player2_v2.mp3';
-import flowerMyturnPlayer2V3 from '../../../assets/sound/flower/myturn/player2_v3.mp3';
-import flowerMyturnPlayer3V1 from '../../../assets/sound/flower/myturn/player3_v1.mp3';
-import flowerMyturnPlayer3V2 from '../../../assets/sound/flower/myturn/player3_v2.mp3';
-import flowerMyturnPlayer3V3 from '../../../assets/sound/flower/myturn/player3_v3.mp3';
-import flowerMyturnPlayer4V1 from '../../../assets/sound/flower/myturn/player4_v1.mp3';
-import flowerMyturnPlayer4V2 from '../../../assets/sound/flower/myturn/player4_v2.mp3';
-import flowerMyturnPlayer4V3 from '../../../assets/sound/flower/myturn/player4_v3.mp3';
-
-import guriMyturnPlayer1V1 from '../../../assets/sound/guri/myturn/player1_v1.mp3';
-import guriMyturnPlayer1V2 from '../../../assets/sound/guri/myturn/player1_v2.mp3';
-import guriMyturnPlayer1V3 from '../../../assets/sound/guri/myturn/player1_v3.mp3';
-import guriMyturnPlayer2V1 from '../../../assets/sound/guri/myturn/player2_v1.mp3';
-import guriMyturnPlayer2V2 from '../../../assets/sound/guri/myturn/player2_v2.mp3';
-import guriMyturnPlayer2V3 from '../../../assets/sound/guri/myturn/player2_v3.mp3';
-import guriMyturnPlayer3V1 from '../../../assets/sound/guri/myturn/player3_v1.mp3';
-import guriMyturnPlayer3V2 from '../../../assets/sound/guri/myturn/player3_v2.mp3';
-import guriMyturnPlayer3V3 from '../../../assets/sound/guri/myturn/player3_v3.mp3';
-import guriMyturnPlayer4V1 from '../../../assets/sound/guri/myturn/player4_v1.mp3';
-import guriMyturnPlayer4V2 from '../../../assets/sound/guri/myturn/player4_v2.mp3';
-import guriMyturnPlayer4V3 from '../../../assets/sound/guri/myturn/player4_v3.mp3';
+import { calcYachtDice } from '../../../utils/checkYachtDice';
+import { scoreBoardSoundFiles } from '../../../constant/soundFiles';
 
 interface propsType {
     playerId: number,
@@ -67,133 +20,166 @@ interface propsType {
     smallStraight: number,
     largeStraight: number,
     turkey: number,
-    nextTurnButtonClick: () => void
+    totalScore: number,
+    diceValue: object | undefined,
+    nextTurnButtonClick: () => void,
+    throwDiceFunction: () => void,
+    selectScore: (playerId: number, category: string, value: number) => Promise<void>
 }
 
 export default function TurkeyDiceScoreCardV1(props: propsType) {
+    const aiVoices = ['daegil', 'flower', 'guri'];
     
-    const audioRef = useRef<HTMLAudioElement | null>(null)
-    const rerollSoundFiles = props.aiVoice === 1 ? [daegilRerollFile1, daegilRerollFile2, daegilRerollFile3]
-                       : props.aiVoice === 2 ? [flowerRerollFile1, flowerRerollFile2, flowerRerollFile3]
-                       : [guriRerollFile1, guriRerollFile2, guriRerollFile3];
-    
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    const [selectState, setSelectState] = useState<string>('');
+    const [rerollButtonState, setRerollButtonState] = useState<boolean>(true);
+
     const rerollButtonClick = () => {
-        const randomSound = rerollSoundFiles[Math.floor(Math.random() * rerollSoundFiles.length)];
-        if (audioRef.current) {
+        const ai = aiVoices[props.aiVoice - 1];
+        const rerollFiles = 
+            ai === 'daegil' ? scoreBoardSoundFiles.daegil.reroll :
+            ai === 'flower' ? scoreBoardSoundFiles.flower.reroll : 
+            scoreBoardSoundFiles.guri.reroll;  
+        const randomSound = rerollFiles[Math.floor(Math.random() * rerollFiles.length)];
+        if(audioRef.current) {
             audioRef.current.src = randomSound;
+
+            // 주사위 리롤 안내 음성 끝난후 주사위 새로 굴리기기
+            audioRef.current.onended = () => {
+                props.throwDiceFunction();
+            };
+
             audioRef.current.play();
         }
+        
+    }
+
+    const selectScoreButtonClick = () => {
+        console.log(props.diceValue);
+        props.selectScore(props.playerId, selectState, calcYachtDice(props.diceValue.dice_values)[selectState]);
+        setRerollButtonState(true);
+        props.nextTurnButtonClick();
     }
 
     useEffect(() => {
+        console.log('selectState', selectState);
+    }, [selectState])
+
+    useEffect(() => {
         if (!props.gameStartFinished || !props.myTurn) return;
-        let randomSoundFiles: any[] = [];
-        if(props.myTurn) {
-            if(props.aiVoice === 1) {
-                if(props.playerId === 1) {
-                    randomSoundFiles = [daegilMyturnPlayer1V1, daegilMyturnPlayer1V2, daegilMyturnPlayer1V3];
-                }else if(props.playerId === 2) {
-                    randomSoundFiles = [daegilMyturnPlayer2V1, daegilMyturnPlayer2V2, daegilMyturnPlayer2V3];
-                }else if(props.playerId === 3) {
-                    randomSoundFiles = [daegilMyturnPlayer3V1, daegilMyturnPlayer3V2, daegilMyturnPlayer3V3];
-                }else if(props.playerId === 4) {
-                    randomSoundFiles = [daegilMyturnPlayer4V1, daegilMyturnPlayer4V2, daegilMyturnPlayer4V3];
-                }
-            }else if(props.aiVoice === 2) {
-                if(props.playerId === 1) {
-                    randomSoundFiles = [flowerMyturnPlayer1V1, flowerMyturnPlayer1V2, flowerMyturnPlayer1V3];
-                }else if(props.playerId === 2) {
-                    randomSoundFiles = [flowerMyturnPlayer2V1, flowerMyturnPlayer2V2, flowerMyturnPlayer2V3];
-                }else if(props.playerId === 3) {
-                    randomSoundFiles = [flowerMyturnPlayer3V1, flowerMyturnPlayer3V2, flowerMyturnPlayer3V3];
-                }else if(props.playerId === 4) {
-                    randomSoundFiles = [flowerMyturnPlayer4V1, flowerMyturnPlayer4V2, flowerMyturnPlayer4V3];
-                }
-            }else if(props.aiVoice === 3) {
-                if(props.playerId === 1) {
-                    randomSoundFiles = [guriMyturnPlayer1V1, guriMyturnPlayer1V2, guriMyturnPlayer1V3];
-                }else if(props.playerId === 2) {
-                    randomSoundFiles = [guriMyturnPlayer2V1, guriMyturnPlayer2V2, guriMyturnPlayer2V3];
-                }else if(props.playerId === 3) {
-                    randomSoundFiles = [guriMyturnPlayer3V1, guriMyturnPlayer3V2, guriMyturnPlayer3V3];
-                }else if(props.playerId === 4) {
-                    randomSoundFiles = [guriMyturnPlayer4V1, guriMyturnPlayer4V2, guriMyturnPlayer4V3];
-                }
-            }
+
+        const ai = aiVoices[props.aiVoice - 1];
+        const myturnFiles = 
+            ai === 'daegil' ? scoreBoardSoundFiles.daegil.myturn :
+            ai === 'flower' ? scoreBoardSoundFiles.flower.myturn : 
+            scoreBoardSoundFiles.guri.myturn;
+
+        let randomSound: any[] = [];
+        
+        switch(props.playerId) {
+            case 1:
+                randomSound = myturnFiles[1];
+                break;
+            case 2:
+                randomSound = myturnFiles[2];
+                break;
+            case 3:
+                randomSound = myturnFiles[3];
+                break;
+            case 4:
+                randomSound = myturnFiles[4];
+                break;
         }
-        const randomSound = randomSoundFiles[Math.floor(Math.random() * 3)]; 
-        if (audioRef.current) {
-            audioRef.current.src = randomSound;
+
+        if(audioRef.current) {
+            audioRef.current.src = randomSound[Math.floor(Math.random() * randomSound.length)];
             audioRef.current.play();
         }
     }, [props.myTurn, props.gameStartFinished]);
 
-  return (
-    <div className={styles.box}>
-        {props.myTurn ? <></> : <div className={styles.block}></div>}
-        <audio ref={audioRef}/>
+    useEffect(() => {
+        if(props.diceValue == undefined) return;
+        
+        if(props.diceValue.rolls_left === 0) {
+            setRerollButtonState(false);
+            console.log("리롤 최대 횟수 달성 리롤 불가");
+        }
+    }, [props.diceValue]);
 
-        <div className={styles.playerInfo}>
-            <div>[PLAYER {props.playerId}]</div>
-            <div>SCORE</div>
+
+    return (
+        <div className={styles.box}>
+            {props.myTurn ? <></> : <div className={styles.block}></div>}
+            <audio ref={audioRef}/>
+
+            <div className={styles.playerInfo} onClick={props.throwDiceFunction}>
+                <div>[PLAYER {props.playerId}]</div>
+                <div>SCORE {props.totalScore}</div>
+            </div>
+
+            <div className={styles.scoreLayout}>
+                <div className={styles.scoreBox}>
+                    <div>에이스</div>
+                    <div onClick={() => setSelectState('ace')}>{props.ace}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>듀얼</div>
+                    <div onClick={() => setSelectState('dual')}>{props.dual}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>트리플</div>
+                    <div onClick={() => setSelectState('triple')}>{props.triple}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>쿼드</div>
+                    <div onClick={() => setSelectState('quad')}>{props.quad}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>펜타</div>
+                    <div onClick={() => setSelectState('penta')}>{props.penta}</div>
+                </div>
+                <div className={styles.hexa}>
+                    <div>헥사</div>
+                    <div onClick={() => setSelectState('hexa')}>{props.hexa}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>찬스</div>
+                    <div onClick={() => setSelectState('chance')}>{props.chance}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>포커</div>
+                    <div onClick={() => setSelectState('poker')}>{props.poker}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>풀하우스</div>
+                    <div onClick={() => setSelectState('full_house')}>{props.fullHouse}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>SS</div>
+                    <div onClick={() => setSelectState('small_straight')}>{props.smallStraight}</div>
+                </div>
+                <div className={styles.scoreBox}>
+                    <div>LS</div>
+                    <div onClick={() => setSelectState('large_straight')}>{props.largeStraight}</div>
+                </div>
+                <div className={styles.turkey}>
+                    <div>터키</div>
+                    <div onClick={() => setSelectState('turkey')}>{props.turkey}</div>
+                </div>
+            </div>
+
+            <div className={styles.buttons}>
+                <div 
+                    onClick={rerollButtonState ? rerollButtonClick : undefined}
+                    className={!rerollButtonState ? styles.disabled : styles.abled}
+                >
+                        REROLL
+                </div>
+                {/* <div onClick={props.nextTurnButtonClick}>NEXT TURN</div> */}
+                <div onClick={selectScoreButtonClick}>NEXT TURN</div>
+            </div>
+
         </div>
-
-        <div className={styles.scoreLayout}>
-            <div className={styles.scoreBox}>
-                <div>에이스</div>
-                <div>{props.ace}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>듀얼</div>
-                <div>{props.dual}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>트리플</div>
-                <div>{props.triple}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>쿼드</div>
-                <div>{props.quad}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>펜타</div>
-                <div>{props.penta}</div>
-            </div>
-            <div className={styles.hexa}>
-                <div>헥사</div>
-                <div>{props.hexa}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>찬스</div>
-                <div>{props.chance}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>포커</div>
-                <div>{props.poker}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>풀하우스</div>
-                <div>{props.fullHouse}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>SS</div>
-                <div>{props.smallStraight}</div>
-            </div>
-            <div className={styles.scoreBox}>
-                <div>LS</div>
-                <div>{props.largeStraight}</div>
-            </div>
-            <div className={styles.turkey}>
-                <div>터키</div>
-                <div>{props.turkey}</div>
-            </div>
-        </div>
-
-        <div className={styles.buttons}>
-            <div onClick={rerollButtonClick}>REROLL</div>
-            <div onClick={props.nextTurnButtonClick}>NEXT TURN</div>
-        </div>
-
-    </div>
-  )
+    )
 }
