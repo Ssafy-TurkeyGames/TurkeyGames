@@ -10,7 +10,7 @@ import { endYachtGame } from '../../../api/dashboardApi';
 // import axiosInstance from '../../../api/axiosInstance';
 
 // 소켓 서버 URL
-const SOCKET_SERVER_URL = 'http://192.168.30.158:8000';
+const SOCKET_SERVER_URL = 'http://localhost:8000';
 
 interface ScoreItem {
   name: string;

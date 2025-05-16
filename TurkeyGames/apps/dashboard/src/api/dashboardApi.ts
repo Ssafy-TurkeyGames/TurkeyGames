@@ -85,7 +85,7 @@ export const getGameRule = async (gameId: string | number): Promise<ApiResponse<
       console.log('게임 종료 API 호출 시작');
       console.log('axiosInstance baseURL:', axiosInstance.defaults.baseURL);
       console.log('요청 URL:', `${axiosInstance.defaults.baseURL}/yacht/${gameId}`);
-      const SOCKET_SERVER_URL = 'http://192.168.30.158:8000';
+      const SOCKET_SERVER_URL = 'http://localhost:8000';
       const response = await axios.delete(`${SOCKET_SERVER_URL}/yacht/${gameId}`);
       console.log('게임 종료 API 응답:', response.data);
     return response.data;
