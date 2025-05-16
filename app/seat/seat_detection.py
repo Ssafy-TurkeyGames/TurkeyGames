@@ -53,9 +53,10 @@ def estimate_missing_point(rect):
 # 아루코 마커 감지 및 좌석 매핑
 def draw_aruco_markers(frame):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) # 흑백으로 받아오기
-    gray = cv2.equalizeHist(gray)  # 명암 대비 조정
 
-    corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+    # corners, ids, _ = cv2.aruco.detectMarkers(gray, aruco_dict, parameters=parameters)
+        # 팀원 코드처럼 detector를 직접 사용
+    corners, ids, _ = detector.detectMarkers(gray)
 
     aruco_markers = {}
 
@@ -78,6 +79,10 @@ def draw_aruco_markers(frame):
                 rect[idx_missing] = missing_pt
 
             if all(x is not None for x in rect):
+                # 직사각형 시각화 (팀원 코드 방식)
+                rect_np = np.array(rect, dtype=np.int32).reshape((-1,1,2))
+                cv2.polylines(frame, [rect_np], isClosed=True, color=(0,255,0), thickness=2)
+
                 for seat_num, (cx, cy) in enumerate(rect):
                     radius = 30  # 고정 반지름, 필요 시 조정 가능
 
@@ -96,13 +101,14 @@ def draw_aruco_markers(frame):
 
     else:
         return {}
+    
 
     # 마커가 없으면 빈 딕셔너리 반환
     return aruco_markers
 
 
 # 사람 위치를 좌석에 맞게 할당하는 함수
-def get_seat_number(person_pos, aruco_markers, seat_threshold=130):
+def get_seat_number(person_pos, aruco_markers, seat_threshold=200):
     if not aruco_markers:  # 마커가 없으면 None 반환
         return None
 

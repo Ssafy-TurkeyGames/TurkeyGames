@@ -5,10 +5,13 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
+# # ..env 파일에서 환경 변수 로드. DB 오류난 가현ver
+# BASE_DIR    = Path(__file__).resolve().parent.parent.parent  
+# dotenv_path = BASE_DIR / ".env"
+# load_dotenv(dotenv_path=dotenv_path, override=True)
+
 # ..env 파일에서 환경 변수 로드
-BASE_DIR    = Path(__file__).resolve().parent.parent.parent  
-dotenv_path = BASE_DIR / ".env"
-load_dotenv(dotenv_path=dotenv_path, override=True)
+load_dotenv()
 
 # 데이터베이스 URL 가져오기
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://username:password@localhost/dbname")
