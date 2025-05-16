@@ -1,16 +1,27 @@
-from fastapi import APIRouter, Depends, Request
-from app.video.service import VideoService
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+from app.video.shared_state import highlight_data_store # Import the shared state
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/highlight",
+    tags=["highlight"],
+)
 
-@router.post("/trigger")
-async def trigger_video_capture(request: Request, video_service: VideoService = Depends()):
-    """
-    API endpoint to trigger video capture.
-    """
-    data = await request.json()
-    print(f"Received data: {data}")
+class HighlightVideoData(BaseModel):
+    local_path: str
+    minio_path: str
+    qr_code: str
+    local_qr_path: str 
 
-    video_service.on_trigger()
-    return {"message": "Video capture triggered", "data": data}
+@router.get("/{game_id}/{player_id}", response_model=HighlightVideoData)
+async def get_highlight_video_data(game_id: str, player_id: str):
+
+    key = f"{game_id}_{player_id}"
+    highlight_data = highlight_data_store.get(key)
+
+    if not highlight_data:
+        raise HTTPException(status_code=404, detail=f"하이라이트 데이터가 없습니다.: {game_id}, player_id: {player_id}")
+
+    return HighlightVideoData(**highlight_data)
