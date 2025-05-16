@@ -61,10 +61,6 @@ export default function TurkeyDiceDefault(props: propsType) {
   };
 
   useEffect(() => {
-    console.log(areaPlayers);
-  }, [areaPlayers])
-
-  useEffect(() => {
     if (playerCount === props.people && audioRef.current) {
       const audio = audioRef.current;
 
@@ -101,6 +97,7 @@ export default function TurkeyDiceDefault(props: propsType) {
       
     }
   }, [playerCount, props.people, props.voice]);
+
   // 자리 선택 클릭 효과음
   const buttonOnClick = () => {
     if(audioRef.current && !gameStarted) {
@@ -136,6 +133,7 @@ export default function TurkeyDiceDefault(props: propsType) {
   // 주사위 던지기 API
   const throwDices = async() => {
     try {
+      console.log("주사위 던지기 API 호출!!!")
       const gameId = props.gameId;
       const data = await yachtService.rollDice(gameId.toString(), {keep_indices: []});
       console.log('데이터:', data);
@@ -219,62 +217,104 @@ export default function TurkeyDiceDefault(props: propsType) {
   //   console.log(calcYachtDice(diceValue.dice_values).turkey);
   // }, [diceValue]);
 
-
-  useEffect((() =>console.log(scoreData)), [scoreData]);
-
   // 버튼 클릭: 턴 증가 + 다음 플레이어
   const nextTurnButtonClick = () => {
     setTurnCount(prev => prev + 1);
     setCurrentTurnIndex(prev => (prev + 1) % playerCount);
+    setDiceValue({});
     getScores();
   };
 
-  // turnCount가 바뀔 때마다 round 갱신
   useEffect(() => {
-
     const newRound = Math.floor(turnCount / playerCount) + 1;
 
     // 최대 12라운드까지만
-    if (newRound <= 3) {
+    if (newRound <= 1) {
       setRound(newRound);
     }
 
     if (newRound > 1) {
-      
-      
-      // 우승자
-      const winner = scoreData.reduce((best, current) => {
-        if (
-          current.total_score > best.total_score || 
-          (current.total_score === best.total_score && current.player_id < best.player_id)
-        ) {
-          return current;
-        }
-        return best;
-      });
-      // alert("🎮 게임 종료!");
-      alert(winner.player_id);
-      let soundFiles: string | any[] = [];
+      // 게임 종료 상태를 먼저 true로 설정 (비동기지만 트리거용)
+      setIsGameOver(true);
+    }
+  }, [turnCount, playerCount]);
+  
+  useEffect(() => {
+    if (!isGameOver) return;
 
-      if(audioRef.current) {
-        if(props.voice === 1) {
-          soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
-        }else if(props.voice === 2) {
-          soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
-        }else if(props.voice === 3) {
-          soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
-        }
+    const winner = scoreData.reduce((best, current) => {
+      if (
+        current.total_score > best.total_score || 
+        (current.total_score === best.total_score && current.player_id < best.player_id)
+      ) {
+        return current;
+      }
+      return best;
+    });
+
+    alert(winner.player_id);
+
+    let soundFiles: string[] = [];
+
+    if (audioRef.current) {
+      if (props.voice === 1) {
+        soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+      } else if (props.voice === 2) {
+        soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+      } else if (props.voice === 3) {
+        soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
       }
 
       const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
-        audioRef.current.src = randomSound;
-        audioRef.current.play();
+      audioRef.current.src = randomSound;
+      audioRef.current.play();
+    }
+  }, [isGameOver]);
+
+  // turnCount가 바뀔 때마다 round 갱신
+  // useEffect(() => {
+
+  //   const newRound = Math.floor(turnCount / playerCount) + 1;
+
+  //   // 최대 12라운드까지만
+  //   if (newRound <= 1) {
+  //     setRound(newRound);
+  //   }
+
+  //   if (newRound > 1) {
+  //     // 필요 시: 게임 종료 상태 설정 등도 가능
+  //     setIsGameOver(true);
       
-      // 필요 시: 게임 종료 상태 설정 등도 가능
-      setIsGameOver(true);
-  }
+  //     // 우승자
+  //     const winner = scoreData.reduce((best, current) => {
+  //       if (
+  //         current.total_score > best.total_score || 
+  //         (current.total_score === best.total_score && current.player_id < best.player_id)
+  //       ) {
+  //         return current;
+  //       }
+  //       return best;
+  //     });
+  //     // alert("🎮 게임 종료!");
+  //     alert(winner.player_id);
+  //     let soundFiles: string | any[] = [];
+
+  //     if(audioRef.current) {
+  //       if(props.voice === 1) {
+  //         soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+  //       }else if(props.voice === 2) {
+  //         soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+  //       }else if(props.voice === 3) {
+  //         soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
+  //       }
+  //     }
+
+  //     const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+  //       audioRef.current.src = randomSound;
+  //       audioRef.current.play();
+  //   }
     
-  }, [turnCount, playerCount]);
+  // }, [turnCount, playerCount]);
 
   useEffect(() => {
     console.log("round : " + round);
@@ -287,6 +327,9 @@ export default function TurkeyDiceDefault(props: propsType) {
   useEffect(() => {
     console.log('scoreData', scoreData);
     console.log(scoreData);
+    console.log(areaPlayers);
+    console.log(scoreData[areaPlayers[0] - 1]);
+    console.log(scoreData[areaPlayers[1] - 1]);
   }, [scoreData])
 
   return (
@@ -318,8 +361,9 @@ export default function TurkeyDiceDefault(props: propsType) {
                   smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard.small_straight ?? 0}
                   largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard.large_straight ?? 0}
                   turkey={scoreData[areaPlayers[0] - 1]?.scorecard.turkey ?? 0}
-                  totalScore={scoreData[areaPlayers[1] - 1]?.total_score ?? 0}
+                  totalScore={scoreData[areaPlayers[0] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}
@@ -356,6 +400,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   turkey={scoreData[areaPlayers[1] - 1]?.scorecard.turkey ?? 0}
                   totalScore={scoreData[areaPlayers[1] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}
@@ -397,6 +442,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   turkey={scoreData[areaPlayers[2] - 1]?.scorecard.turkey ?? 0}
                   totalScore={scoreData[areaPlayers[2] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}
@@ -431,6 +477,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   turkey={scoreData[areaPlayers[3] - 1]?.scorecard.turkey ?? 0}
                   totalScore={scoreData[areaPlayers[3] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}

@@ -184,3 +184,7 @@
     box-shadow: none;           /* 눌림 효과 제거 */
     cursor: not-allowed;        /* 마우스 커서 변경 */
 }
+
+.selected {
+    background-color: #F7C122;
+}
