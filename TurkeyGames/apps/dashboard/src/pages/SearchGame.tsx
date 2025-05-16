@@ -32,26 +32,27 @@ export default function SearchGame() {
   const searchParams = new URLSearchParams(location.search);
   const keywordParam = searchParams.get('keyword');
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRender = useRef(true);
+  
 
   // 필터가 적용되었는지 확인
   const isFilterActive = selectedPlayers.length > 0 || selectedLevels.length > 0;
 
-  // 검색 버튼/엔터 클릭 핸들러
-  const handleSearch = () => {
-    fetchGames();
-    // URL 업데이트 (선택사항)
-    if (search.trim()) {
-      navigate(`/search?keyword=${encodeURIComponent(search)}`, { replace: true });
-    }
-  };
-
-  // 1. 필터/URL 파라미터 변경 시 검색
+  // 1. 필터/URL 파라미터 변경 시 검색 (유지)
   useEffect(() => {
-    const effectiveSearch = keywordParam !== null ? keywordParam : search;
-    fetchGames(effectiveSearch);
+    // 첫 렌더링 시에만 실행되도록 제어
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      const effectiveSearch = keywordParam !== null ? keywordParam : search;
+      fetchGames(effectiveSearch);
+    } else {
+      // 첫 렌더링이 아닌 경우에만 실행
+      const effectiveSearch = keywordParam !== null ? keywordParam : search;
+      fetchGames(effectiveSearch);
+    }
   }, [selectedPlayers, selectedLevels, keywordParam]);
 
-  // 2. // 실시간 검색 핸들링
+  // 2. 실시간 검색 핸들링 (유지)
   useEffect(() => {
     if (selectedPlayers.length > 0 || selectedLevels.length > 0) return;
     if (keywordParam !== null) return;
@@ -65,37 +66,6 @@ export default function SearchGame() {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
   }, [search]);
-
-  // 필터/URL 파라미터 변경 시
-  useEffect(() => {
-    const effectiveSearch = keywordParam !== null ? keywordParam : search;
-    fetchGames(effectiveSearch);
-  }, [selectedPlayers, selectedLevels, keywordParam]);
-
-  // 검색창 JSX
-  const SearchInput = () => (
-    <div className={styles.searchBar}>
-      {/* ... 기존 코드 ... */}
-      <button 
-        className={styles.iconBtn} 
-        onClick={() => fetchGames(search)}
-        aria-label="검색"
-      >
-        <img 
-          src={searchIcon}  // ✅ require() 대신 임포트한 변수 사용
-          alt="검색" 
-          className={styles.icon} 
-        />
-      </button>
-    </div>
-  );
-
-  // 컴포넌트 마운트 시 URL 파라미터 검색어 적용
-  useEffect(() => {
-    // keywordParam이 있으면 우선 적용
-    const effectiveSearch = keywordParam !== null ? keywordParam : search;
-    fetchGames(effectiveSearch);
-  }, [selectedPlayers, selectedLevels, search, keywordParam]);
   
   // 모든 필터 초기화
   const clearAllFilters = () => {
@@ -218,7 +188,7 @@ export default function SearchGame() {
         </div>
       </div>
 
-      {/* 아래는 기존 paste.txt와 동일하게 필터, 결과 등 렌더링 */}
+      {/* 필터, 결과 등 렌더링 */}
       <div className={styles.filterRow}>
         {playerFilters.map(label => (
           <button
