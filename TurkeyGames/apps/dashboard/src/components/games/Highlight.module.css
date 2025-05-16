@@ -87,6 +87,90 @@
   margin-top: 20px;
   font-size: 20px;
   opacity: 0.8;
+  width: 100%;
+  text-align: center;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 40px;
+}
+
+.loadingIcon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 20px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  margin: 40px 0;
+}
+
+.errorMessage {
+  font-size: 18px;
+}
+
+.downloadButton {
+  background-color: white;
+  color: #b44e47;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.downloadButton:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pathInfo {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 600px;
+  text-align: left;
+}
+
+.pathItem {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pathLabel {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.pathValue {
+  word-break: break-all;
+  font-family: monospace;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 5px;
+  border-radius: 5px;
 }
 
 @media (max-width: 768px) {
@@ -104,6 +188,11 @@
   .qrCode {
     width: 200px;
     height: 200px;
+  }
+  
+  .downloadButton {
+    font-size: 16px;
+    padding: 10px 20px;
   }
 }
 

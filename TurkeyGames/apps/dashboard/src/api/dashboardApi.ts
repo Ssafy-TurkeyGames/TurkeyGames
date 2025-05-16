@@ -1,7 +1,7 @@
 // apps/dashboard/src/api/dashboardApi.ts
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
-import { ApiResponse, Game } from './types';
+import { ApiResponse, Game, GameRule, HighlightData } from './types';
 
 // 모든 게임 목록 조회
 export const getAllGames = async (): Promise<ApiResponse<Game[]>> => {
@@ -126,3 +126,23 @@ export const getGameRule = async (gameId: string | number): Promise<ApiResponse<
       throw error;
     }
   };
+
+// 하이라이트 데이터 조회 API
+export const getHighlightData = async (gameId: string, playerId: string): Promise<ApiResponse<HighlightData>> => {
+  console.log(`[API 호출] 하이라이트 데이터 요청 - gameId: ${gameId}, playerId: ${playerId}`);
+  console.log(`[API URL] ${axiosInstance.defaults.baseURL}/highlight/${gameId}/${playerId}`);
+  
+  try {
+    const response = await axiosInstance.get<ApiResponse<HighlightData>>(`/highlight/${gameId}/${playerId}`);
+    console.log('[API 응답] 하이라이트 데이터:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[API 오류] 하이라이트 데이터 조회 실패:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('[API 오류 상세] 상태 코드:', error.response?.status);
+      console.error('[API 오류 상세] 응답 데이터:', error.response?.data);
+      console.error('[API 오류 상세] 요청 URL:', error.config?.url);
+    }
+    throw error;
+  }
+};

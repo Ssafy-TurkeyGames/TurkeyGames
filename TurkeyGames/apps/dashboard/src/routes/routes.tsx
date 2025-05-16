@@ -15,10 +15,11 @@ export default function AppRoutes() {
   const location = useLocation();
   // 모달을 띄우기 직전의 location을 backgroundLocation으로 저장
   const state = location.state as { backgroundLocation?: Location };
+  const backgroundLocation = state?.backgroundLocation;
 
   return (
     <>
-      <Routes location={state?.backgroundLocation || location}>
+      <Routes location={backgroundLocation || location}>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchGame />} />
@@ -32,6 +33,8 @@ export default function AppRoutes() {
             <Route path="result" element={<TurkeyDiceResult />} />
             {/* 추가 터키다이스 관련 페이지들 */}
           </Route>
+          {/* 새로운 하이라이트 경로 - URL 파라미터 방식 */}
+          <Route path="highlight/:gameId/:playerId" element={<HighlightModal />} />
         </Route>
       </Routes>
 
@@ -39,6 +42,8 @@ export default function AppRoutes() {
       {state?.backgroundLocation && (
         <Routes>
           <Route path="/games/TurkeyDice/highlight" element={<HighlightModal />} />
+          {/* 새 API 방식 하이라이트 경로도 추가 */}
+          <Route path="/highlight/:gameId/:playerId" element={<HighlightModal />} />
         </Routes>
       )}
     </>
