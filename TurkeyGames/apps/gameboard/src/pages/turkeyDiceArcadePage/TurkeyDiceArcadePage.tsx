@@ -1,6 +1,6 @@
 // src/pages/turkeyDiceAcadePage/TurkeyDiceAcadePage.jsx
 import React, { useEffect, useRef, useState } from 'react';
-import styles from './TurkeyDiceAcadePage.module.css';
+import styles from './TurkeyDiceArcadePage.module.css';
 import ArcadeMap from '../../assets/images/turkey_acade_map.png';
 import ArcadeScoreCard from '../../components/turkeyDice/Arcade/TurkeyDiceScoreCard';
 import buttonClickFile from '../../assets/sound/default/button/button.mp3';

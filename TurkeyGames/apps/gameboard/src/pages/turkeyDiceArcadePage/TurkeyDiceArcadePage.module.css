@@ -9,7 +9,7 @@
 .CardContainer {
   width: 20%;
   height: 100vh;
-  padding: 1rem;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -21,7 +21,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 3px solid #8a2be2;
+  border: 1px solid #8a2be2;
   border-radius: 15px;
   background-color: rgba(0, 0, 0, 0.8);
   box-shadow: 0 0 15px #8a2be2;
@@ -34,7 +34,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 3px solid #8a2be2;
+  border: 1px solid #8a2be2;
   border-radius: 15px;
   background-color: rgba(0, 0, 0, 0.8);
   box-shadow: 0 0 15px #8a2be2;
