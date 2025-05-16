@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Dict
 
@@ -6,6 +6,7 @@ from app.db.database import get_db
 from app.db import crud
 from app.fivesec import schema
 from app.fivesec.game import FiveSecGame
+from app.websocket.manager import broadcast_scores, sio
 
 # 5초준다 게임 라우터 초기화
 router = APIRouter(
@@ -15,7 +16,7 @@ router = APIRouter(
 
 
 @router.post("/start", response_model=schema.GameState)
-async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db)):
+async def start_game(settings: schema.GameSettings, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """새 게임 시작"""
     # 게임 설정 저장
     db_setting = crud.create_five_sec_setting(db, settings)
@@ -29,11 +30,19 @@ async def start_game(settings: schema.GameSettings, db: Session = Depends(get_db
     # 게임 세션 생성
     game_id = FiveSecGame.create_game(db_setting.id, player_ids)
 
+    game_id_str = str(game_id) if game_id else "1"
+
     # 최대 라운드 설정
     FiveSecGame.set_max_rounds(game_id, settings.round)
 
     # 게임 상태 조회
     game = FiveSecGame.get_game(game_id)
+
+    # 로비에 게임 생성 정보 전송
+    background_tasks.add_task(sio.emit, 'game_created', {
+        "game_id": game_id_str,
+        "settings": settings.dict()
+    })
 
     return schema.GameState(
         id=game_id,
@@ -90,7 +99,7 @@ async def next_turn(game_id: str):
 
 
 @router.post("/{game_id}/update-score", response_model=schema.GameResult)
-async def update_player_score(game_id: str, score_update: schema.ScoreUpdate, db: Session = Depends(get_db)):
+async def update_player_score(game_id: str, score_update: schema.ScoreUpdate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """플레이어 점수 업데이트"""
     game = FiveSecGame.get_game(game_id)
     if not game:
@@ -102,6 +111,22 @@ async def update_player_score(game_id: str, score_update: schema.ScoreUpdate, db
         raise HTTPException(status_code=400, detail="점수를 업데이트할 수 없습니다")
 
     FiveSecGame.update_score(game_id, score_update.player_id, score_update.score)
+
+    # 현재 게임의 전체 점수 가져오기
+    game = FiveSecGame.get_game(game_id)
+    current_scores = game["scores"]
+
+    # 백그라운드 태스크로 웹소켓 브로드캐스트
+    background_tasks.add_task(
+        broadcast_scores,
+        game_id,
+        {
+            "game_id": game_id,
+            "scores": current_scores,
+            "updated_player": score_update.player_id,
+            "new_score": score_update.score
+        }
+    )
 
     return schema.GameResult(success=True, message="점수가 업데이트되었습니다")
 

@@ -50,7 +50,7 @@ else:
 
 # 삭제 예약된 항목들을 추적하기 위한 메모리 내 세트
 DELETION_SCHEDULED_ITEMS = set()
-DELETION_DELAY_SECONDS = 600  # 10분
+DELETION_DELAY_SECONDS = 300  # 5분
 
 async def schedule_full_deletion(minio_object_name: str, bucket_name: str, local_file_path: str | None):
     """지정된 시간 후 MinIO 객체 및 해당 로컬 파일 삭제를 예약합니다."""

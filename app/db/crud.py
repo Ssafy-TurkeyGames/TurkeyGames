@@ -1,19 +1,14 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Dict, Optional
+from sqlalchemy import text
 
 from app.db import models
 from app.yacht import schema
 
 # 야추
 def create_game_setting(db: Session, settings: schema.GameSettings) -> models.TurkeyDiceSetting:
-    """게임 설정을 데이터베이스에 저장"""
-    # 다음 사용할 ID 찾기
-    max_id = db.query(func.max(models.TurkeyDiceSetting.id)).scalar()
-    next_id = 1 if max_id is None else max_id + 1
-
     db_setting = models.TurkeyDiceSetting(
-        id=next_id,  # ID 수동 할당
         people=settings.people,
         map=settings.map,
         voice=settings.voice
@@ -23,10 +18,32 @@ def create_game_setting(db: Session, settings: schema.GameSettings) -> models.Tu
     db.refresh(db_setting)
     return db_setting
 
+
+# crud.py 수정
+def create_player_score(db: Session) -> models.ScoreTableYacht:
+    """새 플레이어 점수표를 생성"""
+    # ID를 지정하지 않음 - SERIAL이 자동 할당
+    player_score = models.ScoreTableYacht(
+        ace=0, dual=0, triple=0, quad=0, penta=0,
+        hexa=0, bonus_available=False, chance=0,
+        poker=0, full_house=0, small_straight=0,
+        large_straight=0, turkey=0
+    )
+    db.add(player_score)
+    db.commit()
+    db.refresh(player_score)  # 자동 생성된 ID 가져오기
+
+    # 점수 선택 가능 여부 테이블도 함께 생성
+    create_player_score_available(db, player_score.id)
+
+    return player_score
+
+
 def create_player_score_available(db: Session, player_id: int) -> models.ScoreTableYachtAvailable:
     """새 플레이어 점수 선택 가능 여부 테이블 생성"""
+    # ID를 지정하지 않음 - SERIAL이 자동 할당
     player_available = models.ScoreTableYachtAvailable(
-        id=player_id,  # 점수표와 동일한 ID 사용
+        # id=player_id,  # 이 줄 제거!
         ace=False, dual=False, triple=False, quad=False, penta=False,
         hexa=False, chance=False, poker=False, full_house=False,
         small_straight=False, large_straight=False, turkey=False
@@ -35,29 +52,6 @@ def create_player_score_available(db: Session, player_id: int) -> models.ScoreTa
     db.commit()
     db.refresh(player_available)
     return player_available
-
-
-def create_player_score(db: Session) -> models.ScoreTableYacht:
-    """새 플레이어 점수표를 생성"""
-    # 다음 사용할 ID 찾기
-    max_id = db.query(func.max(models.ScoreTableYacht.id)).scalar()
-    next_id = 1 if max_id is None else max_id + 1
-
-    player_score = models.ScoreTableYacht(
-        id=next_id,  # ID 수동 할당
-        ace=0, dual=0, triple=0, quad=0, penta=0,
-        hexa=0, bonus_available=False, chance=0,
-        poker=0, full_house=0, small_straight=0,
-        large_straight=0, turkey=0
-    )
-    db.add(player_score)
-    db.commit()
-    db.refresh(player_score)
-
-    # 점수 선택 가능 여부 테이블도 함께 생성
-    create_player_score_available(db, player_score.id)
-
-    return player_score
 
 def get_player_score(db: Session, player_id: int) -> Optional[models.ScoreTableYacht]:
     """플레이어 점수표 조회"""
@@ -107,7 +101,24 @@ def delete_game(db: Session, setting_id: int, player_ids: List[int]) -> bool:
         db.query(models.ScoreTableYachtAvailable).filter(models.ScoreTableYachtAvailable.id == player_id).delete()
 
     db.commit()
+
+    reset_all_sequences_after_delete(db)
     return True
+
+def reset_all_sequences_after_delete(db: Session):
+    """모든 관련 시퀀스를 최대값+1로 리셋"""
+    tables_and_sequences = [
+        ('turkey_dice_setting', 'turkey_dice_setting_id_seq'),
+        ('turkey_dice_score', 'turkey_dice_score_id_seq'),
+        ('turkey_dice_score_available', 'turkey_dice_score_available_id_seq')
+    ]
+
+    for table_name, sequence_name in tables_and_sequences:
+        result = db.execute(text(f"SELECT COALESCE(MAX(id), 0) FROM {table_name}"))
+        max_id = result.scalar()
+        db.execute(text(f"ALTER SEQUENCE {sequence_name} RESTART WITH {max_id + 1}"))
+
+    db.commit()
 
 
 def check_game_finished(db: Session, player_ids: List[int]) -> bool:

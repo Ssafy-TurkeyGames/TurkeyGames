@@ -17,8 +17,11 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://username:password@localhost/dbname")
 
 # SQLAlchemy 엔진 생성
-engine = create_engine(DATABASE_URL)
-
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  # 이 한 줄로 대부분의 문제 해결
+    pool_recycle=3600   # 추가 안전장치
+)
 # 세션 생성기
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
