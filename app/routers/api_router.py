@@ -16,7 +16,7 @@ class HighlightVideoData(BaseModel):
     local_qr_path: str 
 
 @router.get("/{game_id}/{player_id}", response_model=HighlightVideoData)
-async def get_highlight_video_data(game_id: str, player_id: str):
+async def get_highlight_video_data(game_id: int, player_id: int):
 
     key = f"{game_id}_{player_id}"
     highlight_data = highlight_data_store.get(key)
