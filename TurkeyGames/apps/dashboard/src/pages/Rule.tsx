@@ -1,4 +1,3 @@
-// apps/dashboard/src/pages/Rule.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import styles from './Rule.module.css';
@@ -9,14 +8,18 @@ import { GameRule } from '../api/types';
 
 interface RuleProps {
   isModal?: boolean;
+  modalGameId?: string | number; // 모달로 사용될 때 gameId를 props로 받음
 }
 
-export default function Rule({ isModal = false }: RuleProps) {
-  const { gameId } = useParams<{ gameId: string }>();
+export default function Rule({ isModal = false, modalGameId }: RuleProps) {
+  const { gameId: urlGameId } = useParams<{ gameId: string }>();
   const [gameRule, setGameRule] = useState<GameRule | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  
+  // URL 파라미터 또는 props로 전달된 gameId 사용
+  const effectiveGameId = modalGameId || urlGameId;
 
   // 모달 닫기 핸들러
   const handleClose = useCallback(() => {
@@ -32,7 +35,7 @@ export default function Rule({ isModal = false }: RuleProps) {
   }, [handleClose]);
 
   useEffect(() => {
-    if (!gameId) {
+    if (!effectiveGameId) {
       setError('게임 ID가 없습니다.');
       setLoading(false);
       return;
@@ -41,7 +44,7 @@ export default function Rule({ isModal = false }: RuleProps) {
     const fetchRule = async () => {
       try {
         setLoading(true);
-        const res = await getGameRule(gameId);
+        const res = await getGameRule(effectiveGameId);
         if (res.code === 'SUCCESS' && res.data) {
           setGameRule(res.data);
           setError(null);
@@ -58,7 +61,7 @@ export default function Rule({ isModal = false }: RuleProps) {
     };
 
     fetchRule();
-  }, [gameId]);
+  }, [effectiveGameId]);
 
   if (loading) {
     return <div className={styles.loading}>로딩 중...</div>;
@@ -159,7 +162,7 @@ export default function Rule({ isModal = false }: RuleProps) {
           <div className={styles.buttonGroup}>
             <button
               className={styles.backButton}
-              onClick={() => navigate(`/game-options/${gameId}`)}
+              onClick={() => navigate(`/game-options/${effectiveGameId}`)}
             >
               ⚡ 게임 시작
             </button>
