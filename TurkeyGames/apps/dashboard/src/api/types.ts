@@ -26,5 +26,10 @@ export interface GameRule {
     descriptionVideoPath: string;
   }
 
-  // 다른 필요한 타입들 추가
-  
+  // 하이라이트 데이터 인터페이스
+export interface HighlightData {
+  local_path: string;
+  minio_path: string;
+  qr_code: string;
+  local_qr_path: string;
+}
