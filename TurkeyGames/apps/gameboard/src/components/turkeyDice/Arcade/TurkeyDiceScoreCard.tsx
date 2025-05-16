@@ -105,6 +105,13 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
     boxShadow: '0 0 20px gold'
   } : {};
 
+  // 텍스트 스타일 - 자기 차례가 아닐 때 회색으로 표시
+  const textStyle = !myTurn ? { 
+    color: '#888888',
+    textShadow: 'none',
+    WebkitTextStroke: 'none'
+  } : {};
+
   // 총점 계산
   const totalScore = ace + dual + triple + quad + penta + hexa + chance + poker + fullHouse + smallStraight + largeStraight + turkey;
 
@@ -180,60 +187,60 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
       <img src={scoreCardBg} alt="Score Card Background" className={styles.backgroundImage} />
       <div className={styles.scoreCardContent}>
         <div className={styles.header}>
-          <h1 className={styles.title}>{playerName}</h1>
-          <div className={styles.score}>SCORE {totalScore}</div>
+          <h1 className={styles.title} style={textStyle}>{playerName}</h1>
+          <div className={styles.score} style={textStyle}>SCORE {totalScore}</div>
         </div>
         
         <div className={styles.categoryContainer}>
-          <div className={styles.divider}></div>
+          <div className={styles.divider} style={!myTurn ? { backgroundColor: '#555', boxShadow: 'none' } : {}}></div>
           <div className={styles.categoryList}>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>에이스</span>
-              <span className={styles.categoryValue}>{ace}</span>
+              <span className={styles.categoryName} style={textStyle}>에이스</span>
+              <span className={styles.categoryValue} style={textStyle}>{ace}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>듀얼</span>
-              <span className={styles.categoryValue}>{dual}</span>
+              <span className={styles.categoryName} style={textStyle}>듀얼</span>
+              <span className={styles.categoryValue} style={textStyle}>{dual}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>트리플</span>
-              <span className={styles.categoryValue}>{triple}</span>
+              <span className={styles.categoryName} style={textStyle}>트리플</span>
+              <span className={styles.categoryValue} style={textStyle}>{triple}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>쿼드</span>
-              <span className={styles.categoryValue}>{quad}</span>
+              <span className={styles.categoryName} style={textStyle}>쿼드</span>
+              <span className={styles.categoryValue} style={textStyle}>{quad}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>펜타</span>
-              <span className={styles.categoryValue}>{penta}</span>
+              <span className={styles.categoryName} style={textStyle}>펜타</span>
+              <span className={styles.categoryValue} style={textStyle}>{penta}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>헥사</span>
-              <span className={styles.categoryValue}>{hexa}</span>
+              <span className={styles.categoryName} style={textStyle}>헥사</span>
+              <span className={styles.categoryValue} style={textStyle}>{hexa}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>포커</span>
-              <span className={styles.categoryValue}>{poker}</span>
+              <span className={styles.categoryName} style={textStyle}>포커</span>
+              <span className={styles.categoryValue} style={textStyle}>{poker}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>풀하우스</span>
-              <span className={styles.categoryValue}>{fullHouse}</span>
+              <span className={styles.categoryName} style={textStyle}>풀하우스</span>
+              <span className={styles.categoryValue} style={textStyle}>{fullHouse}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>S.S</span>
-              <span className={styles.categoryValue}>{smallStraight}</span>
+              <span className={styles.categoryName} style={textStyle}>S.S</span>
+              <span className={styles.categoryValue} style={textStyle}>{smallStraight}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>L.S</span>
-              <span className={styles.categoryValue}>{largeStraight}</span>
+              <span className={styles.categoryName} style={textStyle}>L.S</span>
+              <span className={styles.categoryValue} style={textStyle}>{largeStraight}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>터키</span>
-              <span className={styles.categoryValue}>{turkey}</span>
+              <span className={styles.categoryName} style={textStyle}>터키</span>
+              <span className={styles.categoryValue} style={textStyle}>{turkey}</span>
             </div>
             <div className={styles.categoryItem}>
-              <span className={styles.categoryName}>찬스</span>
-              <span className={styles.categoryValue}>{chance}</span>
+              <span className={styles.categoryName} style={textStyle}>찬스</span>
+              <span className={styles.categoryValue} style={textStyle}>{chance}</span>
             </div>
           </div>
         </div>
