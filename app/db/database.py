@@ -3,6 +3,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
+from pathlib import Path
+
+# # ..env 파일에서 환경 변수 로드. DB 오류난 가현ver
+# BASE_DIR    = Path(__file__).resolve().parent.parent.parent  
+# dotenv_path = BASE_DIR / ".env"
+# load_dotenv(dotenv_path=dotenv_path, override=True)
 
 # ..env 파일에서 환경 변수 로드
 load_dotenv()
