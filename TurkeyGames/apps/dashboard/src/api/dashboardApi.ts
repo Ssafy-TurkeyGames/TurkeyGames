@@ -85,6 +85,7 @@ export const getFilteredGames = async (
 // 키워드로 게임 검색
 export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse<Game[]>> => {
   if (!keyword.trim()) {
+    console.log('[DEBUG] 빈 키워드 감지, getAllGames() 호출');
     return getAllGames();
   }
     
