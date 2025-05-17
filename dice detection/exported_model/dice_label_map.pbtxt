@@ -1,29 +1,30 @@
 item {
-  id: 1
-  name: 'one'
+    name: "1",
+    id: 1,
+    display_name: "1"
 }
-
 item {
-  id: 2
-  name: 'two'
+    name: "2",
+    id: 2,
+    display_name: "2"
 }
-
 item {
-  id: 3
-  name: 'three'
+    name: "3",
+    id: 3,
+    display_name: "3"
 }
-
 item {
-  id: 4
-  name: 'four'
+    name: "4",
+    id: 4,
+    display_name: "4"
 }
-
 item {
-  id: 5
-  name: 'five'
+    name: "5",
+    id: 5,
+    display_name: "5"
 }
-
 item {
-  id: 6
-  name: 'six'
+    name: "6",
+    id: 6,
+    display_name: "6"
 }
