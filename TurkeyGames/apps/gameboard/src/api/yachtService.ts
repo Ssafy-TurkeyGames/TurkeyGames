@@ -53,6 +53,14 @@ export interface ScoresResponse {
   scores: Player[];
 }
 
+// 하이라이트 응답 인터페이스
+export interface HighlightResponse {
+  local_path: string;
+  minio_path: string;
+  qr_code: string;
+  local_qr_path: string;
+}
+
 // 야추 게임 API 서비스
 const yachtService = {
   // 게임 시작
@@ -66,11 +74,11 @@ const yachtService = {
   },
   
   // 주사위 굴리기
-  rollDice: (gameId: string, request: DiceRollRequest): Promise<{
+  rollDice: (gameId: string): Promise<{
     dice_values: number[];
     rolls_left: number;
   }> => {
-    return apiRequest.post(`/yacht/${gameId}/roll`, request);
+    return apiRequest.post(`/yacht/${gameId}/roll`);
   },
   
   // 점수 선택
@@ -84,13 +92,18 @@ const yachtService = {
   getScores: (gameId: string): Promise<ScoresResponse> => {
     return apiRequest.get<ScoresResponse>(`/yacht/${gameId}/scores`);
   },
-  
+
   // 게임 종료
   endGame: (gameId: string): Promise<{
     message: string;
   }> => {
     return apiRequest.delete(`/yacht/${gameId}`);
-  }
+  },
+
+  // 하이라이트 영상 조회
+  getHighlight: (gameId: string, playerId: string): Promise<HighlightResponse> => {
+  return apiRequest.get<HighlightResponse>(`/highlight/${gameId}/${playerId}`);
+  },
 };
 
 export default yachtService;

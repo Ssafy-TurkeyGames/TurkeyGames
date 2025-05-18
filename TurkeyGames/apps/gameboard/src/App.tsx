@@ -32,6 +32,7 @@ function App({ socket } : props) {
           <DefaultRoute />
           {gameCreatedData && (
           <TurkeyDiceRoute
+            socket={socket}
             gameId={gameCreatedData.game_id}
             people={gameCreatedData.settings.people}
             voice={gameCreatedData.settings.voice}

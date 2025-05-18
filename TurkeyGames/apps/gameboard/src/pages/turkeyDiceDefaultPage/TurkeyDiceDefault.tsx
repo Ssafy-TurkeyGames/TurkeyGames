@@ -9,9 +9,11 @@ import buttonClickFile from '../../assets/sound/default/button/button.mp3';
 import yachtService from '../../api/yachtService';
 import { calcYachtDice, checkYachtDice } from '../../utils/checkYachtDice';
 import { gameBoardSoundFiles } from '../../constant/soundFiles';
+import { Socket } from 'socket.io-client';
 
 
 interface propsType {
+  socket : Socket,
   gameId: number,
   people : number,
   voice : number
@@ -60,6 +62,14 @@ export default function TurkeyDiceDefault(props: propsType) {
     buttonOnClick();
   };
 
+  // 자리 선택 클릭 효과음
+  const buttonOnClick = () => {
+    if(audioRef.current && !gameStarted) {
+      audioRef.current.src = buttonClickFile;
+      audioRef.current.play();
+    }
+  }
+
   useEffect(() => {
     if (playerCount === props.people && audioRef.current) {
       const audio = audioRef.current;
@@ -94,17 +104,10 @@ export default function TurkeyDiceDefault(props: propsType) {
       getScores();
 
       audio.onended = handleFirstEnded;
-      
+      throwDices();
     }
   }, [playerCount, props.people, props.voice]);
 
-  // 자리 선택 클릭 효과음
-  const buttonOnClick = () => {
-    if(audioRef.current && !gameStarted) {
-      audioRef.current.src = buttonClickFile;
-      audioRef.current.play();
-    }
-  }
 
   // 3) 게임 진행
   // 순서대로 턴을 관리하는 상태
@@ -115,34 +118,155 @@ export default function TurkeyDiceDefault(props: propsType) {
   const [diceValue, setDiceValue] = useState<object | undefined>();
 
   const [scoreData, setScoreData] = useState([]);
+  const [winnerPlayer, setWinnerPlayer] = useState<number>(0);
 
   // 점수 조회 API
   const getScores = async() => {
     try {
+      console.log("점수 조회 API 호출!!!");
       const gameId = props.gameId;
       const data = await yachtService.getScores(gameId.toString());
       setScoreData(data.scores);
-      console.log('데이터:', data);
+      return data;
     } catch (error) {
       console.log('에러:', error);
     }
   }
 
-  
-
   // 주사위 던지기 API
   const throwDices = async() => {
     try {
-      console.log("주사위 던지기 API 호출!!!")
+      console.log("주사위 던지기 API 호출!!!");
       const gameId = props.gameId;
-      const data = await yachtService.rollDice(gameId.toString(), {keep_indices: []});
-      console.log('데이터:', data);
-      setDiceValue(data);
+      const data = await yachtService.rollDice(gameId.toString());
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
+  // 점수 선택 API
+  const selectScore = async(playerId : number, category : string, value: number) => {
+    try {
+      console.log("점수 선택 API 호출!!!");
+      const gameId = props.gameId;
+      const data = await yachtService.selectScore(gameId.toString(), {player_id: playerId, category: category, value: value});
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
+  // 우승자 하이라이트 영상 조회 API
+  const getHighlight = async(gameId : number, playerId : number) => {
+    try {
+      const data = await yachtService.getHighlight(gameId.toString(), playerId.toString());
+      console.log(data);
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
+  // 버튼 클릭: 턴 증가 + 다음 플레이어
+  const nextTurnButtonClick = () => {
+    const newTurn = turnCount + 1;
+    const newRound = Math.floor(newTurn / playerCount) + 1;
+    getScores();
+    setDiceValue(undefined);
+
+    if (newRound > 1) {
+    console.log('게임종료!!!');
+    setIsGameOver(true);
+    return; // 이후 로직 실행 안 함
+    }
+
+    setTurnCount(prev => prev + 1);
+    setCurrentTurnIndex(prev => (prev + 1) % playerCount);
+    throwDices();
+  };
+
+  useEffect(() => {
+  if (!isGameOver) return;
+
+  const calcWinner = async () => {
+    try {
+      getScores();
+      const score = await getScores();
+      const winner = score.scores.reduce((best, current) => {
+        if (
+          current.total_score > best.total_score || 
+          (current.total_score === best.total_score && current.player_id < best.player_id)
+        ) {
+          return current;
+        }
+        return best;
+      });
+
+      alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
+      setWinnerPlayer(winner.player_id);
+      getHighlight(props.gameId, winner.player_id);
+
+      let soundFiles: string[] = [];
+
+      if (audioRef.current) {
+        // 우승자에 따라 해당 mp3 리스트 가져오기
+        if (props.voice === 1) {
+          soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+        } else if (props.voice === 2) {
+          soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+        } else if (props.voice === 3) {
+          soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
+        }
+
+        // 무작위 mp3 선택 후 재생
+        const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+        audioRef.current.pause();  // 이전 사운드 중지
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = randomSound;
+        audioRef.current.play();
+      }
+
+      } catch (error) {
+        console.error('우승자 계산 오류:', error);
+      }
+    };
+
+    calcWinner(); // 함수 실행
+    
+
+  }, [isGameOver]);
+
+  useEffect(() => {
+    console.log("round : " + round);
+  }, [round])
+
+  useEffect(() => {
+    console.log("scoreData" + JSON.stringify(scoreData));
+  }, [scoreData])
+
+  useEffect(() => {
+    // 게임 결과 팟지 하이라이트???
+  }, [isGameOver])
+
+  useEffect(() => {
+    props.socket.on("dice_rolling", (data) => {
+      console.log("주사위 굴리기: " + JSON.stringify(data));
+      console.log("주사위 굴리기: " + data);
+    });
+    props.socket.on("dice_update", (data) => {
+      console.log(typeof(data));
+      console.log(data);
+      setDiceValue(data)
+      console.log("주사위 업데이트: " + JSON.stringify(data));
+    });
+  }, [props.socket])
+
+  useEffect(() => {
+    console.log("diceValue : ", diceValue)
+    if(diceValue === undefined) return;
 
       let soundFiles: string | any[] = [];
-
+      if(diceValue.length === 0) return;
       // 주사위 조합(poker, fh, ss, ls, turkey) 확인
-      switch(checkYachtDice(data.dice_values)) {
+      switch(checkYachtDice(diceValue.dice_values)) {
         case "poker":
           if (props.voice === 1) {
             soundFiles = gameBoardSoundFiles.daegil.poker;
@@ -195,142 +319,7 @@ export default function TurkeyDiceDefault(props: propsType) {
         audioRef.current.src = randomSound;
         audioRef.current.play();
       }
-
-    } catch (error) {
-      console.log('에러:', error);
-    }
-  }
-
-  // 점수 선택 API
-  const selectScore = async(playerId : number, category : string, value: number) => {
-    try {
-      const gameId = props.gameId;
-      const data = await yachtService.selectScore(gameId.toString(), {player_id: playerId, category: category, value: value});
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  // useEffect(() => {
-  //   console.log("diceValue: 상태", diceValue, "타입 - ", typeof(diceValue));
-  //   console.log(calcYachtDice(diceValue.dice_values).turkey);
-  // }, [diceValue]);
-
-  // 버튼 클릭: 턴 증가 + 다음 플레이어
-  const nextTurnButtonClick = () => {
-    setTurnCount(prev => prev + 1);
-    setCurrentTurnIndex(prev => (prev + 1) % playerCount);
-    setDiceValue({});
-    getScores();
-  };
-
-  useEffect(() => {
-    const newRound = Math.floor(turnCount / playerCount) + 1;
-
-    // 최대 12라운드까지만
-    if (newRound <= 1) {
-      setRound(newRound);
-    }
-
-    if (newRound > 1) {
-      // 게임 종료 상태를 먼저 true로 설정 (비동기지만 트리거용)
-      setIsGameOver(true);
-    }
-  }, [turnCount, playerCount]);
-  
-  useEffect(() => {
-    if (!isGameOver) return;
-
-    const winner = scoreData.reduce((best, current) => {
-      if (
-        current.total_score > best.total_score || 
-        (current.total_score === best.total_score && current.player_id < best.player_id)
-      ) {
-        return current;
-      }
-      return best;
-    });
-
-    alert(winner.player_id);
-
-    let soundFiles: string[] = [];
-
-    if (audioRef.current) {
-      if (props.voice === 1) {
-        soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
-      } else if (props.voice === 2) {
-        soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
-      } else if (props.voice === 3) {
-        soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
-      }
-
-      const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
-      audioRef.current.src = randomSound;
-      audioRef.current.play();
-    }
-  }, [isGameOver]);
-
-  // turnCount가 바뀔 때마다 round 갱신
-  // useEffect(() => {
-
-  //   const newRound = Math.floor(turnCount / playerCount) + 1;
-
-  //   // 최대 12라운드까지만
-  //   if (newRound <= 1) {
-  //     setRound(newRound);
-  //   }
-
-  //   if (newRound > 1) {
-  //     // 필요 시: 게임 종료 상태 설정 등도 가능
-  //     setIsGameOver(true);
-      
-  //     // 우승자
-  //     const winner = scoreData.reduce((best, current) => {
-  //       if (
-  //         current.total_score > best.total_score || 
-  //         (current.total_score === best.total_score && current.player_id < best.player_id)
-  //       ) {
-  //         return current;
-  //       }
-  //       return best;
-  //     });
-  //     // alert("🎮 게임 종료!");
-  //     alert(winner.player_id);
-  //     let soundFiles: string | any[] = [];
-
-  //     if(audioRef.current) {
-  //       if(props.voice === 1) {
-  //         soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
-  //       }else if(props.voice === 2) {
-  //         soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
-  //       }else if(props.voice === 3) {
-  //         soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
-  //       }
-  //     }
-
-  //     const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
-  //       audioRef.current.src = randomSound;
-  //       audioRef.current.play();
-  //   }
-    
-  // }, [turnCount, playerCount]);
-
-  useEffect(() => {
-    console.log("round : " + round);
-  }, [round])
-
-  useEffect(() => {
-    // 게임 결과 팟지 하이라이트???
-  }, [isGameOver])
-  
-  useEffect(() => {
-    console.log('scoreData', scoreData);
-    console.log(scoreData);
-    console.log(areaPlayers);
-    console.log(scoreData[areaPlayers[0] - 1]);
-    console.log(scoreData[areaPlayers[1] - 1]);
-  }, [scoreData])
+  }, [diceValue])
 
   return (
     <div className={styles.layout}>
@@ -364,6 +353,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   totalScore={scoreData[areaPlayers[0] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
                   isGameOver={isGameOver}
+                  winnerPlayer={winnerPlayer}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}
@@ -401,6 +391,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   totalScore={scoreData[areaPlayers[1] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
                   isGameOver={isGameOver}
+                  winnerPlayer={winnerPlayer}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}
@@ -443,6 +434,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   totalScore={scoreData[areaPlayers[2] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
                   isGameOver={isGameOver}
+                  winnerPlayer={winnerPlayer}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}
@@ -478,6 +470,7 @@ export default function TurkeyDiceDefault(props: propsType) {
                   totalScore={scoreData[areaPlayers[3] - 1]?.total_score ?? 0}
                   diceValue={diceValue}
                   isGameOver={isGameOver}
+                  winnerPlayer={winnerPlayer}
                   nextTurnButtonClick={nextTurnButtonClick}
                   throwDiceFunction={throwDices}
                   selectScore={selectScore}

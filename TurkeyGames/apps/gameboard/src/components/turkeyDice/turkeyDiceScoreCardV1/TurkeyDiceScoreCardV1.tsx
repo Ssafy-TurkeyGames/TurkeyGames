@@ -25,6 +25,7 @@ interface propsType {
     totalScore: number,
     diceValue: object | undefined,
     isGameOver: boolean,
+    winnerPlayer: number,
     nextTurnButtonClick: () => void,
     throwDiceFunction: () => void,
     selectScore: (playerId: number, category: string, value: number) => Promise<void>
@@ -34,8 +35,9 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
     const aiVoices = ['daegil', 'flower', 'guri'];
 
     useEffect(() => {
-        console.log("playerId: ", props.playerId, "myTurn: ", props.myTurn);
-
+        if(props.myTurn) {
+            console.log(`player ${props.playerId} 차례!!!`);
+        }
     }, [props.diceValue])
     
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -47,7 +49,8 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
 
     const rerollButtonClick = () => {
         if(props.isGameOver) return;
-
+        setSelectState('');
+        setPreviewScores({});
         const ai = aiVoices[props.aiVoice - 1];
         const rerollFiles = 
             ai === 'daegil' ? scoreBoardSoundFiles.daegil.reroll :
@@ -86,29 +89,21 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
 
 
     // Next Turn
-    const selectScoreButtonClick = () => {
+    const selectScoreButtonClick = async () => {
+        await props.selectScore(props.playerId, selectState, calcYachtDice(props.diceValue.dice_values)[selectState]);
+        
         props.nextTurnButtonClick();
-
-        if(props.isGameOver) return;
-
-        console.log(props.diceValue);
-        props.selectScore(props.playerId, selectState, calcYachtDice(props.diceValue.dice_values)[selectState]);
+        
         setUsedCategories(prev => [...prev, selectState]);
         setRerollButtonState(true);
         setSelectState('');
+
+        if(props.isGameOver) return;
+        
         if(audioRef.current) {
             audioRef.current.src = buttonClickFile;
-
-            // 주사위 리롤 안내 음성 끝난후 주사위 새로 굴리기기
-            audioRef.current.onended = () => {
-                // props.throwDiceFunction();
-            };
-
             audioRef.current.play();
         }
-
-        setPreviewScores({});
-        
     }
 
     useEffect(() => {
@@ -171,6 +166,8 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
     return (
         <div className={styles.box}>
             {props.myTurn ? <></> : <div className={styles.block}></div>}
+            {props.winnerPlayer === props.playerId ? <div className={styles.winnerblock}></div> : <></>}
+
             <audio ref={audioRef}/>
 
             <div className={styles.playerInfo} onClick={props.throwDiceFunction}>
@@ -188,7 +185,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('ace') ? 
                             props.ace : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.ace : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.ace !== 0 ? previewScores.ace : ''
                         }
                     </div>
                 </div>
@@ -201,7 +198,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('dual') ? 
                             props.dual : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.dual : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.dual !== 0 ? previewScores.dual : ''
                         }
                     </div>
                 </div>
@@ -214,7 +211,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('triple') ? 
                             props.triple : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.triple : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.triple !== 0 ? previewScores.triple : ''
                         }
                     </div>
                 </div>
@@ -227,7 +224,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('quad') ? 
                             props.quad : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.quad : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.quad !== 0 ? previewScores.quad : ''
                         }
                     </div>
                 </div>
@@ -240,7 +237,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('penta') ? 
                             props.penta : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.penta : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.penta !== 0 ? previewScores.penta : ''
                         }
                     </div>
                 </div>
@@ -253,7 +250,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('hexa') ? 
                             props.hexa : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.hexa : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.hexa !== 0 ? previewScores.hexa : ''
                         }
                     </div>
                 </div>
@@ -266,7 +263,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('chance') ? 
                             props.chance : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.chance : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.chance !== 0 ? previewScores.chance : ''
                         }
                     </div>
                 </div>
@@ -279,7 +276,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('poker') ? 
                             props.poker : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.poker : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.poker !== 0 ? previewScores.poker : ''
                         }
                     </div>
                 </div>
@@ -292,7 +289,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('full_house') ? 
                             props.fullHouse : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.full_house : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.full_house !== 0 ? previewScores.full_house : ''
                         }
                     </div>
                 </div>
@@ -305,7 +302,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('small_straight') ? 
                             props.smallStraight : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.small_straight : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.small_straight !== 0 ? previewScores.small_straight : ''
                         }
                     </div>
                 </div>
@@ -318,7 +315,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('large_straight') ? 
                             props.largeStraight : 
-                            Object.keys(previewScores).length !== 0 != 0 && props.myTurn ? previewScores.large_straight : ''
+                            Object.keys(previewScores).length !== 0 != 0 && props.myTurn && previewScores.large_straight !== 0 ? previewScores.large_straight : ''
                         }
                     </div>
                 </div>
@@ -331,7 +328,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('turkey') ? 
                             props.turkey : 
-                            Object.keys(previewScores).length !== 0 && props.myTurn ? previewScores.turkey : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.turkey !== 0 ? previewScores.turkey : ''
                         }
                     </div>
                 </div>
