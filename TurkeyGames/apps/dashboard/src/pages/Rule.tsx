@@ -9,9 +9,11 @@ import { GameRule } from '../api/types';
 interface RuleProps {
   isModal?: boolean;
   modalGameId?: string | number; // 모달로 사용될 때 gameId를 props로 받음
+  onClose?: () => void; // 모달 닫기 함수 추가
+  showButtons?: boolean; // 버튼 표시 여부를 직접 제어
 }
 
-export default function Rule({ isModal = false, modalGameId }: RuleProps) {
+export default function Rule({ isModal = false, modalGameId, onClose, showButtons = true }: RuleProps) {
   const { gameId: urlGameId } = useParams<{ gameId: string }>();
   const [gameRule, setGameRule] = useState<GameRule | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,8 +25,14 @@ export default function Rule({ isModal = false, modalGameId }: RuleProps) {
 
   // 모달 닫기 핸들러
   const handleClose = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    // 모달로 사용되고 onClose 함수가 전달된 경우 해당 함수 호출
+    if (isModal && onClose) {
+      onClose();
+    } else {
+      // 일반 페이지로 사용된 경우 이전 페이지로 이동
+      navigate(-1);
+    }
+  }, [isModal, onClose, navigate]);
 
   // 모달 오버레이 클릭 핸들러 - 모달 바깥 영역 클릭 시 닫기
   const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -92,72 +100,80 @@ export default function Rule({ isModal = false, modalGameId }: RuleProps) {
   const { gameProfilePath, description, imagePath, descriptionVideoPath } = gameRule;
 
   return (
-    <div 
-      className={isModal ? styles.modalOverlay : styles.container}
-      onClick={isModal ? handleOverlayClick : undefined}
-    >
-      <div className={isModal ? styles.modalContent : undefined}>
-        {isModal && (
-          <button
-            className={styles.closeBtn}
-            onClick={handleClose}
-            aria-label="닫기"
-            type="button"
-          >
-            <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
-          </button>
-        )}
+  <div 
+    className={isModal ? styles.modalOverlay : styles.container}
+    onClick={isModal ? handleOverlayClick : undefined}
+  >
+    <div className={isModal ? styles.modalContent : undefined}>
+      {isModal && (
+        <button
+          className={styles.closeBtn}
+          onClick={handleClose}
+          aria-label="닫기"
+          type="button"
+        >
+          <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
+        </button>
+      )}
 
-        <section className={styles.profileSection}>
+      <section className={styles.profileSection}>
+        <img
+          src={gameProfilePath || logo}
+          alt="게임 대표 이미지"
+          className={styles.profileImage}
+          onError={(e) => {
+            e.currentTarget.src = logo;
+            e.currentTarget.onerror = null;
+          }}
+        />
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>📜 게임 규칙 설명</h2>
+        <p className={styles.description}>{description}</p>
+      </section>
+
+      {imagePath && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
           <img
-            src={gameProfilePath || logo}
-            alt="게임 대표 이미지"
-            className={styles.profileImage}
+            src={imagePath}
+            alt="게임 규칙 이미지"
+            className={styles.ruleImage}
             onError={(e) => {
-              e.currentTarget.src = logo;
-              e.currentTarget.onerror = null;
+              e.currentTarget.style.display = 'none';
             }}
           />
         </section>
+      )}
 
+      {descriptionVideoPath && (
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>📜 게임 규칙 설명</h2>
-          <p className={styles.description}>{description}</p>
-        </section>
-
-        {imagePath && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
-            <img
-              src={imagePath}
-              alt="게임 규칙 이미지"
-              className={styles.ruleImage}
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+          <h2 className={styles.sectionTitle}>🎥 규칙 동영상</h2>
+          <div className={styles.videoWrapper}>
+            <iframe
+              src={descriptionVideoPath}
+              title="게임 규칙 동영상"
+              className={styles.video}
+              allowFullScreen
             />
-          </section>
-        )}
+          </div>
+        </section>
+      )}
 
-        {descriptionVideoPath && (
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>🎥 규칙 동영상</h2>
-            <div className={styles.videoWrapper}>
-              <iframe
-                src={descriptionVideoPath}
-                title="게임 규칙 동영상"
-                className={styles.video}
-                allowFullScreen
-              />
-            </div>
-          </section>
-        )}
-
+      {/* showButtons prop이 true이거나 정의되지 않은 경우에만 버튼 섹션 표시 */}
+      {(showButtons !== false) && (
         <section className={styles.buttonSection}>
           <div className={styles.buttonGroup}>
-            <Link to="/search" className={styles.backButton}>
-              ← 목록으로 돌아가기
-            </Link>
+            {!isModal ? (
+              <Link to="/search" className={styles.backButton}>
+                ← 목록으로 돌아가기
+              </Link>
+            ) : (
+              <button onClick={handleClose} className={styles.backButton}>
+                ← 닫기
+              </button>
+            )}
           </div>
           <div className={styles.buttonGroup}>
             <button
@@ -168,7 +184,9 @@ export default function Rule({ isModal = false, modalGameId }: RuleProps) {
             </button>
           </div>
         </section>
-      </div>
+      )}
     </div>
-  );
+  </div>
+);
+
 }
