@@ -199,3 +199,86 @@
   }
 }
 
+/* 규칙 버튼 스타일 추가 */
+.rulesButton {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 15px 50px;
+  border-radius: 25px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.rulesButton:hover {
+  background-color: #1976d2;
+  transform: translateY(-2px);
+}
+
+/* 모달 오버레이 스타일 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 모달 콘텐츠 스타일 */
+.modalContent {
+  background-color: white;
+  border-radius: 32px;
+  padding: 40px 32px 32px 32px;
+  width: 90%;
+  max-width: 800px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  box-sizing: border-box;
+  
+  /* 스크롤바 스타일 */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+/* Webkit 브라우저용 스크롤바 스타일 */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+  border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+/* 반응형 디자인 - 버튼 컨테이너 */
+@media (max-width: 768px) {
+  .buttonContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .endGameButton,
+  .resultButton,
+  .rulesButton {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+  }
+}

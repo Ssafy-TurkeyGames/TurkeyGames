@@ -33,8 +33,8 @@ const getVoiceId = (voiceName: string | null): number => {
 
 // 플레이어 이름 생성 함수
 const generatePlayerNames = (count: number): string[] => {
-  const names = ['가현', '경록', '웅지', '동현'];
-  return names.slice(0, count);
+  // 동적으로 플레이어 이름 생성
+  return Array.from({ length: count }, (_, i) => `PLAYER ${i + 1}`);
 };
 
 export default function TurkeyDiceOptions() {
