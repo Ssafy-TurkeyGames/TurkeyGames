@@ -34,12 +34,12 @@ const scorecardMapping = [
   { apiName: 'quad', displayName: '쿼드' },
   { apiName: 'penta', displayName: '펜타' },
   { apiName: 'hexa', displayName: '헥사' },
+  { apiName: 'chance', displayName: '찬스' },
   { apiName: 'poker', displayName: '포커' },
   { apiName: 'full_house', displayName: '풀하우스' },
   { apiName: 'small_straight', displayName: 'S.S' },
   { apiName: 'large_straight', displayName: 'L.S' },
-  { apiName: 'turkey', displayName: '터키' },
-  { apiName: 'chance', displayName: '찬스' }
+  { apiName: 'turkey', displayName: '터키' }
 ];
 
 // 기본 플레이어 데이터
@@ -70,7 +70,8 @@ const defaultPlayers: PlayerData[] = [
   }
 ];
 
-const playerNames = ['가현', '경록', '웅지', '동현'];
+// 하드코딩했던거 제거
+// const playerNames = ['가현', '경록', '웅지', '동현'];
 
 const ScoreBoard: React.FC = () => {
   const navigate = useNavigate();
@@ -197,30 +198,30 @@ const ScoreBoard: React.FC = () => {
 
   // 플레이어 데이터 포맷 함수
   const formatPlayerData = (scoresData: any[]) => {
-    return scoresData.map((scoreData: any, index: number) => {
-      const scorecard = scoreData.scorecard || {};
+  return scoresData.map((scoreData: any, index: number) => {
+    const scorecard = scoreData.scorecard || {};
+    
+    // 족보 항목 생성
+    const items = scorecardMapping.map(({ apiName, displayName }) => {
+      // API 응답에서 해당 족보의 점수 가져오기
+      const value = scorecard[apiName];
       
-      // 족보 항목 생성
-      const items = scorecardMapping.map(({ apiName, displayName }) => {
-        // API 응답에서 해당 족보의 점수 가져오기
-        const value = scorecard[apiName];
-        
-        // 요트다이스 룰: 기록된 점수는 해당 점수로 표시, 기록되지 않은 항목은 0으로 표시
-        return {
-          name: displayName,
-          score: value !== undefined ? value : 0, // 기록된 점수 표시
-          completed: value !== undefined && value !== 0 // 점수가 기록된 경우에만 completed
-        };
-      });
-      
+      // 요트다이스 룰: 기록된 점수는 해당 점수로 표시, 기록되지 않은 항목은 0으로 표시
       return {
-        id: index + 1,
-        name: playerNames[index] || `플레이어 ${index + 1}`,
-        score: scoreData.total_score || 0,
-        items
+        name: displayName,
+        score: value !== undefined ? value : 0, // 기록된 점수 표시
+        completed: value !== undefined && value !== 0 // 점수가 기록된 경우에만 completed
       };
     });
-  };
+    
+    return {
+      id: index + 1,
+      name: `PLAYER ${index + 1}`, // 동적 플레이어 이름 사용
+      score: scoreData.total_score || 0,
+      items
+    };
+  });
+};
 
   // 게임 결과 버튼 클릭 처리
   const handleGameResult = () => {
