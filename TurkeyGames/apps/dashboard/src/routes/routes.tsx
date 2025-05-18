@@ -1,4 +1,3 @@
-// apps/dashboard/src/routes/routes.tsx
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout'; // 공통 레이아웃
@@ -23,8 +22,9 @@ export default function AppRoutes() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchGame />} />
-          <Route path="/rule/:gameId" element={<Rule />} />
-          {/* 게임 옵션 라우트 */}
+          <Route path="rule/:gameId" element={<Rule />} />
+          {/* 게임 옵션 라우트 - gameId 파라미터 추가 */}
+          <Route path="game-options/:gameId" element={<TurkeyDiceOptions />} />
           <Route path="game-options" element={<TurkeyDiceOptions />} />
           {/* 터키다이스 게임 라우트 */}
           <Route path="games/TurkeyDice">
@@ -44,6 +44,8 @@ export default function AppRoutes() {
           <Route path="/games/TurkeyDice/highlight" element={<HighlightModal />} />
           {/* 새 API 방식 하이라이트 경로도 추가 */}
           <Route path="/highlight/:gameId/:playerId" element={<HighlightModal />} />
+          {/* 규칙 모달 경로 추가 */}
+          <Route path="/rule/:gameId" element={<Rule isModal={true} />} />
         </Routes>
       )}
     </>

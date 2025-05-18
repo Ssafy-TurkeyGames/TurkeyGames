@@ -333,11 +333,15 @@ const ScoreBoard: React.FC = () => {
         </div>
       )}
 
-      {/* 규칙 모달 */}
+      {/* 규칙 모달 - onClose 함수 전달 */}
       {showRuleModal && (
         <div className={styles.modalOverlay} onClick={handleCloseRuleModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <Rule isModal={true} modalGameId={TURKEY_DICE_GAME_ID} />
+            <Rule 
+              isModal={true} 
+              modalGameId={TURKEY_DICE_GAME_ID} 
+              onClose={handleCloseRuleModal}
+            />
           </div>
         </div>
       )}
