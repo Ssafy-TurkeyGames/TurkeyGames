@@ -236,16 +236,26 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   }
 
   // 버튼 클릭: 턴 증가 + 다음 플레이어
-  const nextTurnButtonClick = () => {
-    setTurnCount(prev => prev + 1);
-    setCurrentTurnIndex(prev => (prev + 1) % props.people);
-    setDiceValue(undefined);
-    
-    setTimeout(() => {
-      getScores();
-      throwDices(); // 다음 턴 시작 시 주사위 던지기 API 호출
-    }, 500);
-  };
+const nextTurnButtonClick = () => {
+  const newTurn = turnCount + 1;
+  const newRound = Math.floor(newTurn / props.people) + 1;
+  
+  // 2라운드부터 게임 종료
+  if (newRound > 1) {
+    console.log('게임종료!!!');
+    setIsGameOver(true);
+    return; // 이후 로직 실행 안 함
+  }
+
+  setTurnCount(prev => prev + 1);
+  setCurrentTurnIndex(prev => (prev + 1) % props.people);
+  setDiceValue(undefined);
+  
+  setTimeout(() => {
+    getScores();
+    throwDices(); // 다음 턴 시작 시 주사위 던지기 API 호출
+  }, 500);
+};
 
   // turnCount가 바뀔 때마다 round 갱신
   useEffect(() => {
@@ -263,55 +273,92 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   }, [turnCount, props.people]);
 
   // 게임 종료 시 우승자 결정
-  useEffect(() => {
-    if (!isGameOver) return;
+useEffect(() => {
+  if (!isGameOver) return;
 
-    const calcWinner = async () => {
-      try {
-        const score = await getScores();
-        if (!score || !score.scores || score.scores.length === 0) return;
-        
-        const winner = score.scores.reduce((best, current) => {
-          if (
-            current.total_score > best.total_score || 
-            (current.total_score === best.total_score && current.player_id < best.player_id)
-          ) {
-            return current;
-          }
-          return best;
-        }, score.scores[0]);
+  const calcWinner = async () => {
+    try {
+      const score = await getScores();
+      if (!score || !score.scores || score.scores.length === 0) return;
+      
+      const winner = score.scores.reduce((best, current) => {
+        if (
+          current.total_score > best.total_score || 
+          (current.total_score === best.total_score && current.player_id < best.player_id)
+        ) {
+          return current;
+        }
+        return best;
+      }, score.scores[0]);
 
-        console.log("우승자 결정:", winner);
-        alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
-        setWinnerPlayer(winner.player_id);
-        getHighlight(props.gameId, winner.player_id);
+      console.log("우승자 결정:", winner);
+      alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
+      setWinnerPlayer(winner.player_id);
+      getHighlight(props.gameId, winner.player_id);
 
+      // 소켓을 통해 게임 종료 이벤트 발송
+      if (props.socket && socketConnected) {
+        props.socket.emit('game_ended', { 
+          gameId: props.gameId,
+          winner: winner.player_id,
+          scores: score.scores
+        });
+        console.log('게임 종료 이벤트 발송:', props.gameId);
+      }
+
+      if (audioRef.current) {
         let soundFiles: string[] = [];
-
-        if (audioRef.current) {
-          // 우승자에 따라 해당 mp3 리스트 가져오기
+        
+        // 우승자에 따라 해당 mp3 리스트 가져오기
+        if (props.voice === 1 && gameBoardSoundFiles.daegil.winner[winner.player_id]) {
+          soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+        } else if (props.voice === 2 && gameBoardSoundFiles.flower.winner[winner.player_id]) {
+          soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+        } else if (props.voice === 3 && gameBoardSoundFiles.guri.winner[winner.player_id]) {
+          soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
+        } else {
+          // 해당 플레이어 ID에 대한 음성 파일이 없는 경우 기본 음성 사용
           if (props.voice === 1) {
-            soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+            soundFiles = gameBoardSoundFiles.daegil.winner[1] || [];
           } else if (props.voice === 2) {
-            soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+            soundFiles = gameBoardSoundFiles.flower.winner[1] || [];
           } else if (props.voice === 3) {
-            soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
+            soundFiles = gameBoardSoundFiles.guri.winner[1] || [];
           }
+        }
 
-          // 무작위 mp3 선택 후 재생
+        // 음성 파일이 있는 경우에만 재생
+        if (soundFiles && soundFiles.length > 0) {
           const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
           audioRef.current.src = randomSound;
           audioRef.current.play().catch(e => console.log("우승자 음성 재생 실패:", e));
+        } else {
+          console.log("우승자 음성 파일을 찾을 수 없습니다.");
+          // 음성 파일이 없는 경우 일정 시간 후 홈 화면으로 이동
+          setTimeout(() => {
+            navigate('/gameboard/');
+          }, 3000);
         }
-      } catch (error) {
-        console.error('우승자 계산 오류:', error);
+      } else {
+        // 오디오 참조가 없는 경우 일정 시간 후 홈 화면으로 이동
+        setTimeout(() => {
+          navigate('/gameboard/');
+        }, 3000);
       }
-    };
+    } catch (error) {
+      console.error('우승자 계산 오류:', error);
+      // 오류 발생 시에도 일정 시간 후 홈 화면으로 이동
+      setTimeout(() => {
+        navigate('/gameboard/');
+      }, 3000);
+    }
+  };
 
-    calcWinner();
-  }, [isGameOver, props.gameId, props.voice]);
+  calcWinner();
+}, [isGameOver, props.gameId, props.voice, props.socket, socketConnected, navigate]);
+
 
   // 소켓 이벤트 리스너 설정
   useEffect(() => {
