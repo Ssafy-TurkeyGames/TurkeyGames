@@ -1,16 +1,17 @@
 // pages/games/TurkeyDice/ScoreBoard.tsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import styles from './ScoreBoard.module.css';
 import ScoreCard from '../../../components/games/TurkeyDice/ScoreCard';
 import Logo from '../../../components/common/Logo';
 import axios from 'axios';
 import { useSocket } from '../../../hooks/useSocket';
 import { endYachtGame } from '../../../api/dashboardApi';
+import Rule from '../../../pages/Rule';
 // import axiosInstance from '../../../api/axiosInstance';
 
 // 소켓 서버 URL
-const SOCKET_SERVER_URL = 'http://192.168.30.158:8000';
+const SOCKET_SERVER_URL = 'http://localhost:8000';
 
 interface ScoreItem {
   name: string;
@@ -33,12 +34,12 @@ const scorecardMapping = [
   { apiName: 'quad', displayName: '쿼드' },
   { apiName: 'penta', displayName: '펜타' },
   { apiName: 'hexa', displayName: '헥사' },
+  { apiName: 'chance', displayName: '찬스' },
   { apiName: 'poker', displayName: '포커' },
   { apiName: 'full_house', displayName: '풀하우스' },
   { apiName: 'small_straight', displayName: 'S.S' },
   { apiName: 'large_straight', displayName: 'L.S' },
-  { apiName: 'turkey', displayName: '터키' },
-  { apiName: 'chance', displayName: '찬스' }
+  { apiName: 'turkey', displayName: '터키' }
 ];
 
 // 기본 플레이어 데이터
@@ -69,10 +70,12 @@ const defaultPlayers: PlayerData[] = [
   }
 ];
 
-const playerNames = ['가현', '경록', '웅지', '동현'];
+// 하드코딩했던거 제거
+// const playerNames = ['가현', '경록', '웅지', '동현'];
 
 const ScoreBoard: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const gameId = searchParams.get('gameId');
   const { socket, isConnected } = useSocket();
@@ -81,6 +84,9 @@ const ScoreBoard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [gameStatus, setGameStatus] = useState<string>('waiting');
   const [endingGame, setEndingGame] = useState(false); // 게임 종료 상태 추가
+  const [showRuleModal, setShowRuleModal] = useState(false); // 규칙 모달 표시 상태
+
+  const TURKEY_DICE_GAME_ID = "1";
 
   // 초기 데이터 로딩
   useEffect(() => {
@@ -192,30 +198,30 @@ const ScoreBoard: React.FC = () => {
 
   // 플레이어 데이터 포맷 함수
   const formatPlayerData = (scoresData: any[]) => {
-    return scoresData.map((scoreData: any, index: number) => {
-      const scorecard = scoreData.scorecard || {};
+  return scoresData.map((scoreData: any, index: number) => {
+    const scorecard = scoreData.scorecard || {};
+    
+    // 족보 항목 생성
+    const items = scorecardMapping.map(({ apiName, displayName }) => {
+      // API 응답에서 해당 족보의 점수 가져오기
+      const value = scorecard[apiName];
       
-      // 족보 항목 생성
-      const items = scorecardMapping.map(({ apiName, displayName }) => {
-        // API 응답에서 해당 족보의 점수 가져오기
-        const value = scorecard[apiName];
-        
-        // 요트다이스 룰: 기록된 점수는 해당 점수로 표시, 기록되지 않은 항목은 0으로 표시
-        return {
-          name: displayName,
-          score: value !== undefined ? value : 0, // 기록된 점수 표시
-          completed: value !== undefined && value !== 0 // 점수가 기록된 경우에만 completed
-        };
-      });
-      
+      // 요트다이스 룰: 기록된 점수는 해당 점수로 표시, 기록되지 않은 항목은 0으로 표시
       return {
-        id: index + 1,
-        name: playerNames[index] || `플레이어 ${index + 1}`,
-        score: scoreData.total_score || 0,
-        items
+        name: displayName,
+        score: value !== undefined ? value : 0, // 기록된 점수 표시
+        completed: value !== undefined && value !== 0 // 점수가 기록된 경우에만 completed
       };
     });
-  };
+    
+    return {
+      id: index + 1,
+      name: `PLAYER ${index + 1}`, // 동적 플레이어 이름 사용
+      score: scoreData.total_score || 0,
+      items
+    };
+  });
+};
 
   // 게임 결과 버튼 클릭 처리
   const handleGameResult = () => {
@@ -263,6 +269,16 @@ const ScoreBoard: React.FC = () => {
     }
   };
 
+  // 규칙 보기 버튼 클릭 처리
+  const handleShowRules = () => {
+    setShowRuleModal(true);
+  };
+
+  // 규칙 모달 닫기 처리
+  const handleCloseRuleModal = () => {
+    setShowRuleModal(false);
+  };
+
   if (loading) {
     return (
       <div className={styles.container}>
@@ -307,11 +323,27 @@ const ScoreBoard: React.FC = () => {
         <button className={styles.resultButton} onClick={handleGameResult}>
           게임 결과
         </button>
+        <button className={styles.rulesButton} onClick={handleShowRules}>
+          📖 규칙 보기
+        </button>
       </div>
       
       {gameId && (
         <div className={styles.gameIdBadge}>
           게임 ID: {gameId} | 상태: {gameStatus} | 연결: {isConnected ? '연결됨' : '연결 중...'}
+        </div>
+      )}
+
+      {/* 규칙 모달 - onClose 함수 전달 */}
+      {showRuleModal && (
+        <div className={styles.modalOverlay} onClick={handleCloseRuleModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Rule 
+              isModal={true} 
+              modalGameId={TURKEY_DICE_GAME_ID} 
+              onClose={handleCloseRuleModal}
+            />
+          </div>
         </div>
       )}
     </div>

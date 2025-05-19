@@ -1,4 +1,3 @@
-// apps/dashboard/src/routes/routes.tsx
 import React from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Layout from '../components/Layout'; // 공통 레이아웃
@@ -15,16 +14,18 @@ export default function AppRoutes() {
   const location = useLocation();
   // 모달을 띄우기 직전의 location을 backgroundLocation으로 저장
   const state = location.state as { backgroundLocation?: Location };
+  const backgroundLocation = state?.backgroundLocation;
 
   return (
     <>
-      <Routes location={state?.backgroundLocation || location}>
+      <Routes location={backgroundLocation || location}>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="search" element={<SearchGame />} />
-          <Route path="/rule/:gameId" element={<Rule />} />
-          {/* 게임 옵션 라우트 */}
+          <Route path="rule/:gameId" element={<Rule />} />
+          {/* 게임 옵션 라우트 - gameId 파라미터 추가 */}
           <Route path="game-options/:gameId" element={<TurkeyDiceOptions />} />
+          <Route path="game-options" element={<TurkeyDiceOptions />} />
           {/* 터키다이스 게임 라우트 */}
           <Route path="games/TurkeyDice">
             <Route path="score" element={<ScoreBoard />} />
@@ -32,6 +33,8 @@ export default function AppRoutes() {
             <Route path="result" element={<TurkeyDiceResult />} />
             {/* 추가 터키다이스 관련 페이지들 */}
           </Route>
+          {/* 새로운 하이라이트 경로 - URL 파라미터 방식 */}
+          <Route path="highlight/:gameId/:playerId" element={<HighlightModal />} />
         </Route>
       </Routes>
 
@@ -39,6 +42,10 @@ export default function AppRoutes() {
       {state?.backgroundLocation && (
         <Routes>
           <Route path="/games/TurkeyDice/highlight" element={<HighlightModal />} />
+          {/* 새 API 방식 하이라이트 경로도 추가 */}
+          <Route path="/highlight/:gameId/:playerId" element={<HighlightModal />} />
+          {/* 규칙 모달 경로 추가 */}
+          <Route path="/rule/:gameId" element={<Rule isModal={true} />} />
         </Routes>
       )}
     </>

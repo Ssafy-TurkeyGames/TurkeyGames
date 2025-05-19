@@ -20,7 +20,7 @@ function App({ socket } : props) {
       if(data.settings.map === 1) {
         navigate('/gameboard/turkey_dice/default');
       }else if(data.settings.map === 2) {
-        navigate('/gameboard/turkey_dice/acade');
+        navigate('/gameboard/turkey_dice/arcade');
       }
     });
   }, [socket]);

@@ -1,11 +1,11 @@
 // apps/dashboard/src/pages/SearchGame.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from './SearchGame.module.css';
 import logo from '../assets/images/logo.png';
-import { getAllGames, getFilteredGames, searchGamesByKeyword } from '../api/dashboardApi';
+import { getAllGames, getFilteredGames, searchGamesByKeyword, clearGameCache } from '../api/dashboardApi';
 import { Game } from '../api/types';
-import SearchBar from '../components/SearchBar';
+import searchIcon from '../assets/images/search (1).png';
 
 // 필터 버튼 데이터
 const playerFilters = ['2인', '3인', '4인'];
@@ -31,33 +31,73 @@ export default function SearchGame() {
   // URL 파라미터에서 검색어 읽기 추가
   const searchParams = new URLSearchParams(location.search);
   const keywordParam = searchParams.get('keyword');
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const isFirstRender = useRef(true);
+  
 
   // 필터가 적용되었는지 확인
   const isFilterActive = selectedPlayers.length > 0 || selectedLevels.length > 0;
 
-  // 검색 버튼/엔터 클릭 핸들러
-  const handleSearch = () => {
-    fetchGames();
-    // URL 업데이트 (선택사항)
-    if (search.trim()) {
-      navigate(`/search?keyword=${encodeURIComponent(search)}`, { replace: true });
-    }
-  };
-
-  // 컴포넌트 마운트 시 URL 파라미터 검색어 적용
+  // 1. 필터/URL 파라미터 변경 시 검색 (유지)
   useEffect(() => {
-    // keywordParam이 있으면 우선 적용
-    const effectiveSearch = keywordParam !== null ? keywordParam : search;
-    fetchGames(effectiveSearch);
-  }, [selectedPlayers, selectedLevels, search, keywordParam]);
+    // 첫 렌더링 시에만 실행되도록 제어
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      const effectiveSearch = keywordParam !== null ? keywordParam : search;
+      fetchGames(effectiveSearch);
+    } else {
+      // 첫 렌더링이 아닌 경우에만 실행
+      const effectiveSearch = keywordParam !== null ? keywordParam : search;
+      fetchGames(effectiveSearch);
+    }
+  }, [selectedPlayers, selectedLevels, keywordParam]);
+
+  // 2. 실시간 검색 핸들링 (유지)
+  useEffect(() => {
+    if (selectedPlayers.length > 0 || selectedLevels.length > 0) return;
+    if (keywordParam !== null) return;
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      fetchGames(search);
+    }, 300);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [search]);
   
   // 모든 필터 초기화
-  const clearAllFilters = () => {
-    setSelectedPlayers([]);
-    setSelectedLevels([]);
-    setSearch('');
-    fetchGames('');
-  };
+const clearAllFilters = async () => {
+  setSelectedPlayers([]);
+  setSelectedLevels([]);
+  setSearch('');
+  
+  // 캐시 초기화 및 강제 새로고침으로 전체 게임 목록 불러오기
+  setLoading(true);
+  try {
+    // 캐시 초기화
+    clearGameCache();
+    
+    // 강제 새로고침으로 전체 게임 목록 불러오기
+    const response = await getAllGames(true);
+    
+    if (response.code === 'SUCCESS') {
+      setGames(response.data || []);
+      setError(null);
+    } else {
+      console.error('❌ API 오류:', response.message);
+      setError(response.message || '게임 목록을 불러오는데 실패했습니다.');
+      setGames([]);
+    }
+  } catch (err) {
+    console.error('❌ 네트워크 오류:', err);
+    setError('서버 연결에 실패했습니다.');
+    setGames([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // 게임 목록 불러오기
   const fetchGames = async (searchTerm = search) => {
@@ -147,15 +187,32 @@ export default function SearchGame() {
 
   return (
     <div className={styles.container}>
-      {/* SearchBar 컴포넌트 사용 - onSearch prop 전달 필수 */}
-      <SearchBar
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        onSearch={handleSearch}
-        placeholder="게임을 검색해보세요"
-      />
+      {/* 고정 검색창 */}
+      <div className={styles.fixedSearchBar}>
+        <div className={styles.searchBarInner}>
+          <input
+            className={styles.input}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="게임을 검색해보세요"
+            onKeyDown={(e) => e.key === 'Enter' && fetchGames(search)}
+          />
+          <button 
+            className={styles.iconBtn} 
+            onClick={() => fetchGames(search)}
+            aria-label="검색"
+          >
+            <img 
+              src={searchIcon}
+              alt="검색" 
+              className={styles.icon} 
+            />
+          </button>
+        </div>
+      </div>
 
-      {/* 필터 버튼 */}
+      {/* 필터, 결과 등 렌더링 */}
       <div className={styles.filterRow}>
         {playerFilters.map(label => (
           <button
@@ -176,8 +233,6 @@ export default function SearchGame() {
             {label}
           </button>
         ))}
-        
-        {/* 필터 초기화 버튼 */}
         {isFilterActive && (
           <>
             <span className={styles.divider}>|</span>
@@ -191,15 +246,11 @@ export default function SearchGame() {
           </>
         )}
       </div>
-
-      {/* 에러 상태 */}
       {error && !loading && (
         <div className={styles.errorContainer}>
           <p>{error}</p>
         </div>
       )}
-
-      {/* 게임 카드 리스트 */}
       {!loading && !error && (
         <div className={styles.cardList}>
           {games.length > 0 ? (
@@ -235,7 +286,7 @@ export default function SearchGame() {
                   </button>
                   <button
                     className={styles.playBtn}
-                    onClick={() => navigate(`/game-options/${game.gameId}`)}
+                    onClick={() => navigate(`/game-options/`)}
                   >
                     ⚡ 게임 하기
                   </button>

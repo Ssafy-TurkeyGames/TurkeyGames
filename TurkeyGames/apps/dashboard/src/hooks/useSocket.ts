@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_SERVER_URL = 'http://192.168.30.158:8000' // 경록님 ip임. 실제 서버 URL로 변경해야 함.
+const SOCKET_SERVER_URL = 'http://localhost:8000' // 경록님 ip임. 실제 서버 URL로 변경해야 함.
 
 export function useSocket() {
   const [socket, setSocket] = useState<Socket | null>(null);

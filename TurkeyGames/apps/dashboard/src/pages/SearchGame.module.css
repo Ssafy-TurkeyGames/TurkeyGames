@@ -1,5 +1,4 @@
 /* apps/dashboard/src/pages/SearchGame.module.css */
-
 .container {
   width: 100%;
   min-height: 100vh;
@@ -25,6 +24,60 @@
   margin-right: clamp(8px, 1.5vw, 18px);
 }
 
+/* 검색창을 헤더보다 위에 고정 */
+.fixedSearchBar {
+  position: fixed;
+  top: 1%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60vw;
+  z-index: 1100; /* 헤더보다 높게! */
+  display: flex;
+  justify-content: center;
+  background: rgba(255,255,255,0);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* 검색창 내부 스타일 */
+.searchBarInner {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 28px;
+  padding: 0 24px;
+  height: 54px;
+  min-width: 340px;
+  max-width: 500px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 22px;
+  width: 100%;
+  color: #6d3d47;
+  font-family: inherit;
+  margin-left: 20px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.icon {
+  width: 26px;
+  height: 26px;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
 .searchBox {
   flex: 1;
   display: flex;
@@ -34,6 +87,43 @@
   padding: 0 clamp(10px, 1.5vw, 18px);
   height: clamp(36px, 5vh, 48px);
   margin-right: clamp(8px, 1.5vw, 18px);
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 24px;
+  padding: 0 16px;
+  height: 48px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding: 8px 0;
+  background: transparent;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
 }
 
 .searchIcon {
@@ -48,6 +138,26 @@
   font-size: clamp(16px, 1.8vw, 20px);
   width: 100%;
   background: transparent;
+}
+
+.searchingIndicator {
+  text-align: center;
+  margin-top: 10px;
+  color: #6d3d47;
+  font-size: 0.9rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 5px 10px;
+  border-radius: 15px;
+  display: inline-block;
+  margin-left: auto;
+  margin-right: auto;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }
 
 .filterRow {
@@ -68,7 +178,7 @@
   padding: clamp(5px, 0.8vh, 8px) clamp(15px, 2.5vw, 26px);
   font-size: clamp(16px, 1.8vw, 20px);
   font-weight: 700;
-  margin: 0;
+  margin-top: 50px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -91,6 +201,7 @@
   font-size: clamp(18px, 2.2vw, 24px);
   color: #d6a75f;
   margin: 0 clamp(10px, 1.5vw, 18px);
+  margin-top: 50px;
 }
 
 .cardList {

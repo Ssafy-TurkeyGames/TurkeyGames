@@ -61,7 +61,16 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
     });
   };
 
-  const handleRetryClick = () => navigate(`/games/${gameId}/options`);
+  const handleRetryClick = () => {
+  // gameId가 'TurkeyDice'인 경우 TurkeyDice 옵션 페이지로 이동
+  // if (gameId === '1') {
+  //   navigate('/games/TurkeyDice/options');
+  // } else {
+  //   // 다른 게임인 경우 -- 경로로 이동
+    navigate(`/game-options/`);
+};
+
+
   const handleBackClick = () => navigate('/');
 
   return (
