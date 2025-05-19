@@ -266,7 +266,8 @@ class DiceMonitor:
         self.inverse_perspective_matrix = None
 
         # 마커가 인식된 경우
-        if ids is not None and len(ids) > 0:
+        # if ids is not None and len(ids) > 0:
+        if ids is not None and ids.size > 0:
             # 마커 중심점 계산
             centers = []
             for i, corner in enumerate(corners):
@@ -319,7 +320,8 @@ class DiceMonitor:
 
             if stable_values is not None:
                 # 이전 값과 다른 경우만 처리
-                if stable_values != monitor["last_stable_values"]:
+                # if stable_values != monitor["last_stable_values"]:
+                if not np.array_equal(stable_values, monitor["last_stable_values"]):
                     monitor["last_stable_values"] = stable_values
                     monitor["last_update_time"] = time.time()
 
@@ -577,7 +579,11 @@ class DiceMonitor:
                     for value, (x_norm, y_norm) in zip(frame_data["values"], frame_data["coords"])
                 ]
             # 결과가 다르면 불안정
-            elif list(zip(frame_data["values"], frame_data["coords"])) != stable_results:
+                values = frame_data["values"] if isinstance(frame_data["values"], list) else frame_data["values"].tolist()
+                coords = frame_data["coords"] if isinstance(frame_data["coords"], list) else frame_data["coords"].tolist()
+            # elif list(zip(frame_data["values"], frame_data["coords"])) != stable_results:
+                # return None
+            elif list(zip(values, coords)) != stable_results:
                 return None
 
         # 충분한 시간 동안 안정적이었는지 확인
