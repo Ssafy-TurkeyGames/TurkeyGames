@@ -19,7 +19,7 @@ export default function TurkeyDiceRoute(props: propsType) {
         <Route path='/turkey_dice/default' element={<TurkeyDiceDefault socket={props.socket} gameId={props.gameId} people={props.people} voice={props.voice}/>} />
         <Route path='/turkey_dice/arcade' element={
           <>
-            <TurkeyDiceArcadePage gameId={props.gameId} people={props.people} voice={props.voice}/>
+            <TurkeyDiceArcadePage socket={props.socket} gameId={props.gameId} people={props.people} voice={props.voice}/>
           </>
         } />
     </Routes>
