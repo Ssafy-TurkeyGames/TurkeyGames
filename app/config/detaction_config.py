@@ -1,7 +1,7 @@
 class Settings:
     # 주사위 인식 설정
     AUTO_DICE_DETECTION_ENABLED = True  # True로 설정하면 항상 자동 인식 사용
-    DICE_CAMERA_INDEX = 0
+    DICE_CAMERA_INDEX = 1
     # 주사위 검출 시간 초
     DICE_STABILITY_THRESHOLD = 0.65
     DICE_CONFIDENCE_THRESHOLD = 0.98

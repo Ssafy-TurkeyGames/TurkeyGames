@@ -121,7 +121,6 @@ def order_points_by_position(pts):
     # 좌상-우상-우하-좌하 순서로 반환
     return [tl.tolist(), tr.tolist(), br.tolist(), bl.tolist()]
 
-# ==================================================================
 
 class DiceMonitor:
     def __init__(self):
@@ -280,13 +279,13 @@ class DiceMonitor:
             if len(ids) == 3:
                 # 3개 마커로 직각삼각형 만들고 정사각형 생성
                 self.aruco_square_corners = create_square_from_three_markers(centers)
-                if self.aruco_square_corners:
-                    print("[INFO] 3개 마커로 정사각형 생성 (직각삼각형 이용)")
+                # if self.aruco_square_corners:
+                #     print("[INFO] 3개 마커로 정사각형 생성 (직각삼각형 이용)")
 
             elif len(ids) >= 4:
                 # 4개 이상 마커로 정사각형 생성 (처음 4개만 사용)
                 self.aruco_square_corners = create_square_from_four_markers(centers[:4])
-                print("[INFO] 4개 마커로 정사각형 생성")
+                # print("[INFO] 4개 마커로 정사각형 생성")
 
             # 원근 변환 행렬 계산
             if self.aruco_square_corners is not None:
@@ -297,7 +296,7 @@ class DiceMonitor:
 
 
         # 주사위 인식 (정사각형 영역이 검출된 경우에만)
-        dice_values, detections = self._detect_dice_in_frame(frame)
+        dice_values, dice_coords, detections = self._detect_dice_in_frame(frame)
 
         # 미리보기 창 표시
         if self.show_preview:
@@ -311,6 +310,7 @@ class DiceMonitor:
             # 주사위 값 이력 업데이트
             monitor["value_history"].append({
                 "values": dice_values,
+                "coords": dice_coords,
                 "timestamp": time.time()
             })
 
@@ -325,6 +325,7 @@ class DiceMonitor:
 
                     # waiting_for_roll이 True일 때만 콜백 실행
                     if monitor["waiting_for_roll"] and monitor["callback"]:
+                        print(f"콜백 호출 전 → game_id: {game_id}, stable_values: {stable_values}")
                         try:
                             loop = asyncio.get_event_loop()
                             asyncio.run_coroutine_threadsafe(
@@ -396,7 +397,7 @@ class DiceMonitor:
         """프레임에서 주사위 인식"""
         # ArUco 정사각형이 검출되지 않았으면 주사위 인식 안 함
         if self.aruco_square_corners is None or self.perspective_matrix is None:
-            return None, None
+            return None, None, None
 
         try:
             # RGB 변환
