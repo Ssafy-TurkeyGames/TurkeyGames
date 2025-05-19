@@ -236,24 +236,32 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   }
 
   // 버튼 클릭: 턴 증가 + 다음 플레이어
-const nextTurnButtonClick = () => {
+const nextTurnButtonClick = async () => {
   const newTurn = turnCount + 1;
   const newRound = Math.floor(newTurn / props.people) + 1;
-  
-  // 2라운드부터 게임 종료
+
   if (newRound > 1) {
     console.log('게임종료!!!');
     setIsGameOver(true);
-    return; // 이후 로직 실행 안 함
+    return;
   }
 
   setTurnCount(prev => prev + 1);
   setCurrentTurnIndex(prev => (prev + 1) % props.people);
   setDiceValue(undefined);
-  
-  setTimeout(() => {
-    getScores();
-    throwDices(); // 다음 턴 시작 시 주사위 던지기 API 호출
+
+  setTimeout(async () => {
+    await getScores();
+    await throwDices();
+
+    // 한 라운드가 끝난 경우에만 score_update emit
+    if ((newTurn) % props.people === 0) {
+      const latestScores = await getScores();
+      if (props.socket && socketConnected && latestScores && latestScores.scores) {
+        props.socket.emit('score_update', { scores: latestScores.scores });
+        console.log('한 라운드 종료 후 score_update emit');
+      }
+    }
   }, 500);
 };
 
