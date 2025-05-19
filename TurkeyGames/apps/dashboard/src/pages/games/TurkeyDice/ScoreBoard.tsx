@@ -198,30 +198,33 @@ const ScoreBoard: React.FC = () => {
 
   // 플레이어 데이터 포맷 함수
   const formatPlayerData = (scoresData: any[]) => {
-  return scoresData.map((scoreData: any, index: number) => {
-    const scorecard = scoreData.scorecard || {};
+    // 점수 데이터를 total_score 기준으로 내림차순 정렬
+    const sortedScores = [...scoresData].sort((a, b) => b.total_score - a.total_score);
     
-    // 족보 항목 생성
-    const items = scorecardMapping.map(({ apiName, displayName }) => {
-      // API 응답에서 해당 족보의 점수 가져오기
-      const value = scorecard[apiName];
+    return sortedScores.map((scoreData: any, index: number) => {
+      const scorecard = scoreData.scorecard || {};
       
-      // 요트다이스 룰: 기록된 점수는 해당 점수로 표시, 기록되지 않은 항목은 0으로 표시
+      // 족보 항목 생성
+      const items = scorecardMapping.map(({ apiName, displayName }) => {
+        // API 응답에서 해당 족보의 점수 가져오기
+        const value = scorecard[apiName];
+        
+        // 요트다이스 룰: 기록된 점수는 해당 점수로 표시, 기록되지 않은 항목은 0으로 표시
+        return {
+          name: displayName,
+          score: value !== undefined ? value : 0, // 기록된 점수 표시
+          completed: value !== undefined && value !== 0 // 점수가 기록된 경우에만 completed
+        };
+      });
+      
       return {
-        name: displayName,
-        score: value !== undefined ? value : 0, // 기록된 점수 표시
-        completed: value !== undefined && value !== 0 // 점수가 기록된 경우에만 completed
+        id: index + 1, // 순위에 따른 ID 할당 (1부터 시작)
+        name: `PLAYER ${scoreData.player_id}`, // 원래 플레이어 ID 유지
+        score: scoreData.total_score || 0,
+        items
       };
     });
-    
-    return {
-      id: index + 1,
-      name: `PLAYER ${index + 1}`, // 동적 플레이어 이름 사용
-      score: scoreData.total_score || 0,
-      items
-    };
-  });
-};
+  };
 
   // 게임 결과 버튼 클릭 처리
   const handleGameResult = () => {
