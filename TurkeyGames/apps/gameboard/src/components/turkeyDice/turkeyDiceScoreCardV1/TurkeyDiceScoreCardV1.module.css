@@ -20,6 +20,31 @@
     height: 100%;
 }
 
+.winnerblock {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    outline: 3px solid transparent;
+    animation: winner-inner-border 1s infinite;
+}
+
+@keyframes winner-inner-border {
+  0% {
+    outline-color: transparent;
+    box-shadow: inset 0 0 0 0 yellow;
+  }
+  50% {
+    outline-color: yellow;
+    box-shadow: inset 0 0 10px 3px yellow;
+  }
+  100% {
+    outline-color: transparent;
+    box-shadow: inset 0 0 0 0 yellow;
+  }
+}
+
 .playerInfo {
     display: flex;
     justify-content: center;
@@ -172,4 +197,19 @@
 
 .buttons div:active {
     box-shadow: none;
+}
+
+.abled:active {
+    box-shadow: none;
+}
+
+.disabled {
+    pointer-events: none;       /* 클릭 차단 */
+    opacity: 0.5;               /* 흐릿하게 표시 */
+    box-shadow: none;           /* 눌림 효과 제거 */
+    cursor: not-allowed;        /* 마우스 커서 변경 */
+}
+
+.selected {
+    background-color: #F7C122;
 }
