@@ -299,47 +299,48 @@ class DiceMonitor:
         # 주사위 인식 (정사각형 영역이 검출된 경우에만)
         dice_values, dice_coords, detections = self._detect_dice_in_frame(frame)
 
+        if dice_values is not None and dice_coords is not None and detections is not None:
         # 미리보기 창 표시
-        if self.show_preview:
-            self._show_preview(display_frame, dice_values, detections, corners, ids) # ArUco 정보 추가
+            if self.show_preview:
+                self._show_preview(display_frame, dice_values, detections, corners, ids) # ArUco 정보 추가
 
-        # 각 게임에 대해 처리
-        for game_id, monitor in self.game_monitors.items():
-            if not monitor["active"]:
-                continue
+            # 각 게임에 대해 처리
+            for game_id, monitor in self.game_monitors.items():
+                if not monitor["active"]:
+                    continue
 
-            # 주사위 값 이력 업데이트
-            monitor["value_history"].append({
-                "values": dice_values,
-                "coords": dice_coords,
-                "timestamp": time.time()
-            })
+                # 주사위 값 이력 업데이트
+                monitor["value_history"].append({
+                    "values": dice_values,
+                    "coords": dice_coords,
+                    "timestamp": time.time()
+                })
 
-            # 안정적인 값 확인
-            stable_values = self._check_stability(game_id, monitor["value_history"])
+                # 안정적인 값 확인
+                stable_values = self._check_stability(game_id, monitor["value_history"])
 
-            if stable_values is not None:
-                # 이전 값과 다른 경우만 처리
-                # if stable_values != monitor["last_stable_values"]:
-                if not np.array_equal(stable_values, monitor["last_stable_values"]):
-                    monitor["last_stable_values"] = stable_values
-                    monitor["last_update_time"] = time.time()
+                if stable_values is not None:
+                    # 이전 값과 다른 경우만 처리
+                    # if stable_values != monitor["last_stable_values"]:
+                    if not np.array_equal(stable_values, monitor["last_stable_values"]):
+                        monitor["last_stable_values"] = stable_values
+                        monitor["last_update_time"] = time.time()
 
-                    # waiting_for_roll이 True일 때만 콜백 실행
-                    if monitor["waiting_for_roll"] and monitor["callback"]:
-                        print(f"콜백 호출 전 → game_id: {game_id}, stable_values: {stable_values}")
-                        try:
-                            loop = asyncio.get_event_loop()
-                            asyncio.run_coroutine_threadsafe(
-                                monitor["callback"](game_id, stable_values),
-                                loop
-                            )
-                        except RuntimeError:
-                            # 이벤트 루프가 없는 경우 새로 생성
-                            asyncio.run(monitor["callback"](game_id, stable_values))
+                        # waiting_for_roll이 True일 때만 콜백 실행
+                        if monitor["waiting_for_roll"] and monitor["callback"]:
+                            print(f"콜백 호출 전 → game_id: {game_id}, stable_values: {stable_values}")
+                            try:
+                                loop = asyncio.get_event_loop()
+                                asyncio.run_coroutine_threadsafe(
+                                    monitor["callback"](game_id, stable_values),
+                                    loop
+                                )
+                            except RuntimeError:
+                                # 이벤트 루프가 없는 경우 새로 생성
+                                asyncio.run(monitor["callback"](game_id, stable_values))
 
-                        # 콜백을 실행한 후에는 플래그를 False로 설정하여 중복 전송 방지
-                        monitor["waiting_for_roll"] = False
+                            # 콜백을 실행한 후에는 플래그를 False로 설정하여 중복 전송 방지
+                            monitor["waiting_for_roll"] = False
 
     def _show_preview(self, display_frame, dice_values, detections, aruco_corners, aruco_ids):
         """미리보기 창 표시"""
