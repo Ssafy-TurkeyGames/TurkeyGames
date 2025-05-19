@@ -569,8 +569,13 @@ class DiceMonitor:
 
             # 첫 번째 유효한 결과 저장
             if stable_results is None:
-                # Combine values and coords into a list of tuples (value, (x, y))
-                stable_results = list(zip(frame_data["values"], frame_data["coords"]))
+                # # Combine values and coords into a list of tuples (value, (x, y))
+                # stable_results = list(zip(frame_data["values"], frame_data["coords"]))
+                # 평탄화
+                stable_results = [
+                    (value, x_norm, y_norm)
+                    for value, (x_norm, y_norm) in zip(frame_data["values"], frame_data["coords"])
+                ]
             # 결과가 다르면 불안정
             elif list(zip(frame_data["values"], frame_data["coords"])) != stable_results:
                 return None
