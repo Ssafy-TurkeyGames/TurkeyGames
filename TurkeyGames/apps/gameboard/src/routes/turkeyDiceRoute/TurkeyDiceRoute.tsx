@@ -13,7 +13,6 @@ interface propsType {
 }
 
 export default function TurkeyDiceRoute(props: propsType) {
-  console.log("TurkeyDiceRoute rendered with props:", props);
   return (
     <Routes>
         <Route path='/turkey_dice' element={<TurkeyDice />} />

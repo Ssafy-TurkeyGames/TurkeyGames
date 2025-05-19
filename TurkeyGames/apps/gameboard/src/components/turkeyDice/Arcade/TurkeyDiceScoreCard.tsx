@@ -1,62 +1,11 @@
 // src/components/turkeyDice/Arcade/TurkeyDiceScoreCard.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './TurkeyDiceScoreCard.module.css';
 import scoreCardBg from '../../../assets/images/turkey_arcade_score_resize.png';
-
-// 대길 리롤 음성
-import daegilRerollFile1 from '../../../assets/sound/daegil/reroll/reroll_v1.mp3';
-import daegilRerollFile2 from '../../../assets/sound/daegil/reroll/reroll_v2.mp3';
-import daegilRerollFile3 from '../../../assets/sound/daegil/reroll/reroll_v3.mp3';
-// 플라워 리롤 음성
-import flowerRerollFile1 from '../../../assets/sound/flower/reroll/reroll_v1.mp3';
-import flowerRerollFile2 from '../../../assets/sound/flower/reroll/reroll_v2.mp3';
-import flowerRerollFile3 from '../../../assets/sound/flower/reroll/reroll_v3.mp3';
-// 구리 리롤 음성
-import guriRerollFile1 from '../../../assets/sound/guri/reroll/reroll_v3.mp3';
-import guriRerollFile2 from '../../../assets/sound/guri/reroll/reroll_v3.mp3';
-import guriRerollFile3 from '../../../assets/sound/guri/reroll/reroll_v3.mp3';
-
-// 대길 마이턴 음성
-import daegilMyturnPlayer1V1 from '../../../assets/sound/daegil/myturn/player1_v1.mp3';
-import daegilMyturnPlayer1V2 from '../../../assets/sound/daegil/myturn/player1_v2.mp3';
-import daegilMyturnPlayer1V3 from '../../../assets/sound/daegil/myturn/player1_v3.mp3';
-import daegilMyturnPlayer2V1 from '../../../assets/sound/daegil/myturn/player2_v1.mp3';
-import daegilMyturnPlayer2V2 from '../../../assets/sound/daegil/myturn/player2_v2.mp3';
-import daegilMyturnPlayer2V3 from '../../../assets/sound/daegil/myturn/player2_v3.mp3';
-import daegilMyturnPlayer3V1 from '../../../assets/sound/daegil/myturn/player3_v1.mp3';
-import daegilMyturnPlayer3V2 from '../../../assets/sound/daegil/myturn/player3_v2.mp3';
-import daegilMyturnPlayer3V3 from '../../../assets/sound/daegil/myturn/player3_v3.mp3';
-import daegilMyturnPlayer4V1 from '../../../assets/sound/daegil/myturn/player4_v1.mp3';
-import daegilMyturnPlayer4V2 from '../../../assets/sound/daegil/myturn/player4_v2.mp3';
-import daegilMyturnPlayer4V3 from '../../../assets/sound/daegil/myturn/player4_v3.mp3';
-
-// 플라워 마이턴 음성
-import flowerMyturnPlayer1V1 from '../../../assets/sound/flower/myturn/player1_v1.mp3';
-import flowerMyturnPlayer1V2 from '../../../assets/sound/flower/myturn/player1_v2.mp3';
-import flowerMyturnPlayer1V3 from '../../../assets/sound/flower/myturn/player1_v3.mp3';
-import flowerMyturnPlayer2V1 from '../../../assets/sound/flower/myturn/player2_v1.mp3';
-import flowerMyturnPlayer2V2 from '../../../assets/sound/flower/myturn/player2_v2.mp3';
-import flowerMyturnPlayer2V3 from '../../../assets/sound/flower/myturn/player2_v3.mp3';
-import flowerMyturnPlayer3V1 from '../../../assets/sound/flower/myturn/player3_v1.mp3';
-import flowerMyturnPlayer3V2 from '../../../assets/sound/flower/myturn/player3_v2.mp3';
-import flowerMyturnPlayer3V3 from '../../../assets/sound/flower/myturn/player3_v3.mp3';
-import flowerMyturnPlayer4V1 from '../../../assets/sound/flower/myturn/player4_v1.mp3';
-import flowerMyturnPlayer4V2 from '../../../assets/sound/flower/myturn/player4_v2.mp3';
-import flowerMyturnPlayer4V3 from '../../../assets/sound/flower/myturn/player4_v3.mp3';
-
-// 구리 마이턴 음성
-import guriMyturnPlayer1V1 from '../../../assets/sound/guri/myturn/player1_v1.mp3';
-import guriMyturnPlayer1V2 from '../../../assets/sound/guri/myturn/player1_v2.mp3';
-import guriMyturnPlayer1V3 from '../../../assets/sound/guri/myturn/player1_v3.mp3';
-import guriMyturnPlayer2V1 from '../../../assets/sound/guri/myturn/player2_v1.mp3';
-import guriMyturnPlayer2V2 from '../../../assets/sound/guri/myturn/player2_v2.mp3';
-import guriMyturnPlayer2V3 from '../../../assets/sound/guri/myturn/player2_v3.mp3';
-import guriMyturnPlayer3V1 from '../../../assets/sound/guri/myturn/player3_v1.mp3';
-import guriMyturnPlayer3V2 from '../../../assets/sound/guri/myturn/player3_v2.mp3';
-import guriMyturnPlayer3V3 from '../../../assets/sound/guri/myturn/player3_v3.mp3';
-import guriMyturnPlayer4V1 from '../../../assets/sound/guri/myturn/player4_v1.mp3';
-import guriMyturnPlayer4V2 from '../../../assets/sound/guri/myturn/player4_v2.mp3';
-import guriMyturnPlayer4V3 from '../../../assets/sound/guri/myturn/player4_v3.mp3';
+import { scoreBoardSoundFiles } from '../../../constant/soundFiles';
+import buttonClickFile from '../../../assets/sound/default/button/button.mp3';
+import scoreButtonClickFile from '../../../assets/sound/default/button/score_button.mp3';
+import { calcYachtDice } from '../../../utils/checkYachtDice';
 
 interface TurkeyDiceScoreCardProps {
   playerName?: string;
@@ -76,7 +25,11 @@ interface TurkeyDiceScoreCardProps {
   smallStraight?: number;
   largeStraight?: number;
   turkey?: number;
+  diceValue?: any;
+  isGameOver?: boolean;
   nextTurnButtonClick?: () => void;
+  throwDiceFunction?: () => void;
+  selectScore?: (playerId: number, category: string, value: number) => Promise<void>;
 }
 
 const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({ 
@@ -97,7 +50,11 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
   smallStraight = 0,
   largeStraight = 0,
   turkey = 0,
-  nextTurnButtonClick
+  diceValue,
+  isGameOver = false,
+  nextTurnButtonClick,
+  throwDiceFunction,
+  selectScore
 }) => {
   // 현재 턴인 플레이어의 카드에 하이라이트 효과 추가
   const cardStyle = myTurn ? {
@@ -118,68 +75,127 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
   // 오디오 요소에 대한 참조 생성
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
-  // 리롤 사운드 파일 배열
-  const rerollSoundFiles = aiVoice === 1 ? [daegilRerollFile1, daegilRerollFile2, daegilRerollFile3]
-                     : aiVoice === 2 ? [flowerRerollFile1, flowerRerollFile2, flowerRerollFile3]
-                     : [guriRerollFile1, guriRerollFile2, guriRerollFile3];
-
+  // 상태 관리 추가
+  const [selectState, setSelectState] = useState<string>('');
+  const [rerollButtonState, setRerollButtonState] = useState<boolean>(true);
+  const [usedCategories, setUsedCategories] = useState<string[]>([]);
+  const [previewScores, setPreviewScores] = useState<any>({});
+  
+  // AI 음성 매핑
+  const aiVoices = ['daegil', 'flower', 'guri'];
+  
   // reroll 버튼 클릭 핸들러
   const handleRerollClick = () => {
-    if (!myTurn) return;
+    if (!myTurn || isGameOver) return;
     
-    const randomSound = rerollSoundFiles[Math.floor(Math.random() * rerollSoundFiles.length)];
+    const ai = aiVoices[aiVoice - 1];
+    const rerollFiles = 
+      ai === 'daegil' ? scoreBoardSoundFiles.daegil.reroll :
+      ai === 'flower' ? scoreBoardSoundFiles.flower.reroll : 
+      scoreBoardSoundFiles.guri.reroll;
+      
+    const randomSound = rerollFiles[Math.floor(Math.random() * rerollFiles.length)];
+    
     if (audioRef.current) {
       audioRef.current.src = randomSound;
+      
+      // 주사위 리롤 안내 음성 끝난후 주사위 새로 굴리기
+      audioRef.current.onended = () => {
+        if (throwDiceFunction) throwDiceFunction();
+      };
+      
       audioRef.current.play();
     }
+  };
+
+  // 점수 영역 선택 핸들러
+  const selectScoreAreaClick = (category: string) => {
+    if (!myTurn || usedCategories.includes(category)) return;
+    
+    if (audioRef.current) {
+      audioRef.current.src = scoreButtonClickFile;
+      audioRef.current.play();
+    }
+    
+    if (selectState === category) {
+      setSelectState('');
+      return;
+    }
+    
+    setSelectState(category);
+  };
+
+  // 다음 턴 버튼 핸들러
+  const handleNextTurnClick = () => {
+    if (!myTurn || !selectState) return;
+    
+    if (nextTurnButtonClick) nextTurnButtonClick();
+    
+    if (isGameOver) return;
+    
+    if (selectScore && diceValue && diceValue.dice_values) {
+      selectScore(playerId, selectState, calcYachtDice(diceValue.dice_values)[selectState]);
+    }
+    
+    setUsedCategories(prev => [...prev, selectState]);
+    setRerollButtonState(true);
+    setSelectState('');
+    
+    if (audioRef.current) {
+      audioRef.current.src = buttonClickFile;
+      audioRef.current.play();
+    }
+    
+    setPreviewScores({});
   };
 
   // 턴이 변경될 때 음성 재생
   useEffect(() => {
     if (!gameStartFinished || !myTurn) return;
+    if (isGameOver) return;
+    
+    const ai = aiVoices[aiVoice - 1];
+    const myturnFiles = 
+      ai === 'daegil' ? scoreBoardSoundFiles.daegil.myturn :
+      ai === 'flower' ? scoreBoardSoundFiles.flower.myturn : 
+      scoreBoardSoundFiles.guri.myturn;
     
     let randomSoundFiles: any[] = [];
     
-    if (myTurn) {
-      if (aiVoice === 1) {
-        if (playerId === 1) {
-          randomSoundFiles = [daegilMyturnPlayer1V1, daegilMyturnPlayer1V2, daegilMyturnPlayer1V3];
-        } else if (playerId === 2) {
-          randomSoundFiles = [daegilMyturnPlayer2V1, daegilMyturnPlayer2V2, daegilMyturnPlayer2V3];
-        } else if (playerId === 3) {
-          randomSoundFiles = [daegilMyturnPlayer3V1, daegilMyturnPlayer3V2, daegilMyturnPlayer3V3];
-        } else if (playerId === 4) {
-          randomSoundFiles = [daegilMyturnPlayer4V1, daegilMyturnPlayer4V2, daegilMyturnPlayer4V3];
-        }
-      } else if (aiVoice === 2) {
-        if (playerId === 1) {
-          randomSoundFiles = [flowerMyturnPlayer1V1, flowerMyturnPlayer1V2, flowerMyturnPlayer1V3];
-        } else if (playerId === 2) {
-          randomSoundFiles = [flowerMyturnPlayer2V1, flowerMyturnPlayer2V2, flowerMyturnPlayer2V3];
-        } else if (playerId === 3) {
-          randomSoundFiles = [flowerMyturnPlayer3V1, flowerMyturnPlayer3V2, flowerMyturnPlayer3V3];
-        } else if (playerId === 4) {
-          randomSoundFiles = [flowerMyturnPlayer4V1, flowerMyturnPlayer4V2, flowerMyturnPlayer4V3];
-        }
-      } else if (aiVoice === 3) {
-        if (playerId === 1) {
-          randomSoundFiles = [guriMyturnPlayer1V1, guriMyturnPlayer1V2, guriMyturnPlayer1V3];
-        } else if (playerId === 2) {
-          randomSoundFiles = [guriMyturnPlayer2V1, guriMyturnPlayer2V2, guriMyturnPlayer2V3];
-        } else if (playerId === 3) {
-          randomSoundFiles = [guriMyturnPlayer3V1, guriMyturnPlayer3V2, guriMyturnPlayer3V3];
-        } else if (playerId === 4) {
-          randomSoundFiles = [guriMyturnPlayer4V1, guriMyturnPlayer4V2, guriMyturnPlayer4V3];
-        }
-      }
+    switch(playerId) {
+      case 1:
+        randomSoundFiles = myturnFiles[1];
+        break;
+      case 2:
+        randomSoundFiles = myturnFiles[2];
+        break;
+      case 3:
+        randomSoundFiles = myturnFiles[3];
+        break;
+      case 4:
+        randomSoundFiles = myturnFiles[4];
+        break;
     }
     
-    const randomSound = randomSoundFiles[Math.floor(Math.random() * 3)];
-    if (audioRef.current) {
-      audioRef.current.src = randomSound;
+    if (audioRef.current && randomSoundFiles.length > 0) {
+      audioRef.current.src = randomSoundFiles[Math.floor(Math.random() * randomSoundFiles.length)];
       audioRef.current.play();
     }
-  }, [myTurn, gameStartFinished, aiVoice, playerId]);
+  }, [myTurn, gameStartFinished, isGameOver, aiVoice, playerId]);
+
+  // 주사위 값이 변경될 때 미리보기 점수 계산
+  useEffect(() => {
+    if (!diceValue || !diceValue.dice_values) {
+      setPreviewScores({});
+      return;
+    }
+    
+    setPreviewScores(calcYachtDice(diceValue.dice_values));
+    
+    if (diceValue.rolls_left === 0) {
+      setRerollButtonState(false);
+    }
+  }, [diceValue]);
 
   return (
     <div className={styles.scoreCardWrapper} style={cardStyle}>
@@ -194,53 +210,160 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
         <div className={styles.categoryContainer}>
           <div className={styles.divider} style={!myTurn ? { backgroundColor: '#555', boxShadow: 'none' } : {}}></div>
           <div className={styles.categoryList}>
-            <div className={styles.categoryItem}>
+            <div 
+              className={styles.categoryItem} 
+              onClick={() => selectScoreAreaClick('ace')}
+              style={selectState === 'ace' || usedCategories.includes('ace') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>에이스</span>
-              <span className={styles.categoryValue} style={textStyle}>{ace}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('ace') ? 
+                  ace : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.ace : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('dual')}
+              style={selectState === 'dual' || usedCategories.includes('dual') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>듀얼</span>
-              <span className={styles.categoryValue} style={textStyle}>{dual}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('dual') ? 
+                  dual : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.dual : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('triple')}
+              style={selectState === 'triple' || usedCategories.includes('triple') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>트리플</span>
-              <span className={styles.categoryValue} style={textStyle}>{triple}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('triple') ? 
+                  triple : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.triple : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('quad')}
+              style={selectState === 'quad' || usedCategories.includes('quad') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>쿼드</span>
-              <span className={styles.categoryValue} style={textStyle}>{quad}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('quad') ? 
+                  quad : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.quad : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('penta')}
+              style={selectState === 'penta' || usedCategories.includes('penta') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>펜타</span>
-              <span className={styles.categoryValue} style={textStyle}>{penta}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('penta') ? 
+                  penta : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.penta : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('hexa')}
+              style={selectState === 'hexa' || usedCategories.includes('hexa') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>헥사</span>
-              <span className={styles.categoryValue} style={textStyle}>{hexa}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('hexa') ? 
+                  hexa : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.hexa : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('poker')}
+              style={selectState === 'poker' || usedCategories.includes('poker') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>포커</span>
-              <span className={styles.categoryValue} style={textStyle}>{poker}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('poker') ? 
+                  poker : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.poker : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('full_house')}
+              style={selectState === 'full_house' || usedCategories.includes('full_house') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>풀하우스</span>
-              <span className={styles.categoryValue} style={textStyle}>{fullHouse}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('full_house') ? 
+                  fullHouse : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.full_house : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('small_straight')}
+              style={selectState === 'small_straight' || usedCategories.includes('small_straight') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>S.S</span>
-              <span className={styles.categoryValue} style={textStyle}>{smallStraight}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('small_straight') ? 
+                  smallStraight : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.small_straight : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('large_straight')}
+              style={selectState === 'large_straight' || usedCategories.includes('large_straight') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>L.S</span>
-              <span className={styles.categoryValue} style={textStyle}>{largeStraight}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('large_straight') ? 
+                  largeStraight : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.large_straight : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('turkey')}
+              style={selectState === 'turkey' || usedCategories.includes('turkey') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>터키</span>
-              <span className={styles.categoryValue} style={textStyle}>{turkey}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('turkey') ? 
+                  turkey : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.turkey : '')}
+              </span>
             </div>
-            <div className={styles.categoryItem}>
+            
+            <div 
+              className={styles.categoryItem}
+              onClick={() => selectScoreAreaClick('chance')}
+              style={selectState === 'chance' || usedCategories.includes('chance') ? {backgroundColor: 'rgba(138, 43, 226, 0.3)'} : {}}
+            >
               <span className={styles.categoryName} style={textStyle}>찬스</span>
-              <span className={styles.categoryValue} style={textStyle}>{chance}</span>
+              <span className={styles.categoryValue} style={textStyle}>
+                {usedCategories.includes('chance') ? 
+                  chance : 
+                  (Object.keys(previewScores).length !== 0 && myTurn ? previewScores.chance : '')}
+              </span>
             </div>
           </div>
         </div>
@@ -248,15 +371,15 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
         <div className={styles.buttonArea}>
           <button 
             className={styles.rerollButton} 
-            disabled={!myTurn}
+            disabled={!myTurn || !rerollButtonState || isGameOver}
             onClick={handleRerollClick}
           >
             REROLL
           </button>
           <button 
             className={styles.nextTurnButton} 
-            disabled={!myTurn}
-            onClick={nextTurnButtonClick}
+            disabled={!myTurn || !selectState || isGameOver}
+            onClick={handleNextTurnClick}
           >
             NEXT TURN
           </button>

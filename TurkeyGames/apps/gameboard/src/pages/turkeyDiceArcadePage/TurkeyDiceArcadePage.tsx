@@ -5,14 +5,10 @@ import ArcadeMap from '../../assets/images/turkey_acade_map.png';
 import ArcadeScoreCard from '../../components/turkeyDice/Arcade/TurkeyDiceScoreCard';
 import buttonClickFile from '../../assets/sound/default/button/button.mp3';
 import gameStartFile from '../../assets/sound/default/start/start.mp3';
-import daegilSeatFile from '../../assets/sound/daegil/seat/seat.mp3';
-import flowerSeatFile from '../../assets/sound/flower/seat/seat.mp3';
-import guriSeatFile from '../../assets/sound/guri/seat/seat.mp3';
-import daegilStartFile from '../../assets/sound/daegil/start/start.mp3';
-import flowerStartFile from '../../assets/sound/flower/start/start.mp3';
-import guriStartFile from '../../assets/sound/guri/start/start.mp3';
 import backgroundSound from '../../assets/sound/arcade/background.mp3';
 import yachtService from '../../api/yachtService';
+import { gameBoardSoundFiles } from '../../constant/soundFiles';
+import { checkYachtDice } from '../../utils/checkYachtDice';
 
 interface propsType {
   gameId: number,
@@ -38,13 +34,13 @@ export default function TurkeyDiceAcadePage(props: propsType) {
   useEffect(() => {
     if (audioRef.current) {
       if (props.voice === 1) {
-        audioRef.current.src = daegilSeatFile;
+        audioRef.current.src = gameBoardSoundFiles.daegil.seat;
         audioRef.current.play();
       } else if (props.voice === 2) {
-        audioRef.current.src = flowerSeatFile;
+        audioRef.current.src = gameBoardSoundFiles.flower.seat;
         audioRef.current.play();
       } else if (props.voice === 3) {
-        audioRef.current.src = guriSeatFile;
+        audioRef.current.src = gameBoardSoundFiles.guri.seat;
         audioRef.current.play();
       }
     }
@@ -55,6 +51,7 @@ export default function TurkeyDiceAcadePage(props: propsType) {
   const [playerCount, setPlayerCount] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameStartFinished, setGameStartFinished] = useState(false);
+  const [diceValue, setDiceValue] = useState<any>(undefined);
 
   const handleCellClick = (index: number) => {
     // 이미 자리 배정이 끝났거나, 해당 영역이 이미 선택된 경우 무시
@@ -80,11 +77,11 @@ export default function TurkeyDiceAcadePage(props: propsType) {
       const handleFirstEnded = () => {
         // 두 번째 사운드 설정
         if (props.voice === 1) {
-          audioEl.src = daegilStartFile;
+          audioEl.src = gameBoardSoundFiles.daegil.start;
         } else if (props.voice === 2) {
-          audioEl.src = flowerStartFile;
+          audioEl.src = gameBoardSoundFiles.flower.start;
         } else if (props.voice === 3) {
-          audioEl.src = guriStartFile;
+          audioEl.src = gameBoardSoundFiles.guri.start;
         }
 
         audioEl.play();
@@ -120,6 +117,7 @@ export default function TurkeyDiceAcadePage(props: propsType) {
   const [isGameOver, setIsGameOver] = useState(false);
   const [scoreData, setScoreData] = useState([]);
 
+  // 점수 조회 API
   const getScores = async() => {
     try {
       const gameId = props.gameId;
@@ -131,10 +129,60 @@ export default function TurkeyDiceAcadePage(props: propsType) {
     }
   }
 
+  // 주사위 던지기 API
+  const throwDices = async() => {
+    try {
+      console.log("주사위 던지기 API 호출!!!");
+      const gameId = props.gameId;
+      const data = await yachtService.rollDice(gameId.toString(), {keep_indices: []});
+      console.log('주사위 데이터:', data);
+      setDiceValue(data);
+
+      let soundFiles: any[] = [];
+
+      // 주사위 조합(poker, fh, ss, ls, turkey) 확인
+      const diceCombo = checkYachtDice(data.dice_values);
+      if (diceCombo) {
+        if (props.voice === 1) {
+          soundFiles = gameBoardSoundFiles.daegil[diceCombo];
+        } else if (props.voice === 2) {
+          soundFiles = gameBoardSoundFiles.flower[diceCombo];
+        } else if (props.voice === 3) {
+          soundFiles = gameBoardSoundFiles.guri[diceCombo];
+        }
+
+        if (audioRef.current && soundFiles.length > 0) {
+          const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+          audioRef.current.src = randomSound;
+          audioRef.current.play();
+        }
+      }
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
+  // 점수 선택 API
+  const selectScore = async(playerId: number, category: string, value: number) => {
+    try {
+      const gameId = props.gameId;
+      const data = await yachtService.selectScore(gameId.toString(), {
+        player_id: playerId, 
+        category: category, 
+        value: value
+      });
+      console.log('점수 선택 결과:', data);
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
   // 버튼 클릭: 턴 증가 + 다음 플레이어
   const nextTurnButtonClick = () => {
     setTurnCount(prev => prev + 1);
     setCurrentTurnIndex(prev => (prev + 1) % playerCount);
+    setDiceValue(undefined);
+    getScores();
   };
 
   // turnCount가 바뀔 때마다 round 갱신
@@ -147,10 +195,45 @@ export default function TurkeyDiceAcadePage(props: propsType) {
     }
 
     if (newRound > 12) {
-      alert("🎮 게임 종료!");
       setIsGameOver(true);
     }
   }, [turnCount, playerCount]);
+
+  // 게임 종료 시 승자 결정 및 음성 재생
+  useEffect(() => {
+    if (!isGameOver || scoreData.length === 0) return;
+
+    // 승자 결정 (점수가 가장 높은 플레이어)
+    const winner = scoreData.reduce((best: any, current: any) => {
+      if (
+        current.total_score > best.total_score || 
+        (current.total_score === best.total_score && current.player_id < best.player_id)
+      ) {
+        return current;
+      }
+      return best;
+    }, scoreData[0]);
+
+    alert(`🎮 게임 종료! Player ${winner.player_id}의 승리!`);
+
+    let soundFiles: any[] = [];
+
+    if (audioRef.current) {
+      if (props.voice === 1) {
+        soundFiles = gameBoardSoundFiles.daegil.winner[winner.player_id];
+      } else if (props.voice === 2) {
+        soundFiles = gameBoardSoundFiles.flower.winner[winner.player_id];
+      } else if (props.voice === 3) {
+        soundFiles = gameBoardSoundFiles.guri.winner[winner.player_id];
+      }
+
+      if (soundFiles && soundFiles.length > 0) {
+        const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+        audioRef.current.src = randomSound;
+        audioRef.current.play();
+      }
+    }
+  }, [isGameOver, scoreData, props.voice]);
 
   return (
     <div className={styles.container}>
@@ -168,20 +251,6 @@ export default function TurkeyDiceAcadePage(props: propsType) {
               : <ArcadeScoreCard 
                   playerName={`Player ${areaPlayers[0]}`}
                   playerId={areaPlayers[0]}
-                  score={
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.ace ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.dual ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.triple ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.quad ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.penta ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.hexa ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.chance ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.poker ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.full_house ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.small_straight ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.large_straight ?? 0) +
-                    (scoreData[areaPlayers[0] - 1]?.scorecard.turkey ?? 0)
-                  }
                   myTurn={areaPlayers[0] === currentTurnIndex + 1}
                   aiVoice={props.voice}
                   gameStartFinished={gameStartFinished}
@@ -197,7 +266,11 @@ export default function TurkeyDiceAcadePage(props: propsType) {
                   smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard.small_straight ?? 0}
                   largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard.large_straight ?? 0}
                   turkey={scoreData[areaPlayers[0] - 1]?.scorecard.turkey ?? 0}
+                  diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
                 />
           )}
         </div>
@@ -212,20 +285,6 @@ export default function TurkeyDiceAcadePage(props: propsType) {
               : <ArcadeScoreCard 
                   playerName={`Player ${areaPlayers[1]}`}
                   playerId={areaPlayers[1]}
-                  score={
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.ace ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.dual ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.triple ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.quad ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.penta ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.hexa ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.chance ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.poker ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.full_house ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.small_straight ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.large_straight ?? 0) +
-                    (scoreData[areaPlayers[1] - 1]?.scorecard.turkey ?? 0)
-                  }
                   myTurn={areaPlayers[1] === currentTurnIndex + 1}
                   aiVoice={props.voice}
                   gameStartFinished={gameStartFinished}
@@ -241,7 +300,11 @@ export default function TurkeyDiceAcadePage(props: propsType) {
                   smallStraight={scoreData[areaPlayers[1] - 1]?.scorecard.small_straight ?? 0}
                   largeStraight={scoreData[areaPlayers[1] - 1]?.scorecard.large_straight ?? 0}
                   turkey={scoreData[areaPlayers[1] - 1]?.scorecard.turkey ?? 0}
+                  diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
                 />
           )}
         </div>
@@ -263,20 +326,6 @@ export default function TurkeyDiceAcadePage(props: propsType) {
               : <ArcadeScoreCard 
                   playerName={`Player ${areaPlayers[2]}`}
                   playerId={areaPlayers[2]}
-                  score={
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.ace ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.dual ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.triple ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.quad ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.penta ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.hexa ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.chance ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.poker ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.full_house ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.small_straight ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.large_straight ?? 0) +
-                    (scoreData[areaPlayers[2] - 1]?.scorecard.turkey ?? 0)
-                  }
                   myTurn={areaPlayers[2] === currentTurnIndex + 1}
                   aiVoice={props.voice}
                   gameStartFinished={gameStartFinished}
@@ -292,7 +341,11 @@ export default function TurkeyDiceAcadePage(props: propsType) {
                   smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard.small_straight ?? 0}
                   largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard.large_straight ?? 0}
                   turkey={scoreData[areaPlayers[2] - 1]?.scorecard.turkey ?? 0}
+                  diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
                 />
           )}
         </div>
@@ -307,20 +360,6 @@ export default function TurkeyDiceAcadePage(props: propsType) {
               : <ArcadeScoreCard 
                   playerName={`Player ${areaPlayers[3]}`}
                   playerId={areaPlayers[3]}
-                  score={
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.ace ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.dual ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.triple ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.quad ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.penta ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.hexa ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.chance ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.poker ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.full_house ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.small_straight ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.large_straight ?? 0) +
-                    (scoreData[areaPlayers[3] - 1]?.scorecard.turkey ?? 0)
-                  }
                   myTurn={areaPlayers[3] === currentTurnIndex + 1}
                   aiVoice={props.voice}
                   gameStartFinished={gameStartFinished}
@@ -336,7 +375,11 @@ export default function TurkeyDiceAcadePage(props: propsType) {
                   smallStraight={scoreData[areaPlayers[3] - 1]?.scorecard.small_straight ?? 0}
                   largeStraight={scoreData[areaPlayers[3] - 1]?.scorecard.large_straight ?? 0}
                   turkey={scoreData[areaPlayers[3] - 1]?.scorecard.turkey ?? 0}
+                  diceValue={diceValue}
+                  isGameOver={isGameOver}
                   nextTurnButtonClick={nextTurnButtonClick}
+                  throwDiceFunction={throwDices}
+                  selectScore={selectScore}
                 />
           )}
         </div>
