@@ -227,50 +227,63 @@ const ScoreBoard: React.FC = () => {
   };
 
   // 게임 결과 버튼 클릭 처리
-  const handleGameResult = () => {
-    navigate(`/games/TurkeyDice/result${gameId ? `?gameId=${gameId}` : ''}`);
-  };
+const handleGameResult = () => {
+  // 현재 점수 데이터를 state로 전달
+  navigate(`/games/TurkeyDice/result`, {
+    search: gameId ? `?gameId=${gameId}` : '',
+    state: { scoreData: players }
+  });
+};
 
-  // 게임 종료 버튼 클릭 처리
-  const handleEndGame = async () => {
-    if (!gameId) {
-      console.warn('[ScoreBoard] 게임 ID가 없어 종료할 수 없습니다.');
-      return;
+// 게임 종료 버튼 클릭 처리
+const handleEndGame = async () => {
+  if (!gameId) {
+    console.warn('[ScoreBoard] 게임 ID가 없어 종료할 수 없습니다.');
+    return;
+  }
+  
+  if (!window.confirm('정말 게임을 종료하시겠습니까?')) return;
+  
+  setEndingGame(true);
+  console.log('[ScoreBoard] 게임 종료 시작, gameId:', gameId);
+  
+  try {
+    // dashboardApi의 endYachtGame 함수 사용
+    console.log('[ScoreBoard] endYachtGame 함수 호출, gameId:', gameId);
+    const response = await endYachtGame(gameId);
+    console.log('[ScoreBoard] 게임 종료 API 응답:', response);
+    
+    // 게임 종료 성공 시 결과 화면으로 이동 (점수 데이터 전달)
+    if (response && response.success) {
+      alert('게임이 종료되었습니다.');
+      navigate(`/games/TurkeyDice/result`, {
+        search: `?gameId=${gameId}`,
+        state: { scoreData: players }
+      });
+    } else {
+      alert('게임 종료에 실패했습니다.');
+    }
+  } catch (error) {
+    console.error('[ScoreBoard] 게임 종료 API 호출 오류:', error);
+    
+    // 오류 세부 정보 로깅
+    if (error.response) {
+      console.error('- 상태 코드:', error.response.status);
+      console.error('- 응답 데이터:', error.response.data);
+      console.error('- 요청 URL:', error.config?.url);
     }
     
-    if (!window.confirm('정말 게임을 종료하시겠습니까?')) return;
-    
-    setEndingGame(true);
-    console.log('[ScoreBoard] 게임 종료 시작, gameId:', gameId);
-    
-    try {
-      // dashboardApi의 endYachtGame 함수 사용
-      console.log('[ScoreBoard] endYachtGame 함수 호출, gameId:', gameId);
-      const response = await endYachtGame(gameId);
-      console.log('[ScoreBoard] 게임 종료 API 응답:', response);
-      
-      // 게임 종료 성공 시 결과 화면으로 이동
-      if (response && response.success) {
-        alert('게임이 종료되었습니다.');
-        navigate(`/games/TurkeyDice/result?gameId=${gameId}`);
-      } else {
-        alert('게임 종료에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('[ScoreBoard] 게임 종료 API 호출 오류:', error);
-      
-      // 오류 세부 정보 로깅
-      if (error.response) {
-        console.error('- 상태 코드:', error.response.status);
-        console.error('- 응답 데이터:', error.response.data);
-        console.error('- 요청 URL:', error.config?.url);
-      }
-      
-      alert('게임 종료 중 오류가 발생했습니다.');
-    } finally {
-      setEndingGame(false);
-    }
-  };
+    // 오류가 발생해도 현재 점수 데이터로 결과 화면으로 이동
+    alert('게임 종료 중 오류가 발생했지만, 결과 화면으로 이동합니다.');
+    navigate(`/games/TurkeyDice/result`, {
+      search: `?gameId=${gameId}`,
+      state: { scoreData: players }
+    });
+  } finally {
+    setEndingGame(false);
+  }
+};
+
 
   // 규칙 보기 버튼 클릭 처리
   const handleShowRules = () => {
