@@ -77,7 +77,7 @@ async def broadcast_scores(game_id: str, scores_data: Any):
     return True
 
 
-async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = False):
+async def on_dice_change(game_id: str,stable_values: List[tuple] , timeout: bool = False): #  dice_values: List[int]
     """주사위 값이 변경되었을 때 웹소켓으로 브로드캐스트"""
     game = DiceGame.get_game(game_id)
     from app.yacht.dice_monitor import dice_monitor
@@ -91,7 +91,9 @@ async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = F
             })
         else:
             # NumPy int64를 Python int로 변환
-            dice_values = [int(val) for val in dice_values]
+            # dice_values = [int(val) for val in dice_values]
+            dice_values = [int(v) for v, _, _ in stable_values]
+            coords      = [(x, y) for _, x, y in stable_values]
 
             # 게임 상태 업데이트
             game["dice_values"] = dice_values
@@ -102,6 +104,7 @@ async def on_dice_change(game_id: str, dice_values: List[int], timeout: bool = F
             await sio.emit('dice_update', {
                 'game_id': game_id,
                 'dice_values': dice_values,
+                'coords': coords,
                 'rolls_left': game["rolls_left"],
                 'status': 'detected'
             })
