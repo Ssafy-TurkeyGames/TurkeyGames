@@ -266,8 +266,7 @@ class DiceMonitor:
         self.inverse_perspective_matrix = None
 
         # 마커가 인식된 경우
-        # if ids is not None and len(ids) > 0:
-        if ids is not None and ids.size > 0:
+        if ids is not None and len(ids) > 0:
             # 마커 중심점 계산
             centers = []
             for i, corner in enumerate(corners):
@@ -299,48 +298,55 @@ class DiceMonitor:
         # 주사위 인식 (정사각형 영역이 검출된 경우에만)
         dice_values, dice_coords, detections = self._detect_dice_in_frame(frame)
 
-        if dice_values is not None and dice_coords is not None and detections is not None:
         # 미리보기 창 표시
-            if self.show_preview:
-                self._show_preview(display_frame, dice_values, detections, corners, ids) # ArUco 정보 추가
+        if self.show_preview:
+            self._show_preview(display_frame, dice_values, detections, corners, ids) # ArUco 정보 추가
 
-            # 각 게임에 대해 처리
-            for game_id, monitor in self.game_monitors.items():
-                if not monitor["active"]:
-                    continue
+        # 각 게임에 대해 처리
+        for game_id, monitor in self.game_monitors.items():
+            if not monitor["active"]:
+                continue
 
-                # 주사위 값 이력 업데이트
-                monitor["value_history"].append({
-                    "values": dice_values,
-                    "coords": dice_coords,
-                    "timestamp": time.time()
-                })
+            # 주사위 값 이력 업데이트
+            monitor["value_history"].append({
+                "values": dice_values,
+                "coords": dice_coords,
+                "timestamp": time.time()
+            })
 
-                # 안정적인 값 확인
-                stable_values = self._check_stability(game_id, monitor["value_history"])
+            # 안정적인 값 확인
+            stable_values = self._check_stability(game_id, monitor["value_history"])
 
+<<<<<<< Updated upstream
                 if stable_values is not None:
                     # 이전 값과 다른 경우만 처리
                     # if stable_values != monitor["last_stable_values"]:
                     if monitor["last_stable_values"] is None or not np.array_equal(stable_values, monitor["last_stable_values"]):
                         monitor["last_stable_values"] = stable_values
                         monitor["last_update_time"] = time.time()
+=======
+            if stable_values is not None:
+                # 이전 값과 다른 경우만 처리
+                if stable_values != monitor["last_stable_values"]:
+                    monitor["last_stable_values"] = stable_values
+                    monitor["last_update_time"] = time.time()
+>>>>>>> Stashed changes
 
-                        # waiting_for_roll이 True일 때만 콜백 실행
-                        if monitor["waiting_for_roll"] and monitor["callback"]:
-                            print(f"콜백 호출 전 → game_id: {game_id}, stable_values: {stable_values}")
-                            try:
-                                loop = asyncio.get_event_loop()
-                                asyncio.run_coroutine_threadsafe(
-                                    monitor["callback"](game_id, stable_values),
-                                    loop
-                                )
-                            except RuntimeError:
-                                # 이벤트 루프가 없는 경우 새로 생성
-                                asyncio.run(monitor["callback"](game_id, stable_values))
+                    # waiting_for_roll이 True일 때만 콜백 실행
+                    if monitor["waiting_for_roll"] and monitor["callback"]:
+                        print(f"콜백 호출 전 → game_id: {game_id}, stable_values: {stable_values}")
+                        try:
+                            loop = asyncio.get_event_loop()
+                            asyncio.run_coroutine_threadsafe(
+                                monitor["callback"](game_id, stable_values),
+                                loop
+                            )
+                        except RuntimeError:
+                            # 이벤트 루프가 없는 경우 새로 생성
+                            asyncio.run(monitor["callback"](game_id, stable_values))
 
-                            # 콜백을 실행한 후에는 플래그를 False로 설정하여 중복 전송 방지
-                            monitor["waiting_for_roll"] = False
+                        # 콜백을 실행한 후에는 플래그를 False로 설정하여 중복 전송 방지
+                        monitor["waiting_for_roll"] = False
 
     def _show_preview(self, display_frame, dice_values, detections, aruco_corners, aruco_ids):
         """미리보기 창 표시"""
@@ -442,7 +448,7 @@ class DiceMonitor:
                     # 중심점이 ArUco 정사각형 내부에 있는지 확인
                     # pointPolygonTest를 사용하기 위해 numpy 배열로 변환
                     square_pts = np.array(self.aruco_square_corners, dtype=np.int32)
-                    if cv2.pointPolygonTest(square_pts, (cx, cy), False) >= 0:
+                    if cv2.pointPolygonTest(square_pts, (cx, cy), measureDist=False) >= 0:
                         dice_indices.append(i)
                         valid_detections['detection_boxes'].append(box)
                         valid_detections['detection_classes'].append(class_id)
@@ -572,19 +578,10 @@ class DiceMonitor:
 
             # 첫 번째 유효한 결과 저장
             if stable_results is None:
-                # # Combine values and coords into a list of tuples (value, (x, y))
-                # stable_results = list(zip(frame_data["values"], frame_data["coords"]))
-                # 평탄화
-                stable_results = [
-                    (value, x_norm, y_norm)
-                    for value, (x_norm, y_norm) in zip(frame_data["values"], frame_data["coords"])
-                ]
+                # Combine values and coords into a list of tuples (value, (x, y))
+                stable_results = list(zip(frame_data["values"], frame_data["coords"]))
             # 결과가 다르면 불안정
-                values = frame_data["values"] if isinstance(frame_data["values"], list) else frame_data["values"].tolist()
-                coords = frame_data["coords"] if isinstance(frame_data["coords"], list) else frame_data["coords"].tolist()
-            # elif list(zip(frame_data["values"], frame_data["coords"])) != stable_results:
-                # return None
-            elif list(zip(values, coords)) != stable_results:
+            elif list(zip(frame_data["values"], frame_data["coords"])) != stable_results:
                 return None
 
         # 충분한 시간 동안 안정적이었는지 확인

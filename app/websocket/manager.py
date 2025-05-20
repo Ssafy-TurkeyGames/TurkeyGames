@@ -92,8 +92,8 @@ async def on_dice_change(game_id: str,stable_values: List[tuple] , timeout: bool
         else:
             # NumPy int64를 Python int로 변환
             # dice_values = [int(val) for val in dice_values]
-            dice_values = [int(v) for v, _, _ in stable_values]
-            coords      = [(x, y) for _, x, y in stable_values]
+            dice_values = [int(v) for v, (x, y) in stable_values]
+            coords = [(x, y) for _, (x, y) in stable_values]
 
             # 게임 상태 업데이트
             game["dice_values"] = dice_values
