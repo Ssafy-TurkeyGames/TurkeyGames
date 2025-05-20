@@ -32,6 +32,7 @@ interface TurkeyDiceScoreCardProps {
   nextTurnButtonClick: () => void;
   throwDiceFunction: () => void;
   selectScore: (playerId: number, category: string, value: number) => Promise<void>;
+  isUpside?: boolean; // 위쪽 카드인지 여부를 나타내는 새 prop 추가
 }
 
 const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({ 
@@ -58,7 +59,8 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
   winnerPlayer,
   nextTurnButtonClick,
   throwDiceFunction,
-  selectScore
+  selectScore,
+  isUpside = false // 기본값은 false (아래쪽 카드)
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
@@ -89,6 +91,30 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
     setUsedCategories(categories);
   }, [ace, dual, triple, quad, penta, hexa, chance, poker, fullHouse, smallStraight, largeStraight, turkey]);
 
+  // 오디오 재생 함수 - 이전 오디오 중지 후 새 오디오 재생
+  const playAudio = (audioSrc: string, onEndedCallback?: () => void) => {
+    if (!audioRef.current) return;
+    
+    // 이전 오디오 중지
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    
+    // 새 오디오 설정 및 재생
+    audioRef.current.src = audioSrc;
+    
+    if (onEndedCallback) {
+      audioRef.current.onended = onEndedCallback;
+    } else {
+      audioRef.current.onended = null;
+    }
+    
+    audioRef.current.play().catch(e => {
+      console.log("오디오 재생 실패:", e);
+      // 오디오 재생 실패 시 콜백 실행
+      if (onEndedCallback) onEndedCallback();
+    });
+  };
+
   // 리롤 버튼 클릭 처리
   const rerollButtonClick = () => {
     if(isGameOver) return;
@@ -104,32 +130,15 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
       
     const randomSound = rerollFiles[Math.floor(Math.random() * rerollFiles.length)];
     
-    if(audioRef.current) {
-      audioRef.current.src = randomSound;
-
-      // 주사위 리롤 안내 음성 끝난후 주사위 새로 굴리기
-      audioRef.current.onended = () => {
-        throwDiceFunction();
-      };
-
-      audioRef.current.play().catch(e => {
-        console.log("리롤 음성 재생 실패:", e);
-        // 음성 재생 실패해도 주사위는 던지기
-        throwDiceFunction();
-      });
-    } else {
-      throwDiceFunction();
-    }
+    // 주사위 리롤 안내 음성 끝난후 주사위 새로 굴리기
+    playAudio(randomSound, throwDiceFunction);
   }
 
   // 점수 영역 선택 처리
   const selectScoreAreaClick = (category: string) => {
     if (usedCategories.includes(category)) return;
 
-    if(audioRef.current) {
-      audioRef.current.src = scoreButtonClickFile;
-      audioRef.current.play().catch(e => console.log("점수 선택 음성 재생 실패:", e));
-    }
+    playAudio(scoreButtonClickFile);
 
     if (selectState === category) {
       setSelectState('');
@@ -159,10 +168,7 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
       setPreviewScores({});
       
       // 효과음 재생
-      if(audioRef.current) {
-        audioRef.current.src = buttonClickFile;
-        audioRef.current.play().catch(e => console.log("버튼 클릭 음성 재생 실패:", e));
-      }
+      playAudio(buttonClickFile);
       
       // 다음 턴으로 넘어가기
       nextTurnButtonClick();
@@ -199,9 +205,8 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
         break;
     }
 
-    if(audioRef.current && randomSound.length > 0) {
-      audioRef.current.src = randomSound[Math.floor(Math.random() * randomSound.length)];
-      audioRef.current.play().catch(e => console.log("내 턴 음성 재생 실패:", e));
+    if(randomSound.length > 0) {
+      playAudio(randomSound[Math.floor(Math.random() * randomSound.length)]);
     }
   }, [myTurn, gameStartFinished, isGameOver, aiVoice, playerId]);
 
@@ -251,7 +256,8 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
       
       <audio ref={audioRef}/>
       
-      <div className={styles.scoreCardContent}>
+      {/* isUpside prop에 따라 다른 클래스 적용 */}
+      <div className={`${styles.scoreCardContent} ${isUpside ? styles.upsideContent : ''}`}>
         <div className={styles.header}>
           <h2 className={styles.title}>{playerName}</h2>
           <p className={styles.score}>SCORE: {score}</p>
@@ -488,4 +494,3 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
 }
 
 export default TurkeyDiceScoreCard;
-

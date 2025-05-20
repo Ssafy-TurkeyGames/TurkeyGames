@@ -24,6 +24,7 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const [audioInitialized, setAudioInitialized] = useState(false);
+  const [seatAudioPlayed, setSeatAudioPlayed] = useState(false);
 
   // 자리 선택하기(인원수 만큼 할당)
   const [areaPlayers, setAreaPlayers] = useState<(number | null)[]>([null, null, null, null]);
@@ -41,7 +42,31 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   const [winnerPlayer, setWinnerPlayer] = useState<number>(0);
   const [socketConnected, setSocketConnected] = useState(false);
 
-  // 사용자 상호작용 후 오디오 초기화
+  // 오디오 재생 함수 - 이전 오디오 중지 후 새 오디오 재생
+  const playAudio = (audioSrc: string, onEndedCallback?: () => void) => {
+    if (!audioRef.current) return;
+    
+    // 이전 오디오 중지
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    
+    // 새 오디오 설정 및 재생
+    audioRef.current.src = audioSrc;
+    
+    if (onEndedCallback) {
+      audioRef.current.onended = onEndedCallback;
+    } else {
+      audioRef.current.onended = null;
+    }
+    
+    audioRef.current.play().catch(e => {
+      console.log("오디오 재생 실패:", e);
+      // 오디오 재생 실패 시 콜백 실행
+      if (onEndedCallback) onEndedCallback();
+    });
+  };
+
+  // 사용자 상호작용 후 오디오 초기화 (배경음악만 초기화)
   const initializeAudio = () => {
     if (audioInitialized) return;
     
@@ -58,30 +83,28 @@ export default function TurkeyDiceArcadePage(props: propsType) {
           .then(() => {
             console.log("배경음악 재생 성공");
             setAudioInitialized(true);
+            
+            // 최초 한 번만 자리 안내 음성 재생
+            if (!seatAudioPlayed && props.voice) {
+              let seatSound;
+              if (props.voice === 1) {
+                seatSound = gameBoardSoundFiles.daegil.seat;
+              } else if (props.voice === 2) {
+                seatSound = gameBoardSoundFiles.flower.seat;
+              } else if (props.voice === 3) {
+                seatSound = gameBoardSoundFiles.guri.seat;
+              }
+              
+              if (seatSound) {
+                playAudio(seatSound);
+                setSeatAudioPlayed(true);
+              }
+            }
           })
           .catch(e => {
             console.log("배경음악 자동재생 실패:", e);
           });
       }
-    }
-    
-    // 최초 자리 안내 음성 준비
-    if (audioRef.current && props.voice) {
-      if (props.voice === 1) {
-        audioRef.current.src = gameBoardSoundFiles.daegil.seat;
-      } else if (props.voice === 2) {
-        audioRef.current.src = gameBoardSoundFiles.flower.seat;
-      } else if (props.voice === 3) {
-        audioRef.current.src = gameBoardSoundFiles.guri.seat;
-      }
-      
-      audioRef.current.play()
-        .then(() => {
-          console.log("음성 재생 성공");
-        })
-        .catch(e => {
-          console.log("음성 자동재생 실패:", e);
-        });
     }
   };
 
@@ -97,7 +120,7 @@ export default function TurkeyDiceArcadePage(props: propsType) {
     return () => {
       document.removeEventListener('click', handleUserInteraction);
     };
-  }, []);
+  }, [seatAudioPlayed]);
 
   // 컴포넌트 언마운트 시 배경음악 정지
   useEffect(() => {
@@ -124,39 +147,26 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   // 자리 선택 완료 시 게임 시작
   useEffect(() => {
     if (playerCount === props.people && audioRef.current) {
-      const audioEl = audioRef.current;
-
       // 첫 번째 사운드 재생
-      audioEl.src = gameStartFile;
-      
-      const playPromise = audioEl.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            // 첫 번째 사운드가 끝났을 때
-            audioEl.onended = () => {
-              // 두 번째 사운드 설정
-              if (props.voice === 1) {
-                audioEl.src = gameBoardSoundFiles.daegil.start;
-              } else if (props.voice === 2) {
-                audioEl.src = gameBoardSoundFiles.flower.start;
-              } else if (props.voice === 3) {
-                audioEl.src = gameBoardSoundFiles.guri.start;
-              }
-
-              audioEl.play()
-                .then(() => {
-                  // 두 번째 사운드가 끝났을 때
-                  audioEl.onended = () => {
-                    setGameStartFinished(true);
-                    audioEl.onended = null;
-                  };
-                })
-                .catch(e => console.log("음성 재생 실패:", e));
-            };
-          })
-          .catch(e => console.log("게임 시작 음성 재생 실패:", e));
-      }
+      playAudio(gameStartFile, () => {
+        // 두 번째 사운드 설정
+        let startSound;
+        if (props.voice === 1) {
+          startSound = gameBoardSoundFiles.daegil.start;
+        } else if (props.voice === 2) {
+          startSound = gameBoardSoundFiles.flower.start;
+        } else if (props.voice === 3) {
+          startSound = gameBoardSoundFiles.guri.start;
+        }
+        
+        if (startSound) {
+          playAudio(startSound, () => {
+            setGameStartFinished(true);
+          });
+        } else {
+          setGameStartFinished(true);
+        }
+      });
 
       setGameStarted(true);
       getScores();
@@ -166,9 +176,8 @@ export default function TurkeyDiceArcadePage(props: propsType) {
 
   // 자리 선택 클릭 효과음
   const buttonOnClick = () => {
-    if(audioRef.current && !gameStarted) {
-      audioRef.current.src = buttonClickFile;
-      audioRef.current.play().catch(e => console.log("버튼 클릭 음성 재생 실패:", e));
+    if(!gameStarted) {
+      playAudio(buttonClickFile);
     }
   }
 
@@ -236,34 +245,33 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   }
 
   // 버튼 클릭: 턴 증가 + 다음 플레이어
-const nextTurnButtonClick = async () => {
-  const newTurn = turnCount + 1;
-  const newRound = Math.floor(newTurn / props.people) + 1;
+  const nextTurnButtonClick = async () => {
+    const newTurn = turnCount + 1;
+    const newRound = Math.floor(newTurn / props.people) + 1;
 
-  if (newRound > 1) {
-    console.log('게임종료!!!');
-    setIsGameOver(true);
-    return;
-  }
-
-  setTurnCount(prev => prev + 1);
-  setCurrentTurnIndex(prev => (prev + 1) % props.people);
-  setDiceValue(undefined);
-
-  setTimeout(async () => {
-    await getScores();
-    await throwDices();
-
-    // 한 라운드가 끝난 경우에만 score_update emit
-    if ((newTurn) % props.people === 0) {
-      const latestScores = await getScores();
-      if (props.socket && socketConnected && latestScores && latestScores.scores) {
-        props.socket.emit('score_update', { scores: latestScores.scores });
-        console.log('한 라운드 종료 후 score_update emit');
-      }
+    if (newRound > 1) {
+      console.log('게임종료!!!');
+      setIsGameOver(true);
+      return;
     }
-  }, 500);
-};
+
+    setTurnCount(prev => prev + 1);
+    setCurrentTurnIndex(prev => (prev + 1) % props.people);
+    setDiceValue(undefined);
+
+    setTimeout(async () => {
+      await getScores();
+      await throwDices();
+      // 한 라운드가 끝난 경우에만 score_update emit
+      if ((newTurn) % props.people === 0) {
+        const latestScores = await getScores();
+        if (props.socket && socketConnected && latestScores && latestScores.scores) {
+          props.socket.emit('score_update', { scores: latestScores.scores });
+          console.log('한 라운드 종료 후 score_update emit');
+        }
+      }
+    }, 500);
+  };
 
   // turnCount가 바뀔 때마다 round 갱신
   useEffect(() => {
@@ -281,40 +289,39 @@ const nextTurnButtonClick = async () => {
   }, [turnCount, props.people]);
 
   // 게임 종료 시 우승자 결정
-useEffect(() => {
-  if (!isGameOver) return;
+  useEffect(() => {
+    if (!isGameOver) return;
 
-  const calcWinner = async () => {
-    try {
-      const score = await getScores();
-      if (!score || !score.scores || score.scores.length === 0) return;
-      
-      const winner = score.scores.reduce((best, current) => {
-        if (
-          current.total_score > best.total_score || 
-          (current.total_score === best.total_score && current.player_id < best.player_id)
-        ) {
-          return current;
+    const calcWinner = async () => {
+      try {
+        const score = await getScores();
+        if (!score || !score.scores || score.scores.length === 0) return;
+        
+        const winner = score.scores.reduce((best, current) => {
+          if (
+            current.total_score > best.total_score || 
+            (current.total_score === best.total_score && current.player_id < best.player_id)
+          ) {
+            return current;
+          }
+          return best;
+        }, score.scores[0]);
+
+        console.log("우승자 결정:", winner);
+        alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
+        setWinnerPlayer(winner.player_id);
+        getHighlight(props.gameId, winner.player_id);
+
+        // 소켓을 통해 게임 종료 이벤트 발송
+        if (props.socket && socketConnected) {
+          props.socket.emit('game_ended', { 
+            gameId: props.gameId,
+            winner: winner.player_id,
+            scores: score.scores
+          });
+          console.log('게임 종료 이벤트 발송:', props.gameId);
         }
-        return best;
-      }, score.scores[0]);
 
-      console.log("우승자 결정:", winner);
-      alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
-      setWinnerPlayer(winner.player_id);
-      getHighlight(props.gameId, winner.player_id);
-
-      // 소켓을 통해 게임 종료 이벤트 발송
-      if (props.socket && socketConnected) {
-        props.socket.emit('game_ended', { 
-          gameId: props.gameId,
-          winner: winner.player_id,
-          scores: score.scores
-        });
-        console.log('게임 종료 이벤트 발송:', props.gameId);
-      }
-
-      if (audioRef.current) {
         let soundFiles: string[] = [];
         
         // 우승자에 따라 해당 mp3 리스트 가져오기
@@ -338,10 +345,12 @@ useEffect(() => {
         // 음성 파일이 있는 경우에만 재생
         if (soundFiles && soundFiles.length > 0) {
           const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-          audioRef.current.src = randomSound;
-          audioRef.current.play().catch(e => console.log("우승자 음성 재생 실패:", e));
+          playAudio(randomSound, () => {
+            // 우승자 음성 재생 후 일정 시간 후 홈 화면으로 이동
+            setTimeout(() => {
+              navigate('/gameboard/');
+            }, 3000);
+          });
         } else {
           console.log("우승자 음성 파일을 찾을 수 없습니다.");
           // 음성 파일이 없는 경우 일정 시간 후 홈 화면으로 이동
@@ -349,24 +358,17 @@ useEffect(() => {
             navigate('/gameboard/');
           }, 3000);
         }
-      } else {
-        // 오디오 참조가 없는 경우 일정 시간 후 홈 화면으로 이동
+      } catch (error) {
+        console.error('우승자 계산 오류:', error);
+        // 오류 발생 시에도 일정 시간 후 홈 화면으로 이동
         setTimeout(() => {
           navigate('/gameboard/');
         }, 3000);
       }
-    } catch (error) {
-      console.error('우승자 계산 오류:', error);
-      // 오류 발생 시에도 일정 시간 후 홈 화면으로 이동
-      setTimeout(() => {
-        navigate('/gameboard/');
-      }, 3000);
-    }
-  };
+    };
 
-  calcWinner();
-}, [isGameOver, props.gameId, props.voice, props.socket, socketConnected, navigate]);
-
+    calcWinner();
+  }, [isGameOver, props.gameId, props.voice, props.socket, socketConnected, navigate]);
 
   // 소켓 이벤트 리스너 설정
   useEffect(() => {
@@ -493,12 +495,16 @@ useEffect(() => {
         break;
     }
 
-    if (audioRef.current && soundFiles.length > 0) {
+    if (soundFiles.length > 0) {
       const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
-      audioRef.current.src = randomSound;
-      audioRef.current.play().catch(e => console.log("주사위 조합 음성 재생 실패:", e));
+      playAudio(randomSound);
     }
   }, [diceValue, props.voice]);
+
+  // 스코어카드 스타일 정의
+  const getScoreCardStyle = (isUpside: boolean) => {
+    return isUpside ? { transform: 'rotate(180deg)' } : {};
+  };
 
   return (
     <div className={styles.container}>
@@ -512,58 +518,49 @@ useEffect(() => {
         </div>
       )}
       
-      {/* 소켓 상태 표시 (개발용) */}
-      <div className={styles.socketStatus} style={{
-        position: 'absolute',
-        top: '10px',
-        right: '10px',
-        color: socketConnected ? 'green' : 'red',
-        zIndex: 1000
-      }}>
-        {socketConnected ? '🟢 연결됨' : '🔴 연결 끊김'}
-      </div>
-      
       <div className={styles.CardContainer}>
         <div className={`${styles.upside} ${areaPlayers[0] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(0)}>
           {!gameStarted ? (
-            <div className={`${styles.seat} ${areaPlayers[0] !== null ? styles.ready : ''}`}>
+            <div className={`${styles.seat}`}>
               {areaPlayers[0] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[0]} 준비완료!`}
             </div>
           ) : (
             areaPlayers[0] === null 
               ? <></> 
-              : <ArcadeScoreCard 
-                  playerName={`Player ${areaPlayers[0]}`}
-                  playerId={areaPlayers[0]}
-                  score={scoreData[areaPlayers[0] - 1]?.total_score || 0}
-                  myTurn={areaPlayers[0] === currentTurnIndex + 1}
-                  aiVoice={props.voice}
-                  gameStartFinished={gameStartFinished}
-                  ace={scoreData[areaPlayers[0] - 1]?.scorecard?.ace ?? 0}
-                  dual={scoreData[areaPlayers[0] - 1]?.scorecard?.dual ?? 0}
-                  triple={scoreData[areaPlayers[0] - 1]?.scorecard?.triple ?? 0}
-                  quad={scoreData[areaPlayers[0] - 1]?.scorecard?.quad ?? 0}
-                  penta={scoreData[areaPlayers[0] - 1]?.scorecard?.penta ?? 0}
-                  hexa={scoreData[areaPlayers[0] - 1]?.scorecard?.hexa ?? 0}
-                  chance={scoreData[areaPlayers[0] - 1]?.scorecard?.chance ?? 0}
-                  poker={scoreData[areaPlayers[0] - 1]?.scorecard?.poker ?? 0}
-                  fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard?.full_house ?? 0}
-                  smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.small_straight ?? 0}
-                  largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.large_straight ?? 0}
-                  turkey={scoreData[areaPlayers[0] - 1]?.scorecard?.turkey ?? 0}
-                  diceValue={diceValue}
-                  isGameOver={isGameOver}
-                  winnerPlayer={winnerPlayer}
-                  nextTurnButtonClick={nextTurnButtonClick}
-                  throwDiceFunction={throwDices}
-                  selectScore={selectScore}
-                />
+              : <div style={getScoreCardStyle(true)}>
+                  <ArcadeScoreCard 
+                    playerName={`Player ${areaPlayers[0]}`}
+                    playerId={areaPlayers[0]}
+                    score={scoreData[areaPlayers[0] - 1]?.total_score || 0}
+                    myTurn={areaPlayers[0] === currentTurnIndex + 1}
+                    aiVoice={props.voice}
+                    gameStartFinished={gameStartFinished}
+                    ace={scoreData[areaPlayers[0] - 1]?.scorecard?.ace ?? 0}
+                    dual={scoreData[areaPlayers[0] - 1]?.scorecard?.dual ?? 0}
+                    triple={scoreData[areaPlayers[0] - 1]?.scorecard?.triple ?? 0}
+                    quad={scoreData[areaPlayers[0] - 1]?.scorecard?.quad ?? 0}
+                    penta={scoreData[areaPlayers[0] - 1]?.scorecard?.penta ?? 0}
+                    hexa={scoreData[areaPlayers[0] - 1]?.scorecard?.hexa ?? 0}
+                    chance={scoreData[areaPlayers[0] - 1]?.scorecard?.chance ?? 0}
+                    poker={scoreData[areaPlayers[0] - 1]?.scorecard?.poker ?? 0}
+                    fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard?.full_house ?? 0}
+                    smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.small_straight ?? 0}
+                    largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.large_straight ?? 0}
+                    turkey={scoreData[areaPlayers[0] - 1]?.scorecard?.turkey ?? 0}
+                    diceValue={diceValue}
+                    isGameOver={isGameOver}
+                    winnerPlayer={winnerPlayer}
+                    nextTurnButtonClick={nextTurnButtonClick}
+                    throwDiceFunction={throwDices}
+                    selectScore={selectScore}
+                  />
+                </div>
           )}
         </div>
         
         <div className={`${styles.downside} ${areaPlayers[1] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(1)}>
           {!gameStarted ? (
-            <div className={`${styles.seat} ${areaPlayers[1] !== null ? styles.ready : ''}`}>
+            <div className={`${styles.seat}`}>
               {areaPlayers[1] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[1]} 준비완료!`}
             </div>
           ) : (
@@ -606,44 +603,46 @@ useEffect(() => {
       <div className={styles.CardContainer}>
         <div className={`${styles.upside} ${areaPlayers[2] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(2)}>
           {!gameStarted ? (
-            <div className={`${styles.seat} ${areaPlayers[2] !== null ? styles.ready : ''}`}>
+            <div className={`${styles.seat}`}>
               {areaPlayers[2] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[2]} 준비완료!`}
             </div>
           ) : (
             areaPlayers[2] === null 
               ? <></> 
-              : <ArcadeScoreCard 
-                  playerName={`Player ${areaPlayers[2]}`}
-                  playerId={areaPlayers[2]}
-                  score={scoreData[areaPlayers[2] - 1]?.total_score || 0}
-                  myTurn={areaPlayers[2] === currentTurnIndex + 1}
-                  aiVoice={props.voice}
-                  gameStartFinished={gameStartFinished}
-                  ace={scoreData[areaPlayers[2] - 1]?.scorecard?.ace ?? 0}
-                  dual={scoreData[areaPlayers[2] - 1]?.scorecard?.dual ?? 0}
-                  triple={scoreData[areaPlayers[2] - 1]?.scorecard?.triple ?? 0}
-                  quad={scoreData[areaPlayers[2] - 1]?.scorecard?.quad ?? 0}
-                  penta={scoreData[areaPlayers[2] - 1]?.scorecard?.penta ?? 0}
-                  hexa={scoreData[areaPlayers[2] - 1]?.scorecard?.hexa ?? 0}
-                  chance={scoreData[areaPlayers[2] - 1]?.scorecard?.chance ?? 0}
-                  poker={scoreData[areaPlayers[2] - 1]?.scorecard?.poker ?? 0}
-                  fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard?.full_house ?? 0}
-                  smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.small_straight ?? 0}
-                  largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.large_straight ?? 0}
-                  turkey={scoreData[areaPlayers[2] - 1]?.scorecard?.turkey ?? 0}
-                  diceValue={diceValue}
-                  isGameOver={isGameOver}
-                  winnerPlayer={winnerPlayer}
-                  nextTurnButtonClick={nextTurnButtonClick}
-                  throwDiceFunction={throwDices}
-                  selectScore={selectScore}
-                />
+              : <div style={getScoreCardStyle(true)}>
+                  <ArcadeScoreCard 
+                    playerName={`Player ${areaPlayers[2]}`}
+                    playerId={areaPlayers[2]}
+                    score={scoreData[areaPlayers[2] - 1]?.total_score || 0}
+                    myTurn={areaPlayers[2] === currentTurnIndex + 1}
+                    aiVoice={props.voice}
+                    gameStartFinished={gameStartFinished}
+                    ace={scoreData[areaPlayers[2] - 1]?.scorecard?.ace ?? 0}
+                    dual={scoreData[areaPlayers[2] - 1]?.scorecard?.dual ?? 0}
+                    triple={scoreData[areaPlayers[2] - 1]?.scorecard?.triple ?? 0}
+                    quad={scoreData[areaPlayers[2] - 1]?.scorecard?.quad ?? 0}
+                    penta={scoreData[areaPlayers[2] - 1]?.scorecard?.penta ?? 0}
+                    hexa={scoreData[areaPlayers[2] - 1]?.scorecard?.hexa ?? 0}
+                    chance={scoreData[areaPlayers[2] - 1]?.scorecard?.chance ?? 0}
+                    poker={scoreData[areaPlayers[2] - 1]?.scorecard?.poker ?? 0}
+                    fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard?.full_house ?? 0}
+                    smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.small_straight ?? 0}
+                    largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.large_straight ?? 0}
+                    turkey={scoreData[areaPlayers[2] - 1]?.scorecard?.turkey ?? 0}
+                    diceValue={diceValue}
+                    isGameOver={isGameOver}
+                    winnerPlayer={winnerPlayer}
+                    nextTurnButtonClick={nextTurnButtonClick}
+                    throwDiceFunction={throwDices}
+                    selectScore={selectScore}
+                  />
+                </div>
           )}
         </div>
         
         <div className={`${styles.downside} ${areaPlayers[3] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(3)}>
           {!gameStarted ? (
-            <div className={`${styles.seat} ${areaPlayers[3] !== null ? styles.ready : ''}`}>
+            <div className={`${styles.seat}`}>
               {areaPlayers[3] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[3]} 준비완료!`}
             </div>
           ) : (
