@@ -89,6 +89,14 @@
         socket.on("score_hints", (data) => {
           log("점수 힌트: " + JSON.stringify(data));
         });
+
+        socket.on("end_game", (data) => {
+          log("게임 종료: " + JSON.stringify(data));
+        });
+
+        socket.on("delete_game", (data) => {
+          log("게임 삭제: " + JSON.stringify(data));
+        });
       });
       
       // 게임 참가 버튼 - 처음에는 비활성화
