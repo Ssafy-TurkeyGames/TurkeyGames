@@ -111,3 +111,13 @@ async def on_dice_change(game_id: str,stable_values: List[tuple] , timeout: bool
 
             # 값을 전송한 후 플래그 비활성화 (중복 전송 방지)
             dice_monitor.game_monitors[game_id]["waiting_for_roll"] = False
+
+async def broadcast_end_game(game_id: str, scores_data: Any):
+    """특정 게임의 스코어 업데이트를 모든 참여자에게 브로드캐스트"""
+    print(f"Broadcasting scores for game {game_id}: {scores_data}")
+
+    # 모든 연결된 클라이언트에게 브로드캐스트
+    await sio.emit('end_game', scores_data)
+
+    print(f"Broadcasted to all connected clients")
+    return True

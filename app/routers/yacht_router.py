@@ -6,7 +6,7 @@ from app.db import crud
 from app.yacht import schema
 from app.yacht.dice import DiceGame
 from app.yacht.dice_monitor import dice_monitor
-from app.websocket.manager import broadcast_scores, game_rooms, sio, on_dice_change
+from app.websocket.manager import broadcast_scores, game_rooms, sio, on_dice_change, broadcast_end_game
 from app.config.detaction_config import settings
 
 # 요트 게임 라우터 초기화
@@ -271,9 +271,8 @@ async def get_scores(game_id: str, db: Session = Depends(get_db)):
 
     return schema.AllScores(scores=scores)
 
-
-@router.delete("/{game_id}", response_model=schema.GameEndResult)
-async def end_game(game_id: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+@router.post("/end/{game_id}", response_model=schema.GameEndResult)
+async def end_game(game_id: str, background_tasks: BackgroundTasks):
     """게임 종료 및 데이터 정리"""
     game = DiceGame.get_game(game_id)
     if not game:
@@ -281,15 +280,25 @@ async def end_game(game_id: str, background_tasks: BackgroundTasks, db: Session 
 
     dice_monitor.stop_monitoring(game_id)
 
-    # DB에서 게임 설정 및 플레이어 점수 삭제
-    crud.delete_game(db, game["setting_id"], game["players"])
-
     # 게임 종료 메시지 브로드캐스트
     background_tasks.add_task(
-        broadcast_scores,
+        broadcast_end_game,
         game_id,
         {"game_id": game_id, "is_finished": True, "message": "게임이 종료되었습니다"}
     )
+
+    return schema.GameEndResult(success=True, message="게임이 종료되었습니다")
+
+@router.delete("/{game_id}", response_model=schema.GameEndResult)
+async def delete_game(game_id: str, db: Session = Depends(get_db)):
+    """게임 종료 및 데이터 정리"""
+    game = DiceGame.get_game(game_id)
+    if not game:
+        raise HTTPException(status_code=404, detail="게임을 찾을 수 없습니다")
+
+
+    # DB에서 게임 설정 및 플레이어 점수 삭제
+    crud.delete_game(db, game["setting_id"], game["players"])
 
     # 인메모리 게임 상태 삭제
     DiceGame.delete_game(game_id)
