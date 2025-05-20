@@ -264,6 +264,7 @@ const TurkeyDiceScoreCard: React.FC<TurkeyDiceScoreCardProps> = ({
         </div>
         
         <div className={styles.categoryContainer}>
+          <div className={styles.divider}></div>
           <ul className={styles.categoryList}>
             <li className={styles.categoryItem}>
               <span className={styles.categoryName}>에이스</span>

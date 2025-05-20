@@ -105,7 +105,9 @@
 .categoryName {
   color: #ffffff;
   font-size: 1.3rem;
-  padding-left: 20px;
+  width: 50%; /* 너비를 고정하여 정렬 영역 확보 */
+  text-align: center; /* 텍스트 가운데 정렬 */
+  padding-left: 0; /* 기존 패딩 제거 */
   box-shadow: 3px #10FFFF;
   text-shadow:
     0 0 5px #10FFFF,
