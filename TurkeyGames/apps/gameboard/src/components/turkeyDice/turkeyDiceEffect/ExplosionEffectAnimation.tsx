@@ -15,20 +15,27 @@ const framePaths = Array.from(
 );
 
 // 하드코딩된 좌표들
-const positions = [
-  { x: 1300, y: 600 },
-  { x: 400, y: 250 },
-  { x: 600, y: 350 },
-  { x: 800, y: 200 },
-  { x: 1000, y: 400 },
-];
+// const positions = [
+//   { x: 1300, y: 600 },
+//   { x: 400, y: 250 },
+//   { x: 600, y: 350 },
+//   { x: 800, y: 200 },
+//   { x: 1000, y: 400 },
+// ];
 
-const ExplosionEffectAnimation: React.FC = () => {
+interface ExplosionEffectAnimationProps {
+  coords: [number, number][];
+}
+
+const ExplosionEffectAnimation: React.FC<ExplosionEffectAnimationProps> = ({ coords }) => {
   useEffect(() => {
-    const audio = new Audio('/sounds/magic6.mp3');
+    coords.forEach(([xRatio, yRatio]) => {
+      const x = xRatio * window.innerWidth;
+      const y = yRatio * window.innerHeight;
+
+      const audio = new Audio('/sounds/magic6.mp3');
     audio.play().catch((err) => console.warn('🎵 사운드 재생 실패:', err));
 
-    positions.forEach(({ x, y }) => {
       let current = 0;
       const img = document.createElement('img');
 
@@ -36,7 +43,7 @@ const ExplosionEffectAnimation: React.FC = () => {
         position: 'absolute',
         left: `${x}px`,
         top: `${y}px`,
-        transform: 'translate(-50%, -50%) scale(1.2)',
+        transform: 'translate(-50%, -50%) scale(1.2) rotate(180deg)',
         pointerEvents: 'none',
         width: '300px',
         height: '300px',
@@ -59,7 +66,7 @@ const ExplosionEffectAnimation: React.FC = () => {
         }
       }, frameDuration);
     });
-  }, []);
+  }, [coords]);
 
   return null;
 };

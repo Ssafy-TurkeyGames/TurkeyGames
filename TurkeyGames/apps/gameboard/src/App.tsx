@@ -23,6 +23,11 @@ function App({ socket } : props) {
         navigate('/gameboard/turkey_dice/arcade');
       }
     });
+    socket.on('delete_game', (data) => {
+      console.log('게임방을 삭제합니다. 기본 화면으로 돌아갑니다.', data);
+      setGameCreatedData(null);
+      navigate('/gameboard/');
+    })
   }, [socket]);
 
   return (

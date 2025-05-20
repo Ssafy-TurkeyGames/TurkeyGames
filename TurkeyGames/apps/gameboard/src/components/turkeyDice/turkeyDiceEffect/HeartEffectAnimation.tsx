@@ -18,21 +18,26 @@ const framePaths = Array.from(
 );
 
 // 💡 하드코딩된 좌표 리스트
-const positions = [
-  { x: 100, y: 200, withSound: true },
-  { x: 300, y: 400, withSound: false },
-  { x: 500, y: 500, withSound: true },
-  { x: 700, y: 300, withSound: false },
-  { x: 900, y: 600, withSound: true },
-];
+// const positions = [
+//   { x: 100, y: 200 },
+//   { x: 300, y: 400 },
+//   { x: 500, y: 500 },
+//   { x: 700, y: 300 },
+//   { x: 900, y: 600 },
+// ];
 
-const HeartEffectAnimation: React.FC = () => {
+interface HeartEffectAnimationProps {
+  coords: [number, number][];
+}
+
+const HeartEffectAnimation: React.FC<HeartEffectAnimationProps> = ({ coords }) => {
   useEffect(() => {
-    positions.forEach(({ x, y, withSound }) => {
-      if (withSound) {
-        const audio = new Audio('/sounds/magic6.mp3');
-        audio.play().catch((err) => console.warn('🎵 사운드 재생 실패:', err));
-      }
+    coords.forEach(([xRatio, yRatio]) => {
+      const y = xRatio * window.innerWidth;
+      const x = yRatio * window.innerHeight;
+
+      const audio = new Audio('/sounds/magic6.mp3');
+      audio.play().catch((err) => console.warn('🎵 사운드 재생 실패:', err));
 
       let current = 0;
       const img = document.createElement('img');
@@ -64,7 +69,7 @@ const HeartEffectAnimation: React.FC = () => {
         }
       }, frameDuration);
     });
-  }, []);
+  }, [coords]);
 
   return null;
 };

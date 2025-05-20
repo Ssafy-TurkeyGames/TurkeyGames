@@ -93,11 +93,18 @@ const yachtService = {
     return apiRequest.get<ScoresResponse>(`/yacht/${gameId}/scores`);
   },
 
-  // 게임 종료
+  // 게임 삭제
   endGame: (gameId: string): Promise<{
     message: string;
   }> => {
     return apiRequest.delete(`/yacht/${gameId}`);
+  },
+
+  // 게임 종료
+  endGameNotice: (gameId: string) : Promise<{
+    message: string;
+  }> => {
+    return apiRequest.post(`/yacht/end/${gameId}`);
   },
 
   // 하이라이트 영상 조회

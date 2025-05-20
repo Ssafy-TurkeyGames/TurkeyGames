@@ -10,6 +10,9 @@ import yachtService from '../../api/yachtService';
 import { calcYachtDice, checkYachtDice } from '../../utils/checkYachtDice';
 import { gameBoardSoundFiles } from '../../constant/soundFiles';
 import { Socket } from 'socket.io-client';
+import { effectMap, GameMode } from '../../components/turkeyDice/turkeyDiceEffect/effectMap';
+import HeartEffectAnimation from '../../components/turkeyDice/turkeyDiceEffect/HeartEffectAnimation';
+import ExplosionEffectAnimation from '../../components/turkeyDice/turkeyDiceEffect/ExplosionEffectAnimation';
 
 
 interface propsType {
@@ -155,6 +158,16 @@ export default function TurkeyDiceDefault(props: propsType) {
     }
   }
 
+  // 게임 종료 알리기
+  const infoGameIsOver = async(gameId : number) => {
+    try {
+      const data = await yachtService.endGameNotice(gameId.toString());
+      console.log(data);
+    } catch (error) {
+      console.log('에러:', error);
+    }
+  }
+
   // 우승자 하이라이트 영상 조회 API
   const getHighlight = async(gameId : number, playerId : number) => {
     try {
@@ -174,6 +187,9 @@ export default function TurkeyDiceDefault(props: propsType) {
 
     if (newRound > 1) {
     console.log('게임종료!!!');
+    // 게임 종료 알리기 API => 메세지 전송까지지
+    infoGameIsOver(props.gameId);
+
     setIsGameOver(true);
     return; // 이후 로직 실행 안 함
     }
@@ -259,10 +275,34 @@ export default function TurkeyDiceDefault(props: propsType) {
     });
   }, [props.socket])
 
+  const [mode, setMode] = useState<GameMode| null>(null);
+  const [EffectComponent, setEffectComponent] =
+    useState<React.ComponentType | null>(null);
+
+  const handleModeClick = (selectedMode: GameMode) => {
+    setMode(selectedMode);
+    const effects = effectMap[selectedMode];
+    const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+    setEffectComponent(() => randomEffect);
+  };
+
+  const [effectType, setEffectType] = useState<'heart' | 'explosion' | null>(null);
+
+  const handleEffect = () => {
+    if (effectType !== null) return;
+
+    const randomEffect = Math.random() < 0.5 ? 'explosion' : 'explosion';
+    setEffectType(randomEffect);
+
+    const duration = 1000; // 애니메이션 길이에 맞게 조정
+    setTimeout(() => setEffectType(null), duration);
+  };
+
   useEffect(() => {
     console.log("diceValue : ", diceValue)
     if(diceValue === undefined) return;
-
+      handleEffect();
+      console.log('diceValue.coords : ', diceValue.coords);
       let soundFiles: string | any[] = [];
       if(diceValue.length === 0) return;
       // 주사위 조합(poker, fh, ss, ls, turkey) 확인
@@ -402,6 +442,8 @@ export default function TurkeyDiceDefault(props: propsType) {
         
       <div className={styles.map}>
         <img src={turkeyDiceDefaultMap} alt="turkeyDice Map" />
+        {/* {effectType === 'heart' && <HeartEffectAnimation coords={diceValue.coords}  />} */}
+        {effectType === 'explosion' && <ExplosionEffectAnimation coords={diceValue.coords} />}
       </div>
 
       <div className={styles.rightArea}>
