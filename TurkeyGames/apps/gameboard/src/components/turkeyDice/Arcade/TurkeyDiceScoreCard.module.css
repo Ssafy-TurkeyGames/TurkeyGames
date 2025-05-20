@@ -125,9 +125,9 @@
 }
 
 .divider {
-  width: 2.5px;
+  width: 2px;
   height: 100%;
-  background-color: #A300B2;
+  background-color: #c954d4;
   box-shadow:
     0 0 4px #A300B2,
     0 0 8px #A300B2;
