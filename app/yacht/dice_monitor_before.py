@@ -29,7 +29,7 @@ def create_square_from_three_markers(centers):
     # 거리 기준으로 정렬
     distances = [(dist01, 0, 1), (dist12, 1, 2), (dist20, 2, 0)]
     distances.sort()  # 거리 오름차순 정렬
-    
+
     # 가장 긴 변이 빗변, 나머지 두 변이 직각삼각형의 두 변
     _, i1, i2 = distances[0]  # 첫 번째 짧은 변
     _, i3, i4 = distances[1]  # 두 번째 짧은 변
@@ -169,6 +169,14 @@ class DiceMonitor:
         # 프레임 처리를 위한 변수
         self.last_process_time = 0
         self.processing_lock = threading.Lock()
+
+        # ArUco 관련 변수
+        self.aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT)
+        self.aruco_parameters = cv2.aruco.DetectorParameters()
+        self.aruco_detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.aruco_parameters)
+        self.aruco_square_corners: Optional[List[List[int]]] = None # 검출된 정사각형 코너 좌표
+        self.perspective_matrix: Optional[np.ndarray] = None # 원근 변환 행렬
+        self.inverse_perspective_matrix: Optional[np.ndarray] = None # 역 원근 변환 행렬
 
         # ArUco 관련 변수
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT)
@@ -385,7 +393,7 @@ class DiceMonitor:
             self.show_preview = False
             cv2.destroyWindow('Dice Detection Monitor')
 
-    def _detect_dice_in_frame(self, frame):
+    def _detect_dice_in_frame(self, frame) -> tuple[Optional[List[int]], Optional[dict]]:
         """프레임에서 주사위 인식"""
         # ArUco 정사각형이 검출되지 않았으면 주사위 인식 안 함
         if self.aruco_square_corners is None or self.perspective_matrix is None:
@@ -409,15 +417,7 @@ class DiceMonitor:
             # 프레임 크기
             h, w, _ = frame.shape
 
-            # 클래스 ID를 실제 주사위 값으로 변환하는 함수
-            def convert_class_to_dice_value(class_id):
-                # 클래스 ID 2-7이 주사위 눈 1-6을 의미
-                if 2 <= class_id <= 7:
-                    return class_id - 1
-                # 다른 클래스는 그대로 반환
-                return class_id
-
-            # 1. 주사위 클래스(1-9)만 필터링하고 신뢰도 점수 획득 및 정사각형 내 포함 여부 확인
+            # 1. 주사위 클래스(1-6)만 필터링하고 신뢰도 점수 획득 및 정사각형 내 포함 여부 확인
             dice_indices = []
             valid_detections = {
                 'detection_boxes': [],
@@ -430,7 +430,7 @@ class DiceMonitor:
                 class_id = detections['detection_classes'][i]
                 box = detections['detection_boxes'][i] # normalized coordinates
 
-                if (1 <= class_id <= 9 and score > self.CONFIDENCE_THRESHOLD):  # 클래스 범위 확장 (1-9)
+                if (1 <= class_id <= 6 and score > self.CONFIDENCE_THRESHOLD):
                     # 바운딩 박스 중심점 (픽셀 좌표)
                     ymin, xmin, ymax, xmax = box
                     cx = int((xmin + xmax) / 2 * w)
@@ -442,14 +442,12 @@ class DiceMonitor:
                     if cv2.pointPolygonTest(square_pts, (cx, cy), measureDist=False) >= 0:
                         dice_indices.append(i)
                         valid_detections['detection_boxes'].append(box)
-                        # 클래스 ID 변환 적용
-                        converted_class = convert_class_to_dice_value(class_id)
-                        valid_detections['detection_classes'].append(converted_class)
+                        valid_detections['detection_classes'].append(class_id)
                         valid_detections['detection_scores'].append(score)
 
             # 유효한 감지 결과가 없으면 반환
             if not dice_indices:
-                return None, None, None
+                return None, None
 
             # 유효한 감지 결과 numpy 배열로 변환
             valid_detections['detection_boxes'] = np.array(valid_detections['detection_boxes'])
