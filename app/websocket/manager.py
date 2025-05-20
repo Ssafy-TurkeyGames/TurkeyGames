@@ -121,3 +121,13 @@ async def broadcast_end_game(game_id: str, scores_data: Any):
 
     print(f"Broadcasted to all connected clients")
     return True
+
+async def broadcast_delete_game(game_id: str, scores_data: Any):
+    """특정 게임의 스코어 업데이트를 모든 참여자에게 브로드캐스트"""
+    print(f"Broadcasting scores for game {game_id}: {scores_data}")
+
+    # 모든 연결된 클라이언트에게 브로드캐스트
+    await sio.emit('delete_game', scores_data)
+
+    print(f"Broadcasted to all connected clients")
+    return True

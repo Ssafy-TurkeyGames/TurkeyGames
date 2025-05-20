@@ -290,12 +290,13 @@ async def end_game(game_id: str, background_tasks: BackgroundTasks):
     return schema.GameEndResult(success=True, message="게임이 종료되었습니다")
 
 @router.delete("/{game_id}", response_model=schema.GameEndResult)
-async def delete_game(game_id: str, db: Session = Depends(get_db)):
+async def delete_game(game_id: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """게임 종료 및 데이터 정리"""
     game = DiceGame.get_game(game_id)
     if not game:
         raise HTTPException(status_code=404, detail="게임을 찾을 수 없습니다")
 
+    dice_monitor.stop_monitoring(game_id)
 
     # DB에서 게임 설정 및 플레이어 점수 삭제
     crud.delete_game(db, game["setting_id"], game["players"])
@@ -303,7 +304,14 @@ async def delete_game(game_id: str, db: Session = Depends(get_db)):
     # 인메모리 게임 상태 삭제
     DiceGame.delete_game(game_id)
 
-    return schema.GameEndResult(success=True, message="게임이 종료되었습니다")
+    # 게임 종료 메시지 브로드캐스트
+    background_tasks.add_task(
+        broadcast_end_game,
+        game_id,
+        {"game_id": game_id, "is_finished": True, "message": "게임이 삭제되었습니다"}
+    )
+
+    return schema.GameEndResult(success=True, message="게임이 삭제되었습니다")
 
 
 @router.get("/{game_id}/dice/current")
