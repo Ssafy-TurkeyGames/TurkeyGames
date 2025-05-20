@@ -507,176 +507,174 @@ export default function TurkeyDiceArcadePage(props: propsType) {
   };
 
   return (
-    <div className={styles.container}>
-      <audio ref={audioRef}/>
-      <audio ref={bgMusicRef}/>
-      
-      {/* 라운드 표시 */}
-      {gameStarted && (
-        <div className={styles.roundInfo}>
-          Round: {round}/12
-        </div>
-      )}
-      
-      <div className={styles.CardContainer}>
-        <div className={`${styles.upside} ${areaPlayers[0] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(0)}>
-          {!gameStarted ? (
-            <div className={`${styles.seat}`}>
-              {areaPlayers[0] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[0]} 준비완료!`}
-            </div>
-          ) : (
-            areaPlayers[0] === null 
-              ? <></> 
-              : <div style={getScoreCardStyle(true)}>
-                  <ArcadeScoreCard 
-                    playerName={`Player ${areaPlayers[0]}`}
-                    playerId={areaPlayers[0]}
-                    score={scoreData[areaPlayers[0] - 1]?.total_score || 0}
-                    myTurn={areaPlayers[0] === currentTurnIndex + 1}
-                    aiVoice={props.voice}
-                    gameStartFinished={gameStartFinished}
-                    ace={scoreData[areaPlayers[0] - 1]?.scorecard?.ace ?? 0}
-                    dual={scoreData[areaPlayers[0] - 1]?.scorecard?.dual ?? 0}
-                    triple={scoreData[areaPlayers[0] - 1]?.scorecard?.triple ?? 0}
-                    quad={scoreData[areaPlayers[0] - 1]?.scorecard?.quad ?? 0}
-                    penta={scoreData[areaPlayers[0] - 1]?.scorecard?.penta ?? 0}
-                    hexa={scoreData[areaPlayers[0] - 1]?.scorecard?.hexa ?? 0}
-                    chance={scoreData[areaPlayers[0] - 1]?.scorecard?.chance ?? 0}
-                    poker={scoreData[areaPlayers[0] - 1]?.scorecard?.poker ?? 0}
-                    fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard?.full_house ?? 0}
-                    smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.small_straight ?? 0}
-                    largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.large_straight ?? 0}
-                    turkey={scoreData[areaPlayers[0] - 1]?.scorecard?.turkey ?? 0}
-                    diceValue={diceValue}
-                    isGameOver={isGameOver}
-                    winnerPlayer={winnerPlayer}
-                    nextTurnButtonClick={nextTurnButtonClick}
-                    throwDiceFunction={throwDices}
-                    selectScore={selectScore}
-                  />
-                </div>
-          )}
-        </div>
-        
-        <div className={`${styles.downside} ${areaPlayers[1] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(1)}>
-          {!gameStarted ? (
-            <div className={`${styles.seat}`}>
-              {areaPlayers[1] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[1]} 준비완료!`}
-            </div>
-          ) : (
-            areaPlayers[1] === null 
-              ? <></> 
-              : <ArcadeScoreCard 
-                  playerName={`Player ${areaPlayers[1]}`}
-                  playerId={areaPlayers[1]}
-                  score={scoreData[areaPlayers[1] - 1]?.total_score || 0}
-                  myTurn={areaPlayers[1] === currentTurnIndex + 1}
-                  aiVoice={props.voice}
-                  gameStartFinished={gameStartFinished}
-                  ace={scoreData[areaPlayers[1] - 1]?.scorecard?.ace ?? 0}
-                  dual={scoreData[areaPlayers[1] - 1]?.scorecard?.dual ?? 0}
-                  triple={scoreData[areaPlayers[1] - 1]?.scorecard?.triple ?? 0}
-                  quad={scoreData[areaPlayers[1] - 1]?.scorecard?.quad ?? 0}
-                  penta={scoreData[areaPlayers[1] - 1]?.scorecard?.penta ?? 0}
-                  hexa={scoreData[areaPlayers[1] - 1]?.scorecard?.hexa ?? 0}
-                  chance={scoreData[areaPlayers[1] - 1]?.scorecard?.chance ?? 0}
-                  poker={scoreData[areaPlayers[1] - 1]?.scorecard?.poker ?? 0}
-                  fullHouse={scoreData[areaPlayers[1] - 1]?.scorecard?.full_house ?? 0}
-                  smallStraight={scoreData[areaPlayers[1] - 1]?.scorecard?.small_straight ?? 0}
-                  largeStraight={scoreData[areaPlayers[1] - 1]?.scorecard?.large_straight ?? 0}
-                  turkey={scoreData[areaPlayers[1] - 1]?.scorecard?.turkey ?? 0}
-                  diceValue={diceValue}
-                  isGameOver={isGameOver}
-                  winnerPlayer={winnerPlayer}
-                  nextTurnButtonClick={nextTurnButtonClick}
-                  throwDiceFunction={throwDices}
-                  selectScore={selectScore}
-                />
-          )}
-        </div>
+  <div className={styles.container}>
+    <audio ref={audioRef}/>
+    <audio ref={bgMusicRef}/>
+    
+    {/* 라운드 표시 */}
+    {gameStarted && (
+      <div className={styles.roundInfo}>
+        Round: {round}/12
+      </div>
+    )}
+    
+    <div className={styles.CardContainer}>
+      <div className={`${styles.upside} ${areaPlayers[0] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(0)}>
+        {!gameStarted ? (
+          <div className={`${styles.seat}`}>
+            {areaPlayers[0] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[0]} 준비완료!`}
+          </div>
+        ) : (
+          areaPlayers[0] === null 
+            ? <></> 
+            : <ArcadeScoreCard 
+                playerName={`Player ${areaPlayers[0]}`}
+                playerId={areaPlayers[0]}
+                score={scoreData[areaPlayers[0] - 1]?.total_score || 0}
+                myTurn={areaPlayers[0] === currentTurnIndex + 1}
+                aiVoice={props.voice}
+                gameStartFinished={gameStartFinished}
+                ace={scoreData[areaPlayers[0] - 1]?.scorecard?.ace ?? 0}
+                dual={scoreData[areaPlayers[0] - 1]?.scorecard?.dual ?? 0}
+                triple={scoreData[areaPlayers[0] - 1]?.scorecard?.triple ?? 0}
+                quad={scoreData[areaPlayers[0] - 1]?.scorecard?.quad ?? 0}
+                penta={scoreData[areaPlayers[0] - 1]?.scorecard?.penta ?? 0}
+                hexa={scoreData[areaPlayers[0] - 1]?.scorecard?.hexa ?? 0}
+                chance={scoreData[areaPlayers[0] - 1]?.scorecard?.chance ?? 0}
+                poker={scoreData[areaPlayers[0] - 1]?.scorecard?.poker ?? 0}
+                fullHouse={scoreData[areaPlayers[0] - 1]?.scorecard?.full_house ?? 0}
+                smallStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.small_straight ?? 0}
+                largeStraight={scoreData[areaPlayers[0] - 1]?.scorecard?.large_straight ?? 0}
+                turkey={scoreData[areaPlayers[0] - 1]?.scorecard?.turkey ?? 0}
+                diceValue={diceValue}
+                isGameOver={isGameOver}
+                winnerPlayer={winnerPlayer}
+                nextTurnButtonClick={nextTurnButtonClick}
+                throwDiceFunction={throwDices}
+                selectScore={selectScore}
+              />
+        )}
       </div>
       
-      <div className={styles.centerMap}>
-        <img src={ArcadeMap} alt="game map" />
-      </div>
-      
-      <div className={styles.CardContainer}>
-        <div className={`${styles.upside} ${areaPlayers[2] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(2)}>
-          {!gameStarted ? (
-            <div className={`${styles.seat}`}>
-              {areaPlayers[2] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[2]} 준비완료!`}
-            </div>
-          ) : (
-            areaPlayers[2] === null 
-              ? <></> 
-              : <div style={getScoreCardStyle(true)}>
-                  <ArcadeScoreCard 
-                    playerName={`Player ${areaPlayers[2]}`}
-                    playerId={areaPlayers[2]}
-                    score={scoreData[areaPlayers[2] - 1]?.total_score || 0}
-                    myTurn={areaPlayers[2] === currentTurnIndex + 1}
-                    aiVoice={props.voice}
-                    gameStartFinished={gameStartFinished}
-                    ace={scoreData[areaPlayers[2] - 1]?.scorecard?.ace ?? 0}
-                    dual={scoreData[areaPlayers[2] - 1]?.scorecard?.dual ?? 0}
-                    triple={scoreData[areaPlayers[2] - 1]?.scorecard?.triple ?? 0}
-                    quad={scoreData[areaPlayers[2] - 1]?.scorecard?.quad ?? 0}
-                    penta={scoreData[areaPlayers[2] - 1]?.scorecard?.penta ?? 0}
-                    hexa={scoreData[areaPlayers[2] - 1]?.scorecard?.hexa ?? 0}
-                    chance={scoreData[areaPlayers[2] - 1]?.scorecard?.chance ?? 0}
-                    poker={scoreData[areaPlayers[2] - 1]?.scorecard?.poker ?? 0}
-                    fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard?.full_house ?? 0}
-                    smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.small_straight ?? 0}
-                    largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.large_straight ?? 0}
-                    turkey={scoreData[areaPlayers[2] - 1]?.scorecard?.turkey ?? 0}
-                    diceValue={diceValue}
-                    isGameOver={isGameOver}
-                    winnerPlayer={winnerPlayer}
-                    nextTurnButtonClick={nextTurnButtonClick}
-                    throwDiceFunction={throwDices}
-                    selectScore={selectScore}
-                  />
-                </div>
-          )}
-        </div>
-        
-        <div className={`${styles.downside} ${areaPlayers[3] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(3)}>
-          {!gameStarted ? (
-            <div className={`${styles.seat}`}>
-              {areaPlayers[3] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[3]} 준비완료!`}
-            </div>
-          ) : (
-            areaPlayers[3] === null 
-              ? <></> 
-              : <ArcadeScoreCard 
-                  playerName={`Player ${areaPlayers[3]}`}
-                  playerId={areaPlayers[3]}
-                  score={scoreData[areaPlayers[3] - 1]?.total_score || 0}
-                  myTurn={areaPlayers[3] === currentTurnIndex + 1}
-                  aiVoice={props.voice}
-                  gameStartFinished={gameStartFinished}
-                  ace={scoreData[areaPlayers[3] - 1]?.scorecard?.ace ?? 0}
-                  dual={scoreData[areaPlayers[3] - 1]?.scorecard?.dual ?? 0}
-                  triple={scoreData[areaPlayers[3] - 1]?.scorecard?.triple ?? 0}
-                  quad={scoreData[areaPlayers[3] - 1]?.scorecard?.quad ?? 0}
-                  penta={scoreData[areaPlayers[3] - 1]?.scorecard?.penta ?? 0}
-                  hexa={scoreData[areaPlayers[3] - 1]?.scorecard?.hexa ?? 0}
-                  chance={scoreData[areaPlayers[3] - 1]?.scorecard?.chance ?? 0}
-                  poker={scoreData[areaPlayers[3] - 1]?.scorecard?.poker ?? 0}
-                  fullHouse={scoreData[areaPlayers[3] - 1]?.scorecard?.full_house ?? 0}
-                  smallStraight={scoreData[areaPlayers[3] - 1]?.scorecard?.small_straight ?? 0}
-                  largeStraight={scoreData[areaPlayers[3] - 1]?.scorecard?.large_straight ?? 0}
-                  turkey={scoreData[areaPlayers[3] - 1]?.scorecard?.turkey ?? 0}
-                  diceValue={diceValue}
-                  isGameOver={isGameOver}
-                  winnerPlayer={winnerPlayer}
-                  nextTurnButtonClick={nextTurnButtonClick}
-                  throwDiceFunction={throwDices}
-                  selectScore={selectScore}
-                />
-          )}
-        </div>
+      <div className={`${styles.downside} ${areaPlayers[1] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(1)}>
+        {!gameStarted ? (
+          <div className={`${styles.seat}`}>
+            {areaPlayers[1] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[1]} 준비완료!`}
+          </div>
+        ) : (
+          areaPlayers[1] === null 
+            ? <></> 
+            : <ArcadeScoreCard 
+                playerName={`Player ${areaPlayers[1]}`}
+                playerId={areaPlayers[1]}
+                score={scoreData[areaPlayers[1] - 1]?.total_score || 0}
+                myTurn={areaPlayers[1] === currentTurnIndex + 1}
+                aiVoice={props.voice}
+                gameStartFinished={gameStartFinished}
+                ace={scoreData[areaPlayers[1] - 1]?.scorecard?.ace ?? 0}
+                dual={scoreData[areaPlayers[1] - 1]?.scorecard?.dual ?? 0}
+                triple={scoreData[areaPlayers[1] - 1]?.scorecard?.triple ?? 0}
+                quad={scoreData[areaPlayers[1] - 1]?.scorecard?.quad ?? 0}
+                penta={scoreData[areaPlayers[1] - 1]?.scorecard?.penta ?? 0}
+                hexa={scoreData[areaPlayers[1] - 1]?.scorecard?.hexa ?? 0}
+                chance={scoreData[areaPlayers[1] - 1]?.scorecard?.chance ?? 0}
+                poker={scoreData[areaPlayers[1] - 1]?.scorecard?.poker ?? 0}
+                fullHouse={scoreData[areaPlayers[1] - 1]?.scorecard?.full_house ?? 0}
+                smallStraight={scoreData[areaPlayers[1] - 1]?.scorecard?.small_straight ?? 0}
+                largeStraight={scoreData[areaPlayers[1] - 1]?.scorecard?.large_straight ?? 0}
+                turkey={scoreData[areaPlayers[1] - 1]?.scorecard?.turkey ?? 0}
+                diceValue={diceValue}
+                isGameOver={isGameOver}
+                winnerPlayer={winnerPlayer}
+                nextTurnButtonClick={nextTurnButtonClick}
+                throwDiceFunction={throwDices}
+                selectScore={selectScore}
+              />
+        )}
       </div>
     </div>
-  );
+    
+    <div className={styles.centerMap}>
+      <img src={ArcadeMap} alt="game map" />
+    </div>
+    
+    <div className={styles.CardContainer}>
+      <div className={`${styles.upside} ${areaPlayers[2] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(2)}>
+        {!gameStarted ? (
+          <div className={`${styles.seat}`}>
+            {areaPlayers[2] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[2]} 준비완료!`}
+          </div>
+        ) : (
+          areaPlayers[2] === null 
+            ? <></> 
+            : <ArcadeScoreCard 
+                playerName={`Player ${areaPlayers[2]}`}
+                playerId={areaPlayers[2]}
+                score={scoreData[areaPlayers[2] - 1]?.total_score || 0}
+                myTurn={areaPlayers[2] === currentTurnIndex + 1}
+                aiVoice={props.voice}
+                gameStartFinished={gameStartFinished}
+                ace={scoreData[areaPlayers[2] - 1]?.scorecard?.ace ?? 0}
+                dual={scoreData[areaPlayers[2] - 1]?.scorecard?.dual ?? 0}
+                triple={scoreData[areaPlayers[2] - 1]?.scorecard?.triple ?? 0}
+                quad={scoreData[areaPlayers[2] - 1]?.scorecard?.quad ?? 0}
+                penta={scoreData[areaPlayers[2] - 1]?.scorecard?.penta ?? 0}
+                hexa={scoreData[areaPlayers[2] - 1]?.scorecard?.hexa ?? 0}
+                chance={scoreData[areaPlayers[2] - 1]?.scorecard?.chance ?? 0}
+                poker={scoreData[areaPlayers[2] - 1]?.scorecard?.poker ?? 0}
+                fullHouse={scoreData[areaPlayers[2] - 1]?.scorecard?.full_house ?? 0}
+                smallStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.small_straight ?? 0}
+                largeStraight={scoreData[areaPlayers[2] - 1]?.scorecard?.large_straight ?? 0}
+                turkey={scoreData[areaPlayers[2] - 1]?.scorecard?.turkey ?? 0}
+                diceValue={diceValue}
+                isGameOver={isGameOver}
+                winnerPlayer={winnerPlayer}
+                nextTurnButtonClick={nextTurnButtonClick}
+                throwDiceFunction={throwDices}
+                selectScore={selectScore}
+              />
+        )}
+      </div>
+      
+      <div className={`${styles.downside} ${areaPlayers[3] === null ? styles.emptyArea : ''}`} onClick={() => handleCellClick(3)}>
+        {!gameStarted ? (
+          <div className={`${styles.seat}`}>
+            {areaPlayers[3] === null ? '자리를 선택해주세요!' : `Player ${areaPlayers[3]} 준비완료!`}
+          </div>
+        ) : (
+          areaPlayers[3] === null 
+            ? <></> 
+            : <ArcadeScoreCard 
+                playerName={`Player ${areaPlayers[3]}`}
+                playerId={areaPlayers[3]}
+                score={scoreData[areaPlayers[3] - 1]?.total_score || 0}
+                myTurn={areaPlayers[3] === currentTurnIndex + 1}
+                aiVoice={props.voice}
+                gameStartFinished={gameStartFinished}
+                ace={scoreData[areaPlayers[3] - 1]?.scorecard?.ace ?? 0}
+                dual={scoreData[areaPlayers[3] - 1]?.scorecard?.dual ?? 0}
+                triple={scoreData[areaPlayers[3] - 1]?.scorecard?.triple ?? 0}
+                quad={scoreData[areaPlayers[3] - 1]?.scorecard?.quad ?? 0}
+                penta={scoreData[areaPlayers[3] - 1]?.scorecard?.penta ?? 0}
+                hexa={scoreData[areaPlayers[3] - 1]?.scorecard?.hexa ?? 0}
+                chance={scoreData[areaPlayers[3] - 1]?.scorecard?.chance ?? 0}
+                poker={scoreData[areaPlayers[3] - 1]?.scorecard?.poker ?? 0}
+                fullHouse={scoreData[areaPlayers[3] - 1]?.scorecard?.full_house ?? 0}
+                smallStraight={scoreData[areaPlayers[3] - 1]?.scorecard?.small_straight ?? 0}
+                largeStraight={scoreData[areaPlayers[3] - 1]?.scorecard?.large_straight ?? 0}
+                turkey={scoreData[areaPlayers[3] - 1]?.scorecard?.turkey ?? 0}
+                diceValue={diceValue}
+                isGameOver={isGameOver}
+                winnerPlayer={winnerPlayer}
+                nextTurnButtonClick={nextTurnButtonClick}
+                throwDiceFunction={throwDices}
+                selectScore={selectScore}
+              />
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+
 }
