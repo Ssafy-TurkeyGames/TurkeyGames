@@ -38,6 +38,7 @@
   border-radius: 15px;
   background-color: rgba(0, 0, 0, 0.8);
   box-shadow: 0 0 15px #8a2be2;
+  transform: rotate(180deg);
 }
 
 /* 중앙 맵 영역 */
