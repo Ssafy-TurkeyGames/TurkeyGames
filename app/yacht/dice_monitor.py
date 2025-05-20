@@ -322,7 +322,7 @@ class DiceMonitor:
                 if stable_values is not None:
                     # 이전 값과 다른 경우만 처리
                     # if stable_values != monitor["last_stable_values"]:
-                    if not np.array_equal(stable_values, monitor["last_stable_values"]):
+                    if monitor["last_stable_values"] is None or not np.array_equal(stable_values, monitor["last_stable_values"]):
                         monitor["last_stable_values"] = stable_values
                         monitor["last_update_time"] = time.time()
 
