@@ -317,20 +317,11 @@ class DiceMonitor:
             # 안정적인 값 확인
             stable_values = self._check_stability(game_id, monitor["value_history"])
 
-<<<<<<< Updated upstream
-                if stable_values is not None:
-                    # 이전 값과 다른 경우만 처리
-                    # if stable_values != monitor["last_stable_values"]:
-                    if monitor["last_stable_values"] is None or not np.array_equal(stable_values, monitor["last_stable_values"]):
-                        monitor["last_stable_values"] = stable_values
-                        monitor["last_update_time"] = time.time()
-=======
             if stable_values is not None:
                 # 이전 값과 다른 경우만 처리
                 if stable_values != monitor["last_stable_values"]:
                     monitor["last_stable_values"] = stable_values
                     monitor["last_update_time"] = time.time()
->>>>>>> Stashed changes
 
                     # waiting_for_roll이 True일 때만 콜백 실행
                     if monitor["waiting_for_roll"] and monitor["callback"]:
