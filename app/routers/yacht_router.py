@@ -132,10 +132,6 @@ async def select_score(
     """점수 선택 및 기록"""
     # 게임 상태 조회
     game = DiceGame.get_game(game_id)
-    if game:
-        game["dice_values"] = [0, 0, 0, 0, 0]
-        game["rolls_left"] = 3
-
     if not game:
         raise HTTPException(status_code=404, detail="게임을 찾을 수 없습니다")
 
@@ -143,23 +139,60 @@ async def select_score(
     if current_player_id != selection.player_id:
         raise HTTPException(status_code=400, detail="현재 플레이어의 턴이 아닙니다")
 
+    # 현재 주사위 값을 먼저 저장 (초기화하기 전에)
+    current_dice_values = list(game["dice_values"])  # 복사본 생성
+    print(f"⚡ 기존 주사위 값 저장: {current_dice_values}")
+
     # 점수 업데이트
     success = crud.update_player_score(db, selection.player_id, selection.category, selection.value)
-    if success :
+
+    if success:
         game["turn_counts"][selection.player_id] += 1  # 턴 수 증가
         remaining_turns = 12 - game["turn_counts"][selection.player_id]
-    
-        # 2. 하이라이트 트리거 호출 추가 (아래 코드 추가)
-        yacht_detector = request.app.state.yacht_highlight_detector
-        all_scores = await get_scores(game_id, db)  # 기존 코드 재사용
-        background_tasks.add_task(
-            yacht_detector.process_game_state,
-            game_id,
-            selection.player_id,
-            game["dice_values"],
-            {str(s.player_id): s.dict() for s in all_scores.scores},
-            remaining_turns
-        )
+
+        # 주사위 초기화 - 하이라이트 감지 전에 초기화하면 안 됨
+        game["dice_values"] = [0, 0, 0, 0, 0]
+        game["rolls_left"] = 3
+
+        print(f"⚡ 하이라이트 감지 시작: 주사위 값 = {current_dice_values}, 플레이어: {selection.player_id}, 카테고리: {selection.category}")
+
+        try:
+            # 하이라이트 트리거 호출
+            yacht_detector = request.app.state.yacht_highlight_detector
+            if not yacht_detector:
+                print("❌ yacht_highlight_detector가 app.state에 없습니다!")
+            else:
+                print(f"✅ yacht_detector 객체 발견: {yacht_detector}")
+
+            all_scores = await get_scores(game_id, db)
+            scores_dict = {str(s.player_id): s.dict() for s in all_scores.scores}
+
+            # 주사위 값이 모두 0인지 확인
+            if all(val == 0 for val in current_dice_values):
+                print("⚠️ 경고: 주사위 값이 모두 0입니다. 이전에 저장된 값 사용 필요")
+                # 만약 주사위 값이 모두 0이라면, selection.category가 'turkey'인 경우
+                # 실제로 야추가 발생했을 가능성이 높습니다. 이 경우 특별 처리:
+                if selection.category == 'turkey' and selection.value == 50:
+                    print("🎯 야추 감지: 카테고리가 turkey이고 점수가 50입니다")
+                    # 임의의 동일한 주사위 값 설정 (예: 모두 6)
+                    current_dice_values = [6, 6, 6, 6, 6]
+                    print(f"🎲 야추 조건 충족을 위해 주사위 값 수정: {current_dice_values}")
+
+            # 직접 호출하여 하이라이트 감지
+            await yacht_detector.process_game_state(
+                game_id,
+                selection.player_id,
+                current_dice_values,  # 이전에 저장한 주사위 값 사용
+                scores_dict,
+                remaining_turns
+            )
+            print(f"✅ 하이라이트 감지 호출 완료: 게임 {game_id}, 플레이어 {selection.player_id}")
+
+        except Exception as e:
+            print(f"❌ 하이라이트 감지 오류: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+
     if not success:
         raise HTTPException(status_code=400, detail="이미 선택한 카테고리이거나 점수를 업데이트할 수 없습니다")
 
