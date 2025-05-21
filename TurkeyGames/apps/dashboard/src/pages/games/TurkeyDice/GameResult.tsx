@@ -107,13 +107,64 @@ const TurkeyDiceResult: React.FC = () => {
 
     fetchGameResults();
     
-    // 소켓 이벤트 리스너 설정 (기존 코드 유지)
-    // ...
-  }, [gameId, socket, scoreDataFromState]);
+    // 소켓 이벤트 리스너 설정
+    if (socket && isConnected && gameId) {
+      console.log('[TurkeyDiceResult] 웹소켓 이벤트 리스너 등록, 연결 상태:', isConnected);
+      
+      // 점수 업데이트 이벤트
+      socket.on('score_update', (data) => {
+        console.log('[TurkeyDiceResult] 점수 업데이트 이벤트:', data);
+        if (data.scores) {
+          const formattedPlayers = formatPlayerResults(data.scores);
+          setPlayers(formattedPlayers);
+        }
+      });
+      
+      // end_game 이벤트 리스너
+      socket.on('end_game', (data) => {
+        console.log('[TurkeyDiceResult] end_game 이벤트 수신:', data);
+        // 이미 결과 화면에 있으므로 추가 작업은 필요 없음
+        if (data.scores) {
+          const formattedPlayers = formatPlayerResults(data.scores);
+          setPlayers(formattedPlayers);
+        }
+      });
+      
+      // 게임 참가
+      socket.emit('join_game', { gameId });
+      console.log('[TurkeyDiceResult] 게임 참가 이벤트 발송, gameId:', gameId);
+      
+      return () => {
+        console.log('[TurkeyDiceResult] 웹소켓 이벤트 리스너 정리');
+        socket.off('score_update');
+        socket.off('end_game');
+        
+        // 게임 퇴장
+        socket.emit('leave_game', { gameId });
+        console.log('[TurkeyDiceResult] 게임 퇴장 이벤트 발송, gameId:', gameId);
+      };
+    }
+  }, [gameId, socket, isConnected, scoreDataFromState]);
 
-  // 플레이어 결과 데이터 포맷 함수 (기존 코드 유지)
+  // 플레이어 결과 데이터 포맷 함수
   const formatPlayerResults = (scoresData: PlayerScore[]): PlayerResult[] => {
-    // ...
+    // 점수 데이터를 total_score 기준으로 내림차순 정렬
+    const sortedScores = [...scoresData].sort((a, b) => b.total_score - a.total_score);
+    
+    return sortedScores.map((scoreData, index) => {
+      // 순위 계산 (동점자 처리)
+      let rank = index + 1;
+      if (index > 0 && scoreData.total_score === sortedScores[index - 1].total_score) {
+        rank = index; // 동점자는 같은 순위
+      }
+      
+      return {
+        id: scoreData.player_id,
+        name: `PLAYER ${scoreData.player_id}`,
+        score: scoreData.total_score || 0,
+        rank
+      };
+    });
   };
 
   if (loading) {
