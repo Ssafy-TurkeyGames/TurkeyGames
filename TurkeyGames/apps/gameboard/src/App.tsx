@@ -20,9 +20,15 @@ function App({ socket } : props) {
       if(data.settings.map === 1) {
         navigate('/gameboard/turkey_dice/default');
       }else if(data.settings.map === 2) {
+        setGameCreatedData(null);
         navigate('/gameboard/turkey_dice/arcade');
       }
     });
+    socket.on('delete_game', (data) => {
+      console.log('게임 방 삭제');
+      navigate('/gameboard/');
+    })
+
   }, [socket]);
 
   return (
