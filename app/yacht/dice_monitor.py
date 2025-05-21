@@ -4,20 +4,20 @@ import numpy as np
 import tensorflow as tf
 import asyncio
 import time
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 from collections import deque
 import threading
 from app.config.detaction_config import settings
-from app.video.camera_manager import camera_manager  # 추가
+from app.video.camera_manager import camera_manager
 
 # object_detection 호환 패치
 tf.gfile = tf.io.gfile
 
 # ArUco 마커 설정
 ARUCO_DICT = cv2.aruco.DICT_6X6_250  # 아루코 마커 사전
-RECT_SHAPE = (400, 400)  # 정사각형 변환 크기
+RECT_SHAPE = (640, 640)  # 정사각형 변환 크기
 
 def create_square_from_three_markers(centers):
     """세 개의 마커로 직각삼각형을 만들고 네 번째 점 추정"""
@@ -145,8 +145,6 @@ class DiceMonitor:
         print('Model loaded.')
 
         # 카메라 관련 변수 제거 (CameraManager가 관리)
-        # self.cap = None  # 제거
-        # self.monitoring_thread = None  # 제거
         self.is_monitoring = False
 
         # 게임별 모니터링 상태
@@ -155,6 +153,15 @@ class DiceMonitor:
         # 안정화 설정
         self.STABILITY_THRESHOLD = settings.DICE_STABILITY_THRESHOLD
         self.CONFIDENCE_THRESHOLD = settings.DICE_CONFIDENCE_THRESHOLD
+        
+        # 좌표 허용 오차 설정 (추가)
+        self.POSITION_TOLERANCE = 0.05  # 5% 오차 허용
+        
+        # 칼만 필터 관련 변수 (추가)
+        self.dice_kalman_filters = {}  # 주사위 ID별 칼만 필터 저장
+        self.marker_kalman_filters = {}  # 마커 ID별 칼만 필터 저장
+        self.marker_history = {}  # 마커 위치 이력 저장
+        self.history_length = 5  # 마커 위치 이력 길이
 
         # 프레임 속도 설정
         self.FPS_DELAY = settings.DICE_FPS_DELAY if hasattr(settings, 'DICE_FPS_DELAY') else 0.05
@@ -172,11 +179,34 @@ class DiceMonitor:
 
         # ArUco 관련 변수
         self.aruco_dict = cv2.aruco.getPredefinedDictionary(ARUCO_DICT)
-        self.aruco_parameters = cv2.aruco.DetectorParameters()
+        self.aruco_parameters = self.optimize_aruco_parameters()  # 최적화된 파라미터 사용
         self.aruco_detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.aruco_parameters)
         self.aruco_square_corners: Optional[List[List[int]]] = None # 검출된 정사각형 코너 좌표
         self.perspective_matrix: Optional[np.ndarray] = None # 원근 변환 행렬
         self.inverse_perspective_matrix: Optional[np.ndarray] = None # 역 원근 변환 행렬
+
+    def optimize_aruco_parameters(self):
+        """아루코 마커 검출 파라미터 최적화"""
+        parameters = cv2.aruco.DetectorParameters()
+        # 적응형 임계값 조정
+        parameters.adaptiveThreshWinSizeMin = 7
+        parameters.adaptiveThreshWinSizeMax = 23
+        parameters.adaptiveThreshWinSizeStep = 10
+        parameters.adaptiveThreshConstant = 7
+        
+        # 코너 정제 매개변수
+        parameters.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
+        parameters.cornerRefinementWinSize = 5
+        parameters.cornerRefinementMaxIterations = 30
+        parameters.cornerRefinementMinAccuracy = 0.1
+        
+        # 마커 경계 매개변수
+        parameters.minMarkerPerimeterRate = 0.03
+        parameters.maxMarkerPerimeterRate = 4.0
+        parameters.polygonalApproxAccuracyRate = 0.05
+        parameters.minCornerDistanceRate = 0.05
+        
+        return parameters
 
     def set_preview(self, show: bool):
         """미리보기 창 표시 설정"""
@@ -211,7 +241,6 @@ class DiceMonitor:
         """특정 게임의 모니터링 중지"""
         if game_id in self.game_monitors:
             self.game_monitors[game_id]["active"] = False
-
             del self.game_monitors[game_id]
 
         # 활성 게임이 없으면 카메라 매니저 구독 해제
@@ -249,9 +278,16 @@ class DiceMonitor:
         """프레임 처리"""
         # 복사본 생성 (미리보기용)
         display_frame = frame.copy()
+        
+        # 이미지 전처리 (추가)
+        processed_frame = self.preprocess_image_for_detection(frame)
 
         # ArUco 마커 검출
-        corners, ids, _ = self.aruco_detector.detectMarkers(frame)
+        corners, ids, _ = self.aruco_detector.detectMarkers(processed_frame)
+        
+        # 마커 안정화 (추가)
+        if ids is not None and len(ids) > 0:
+            corners, ids = self.stabilize_marker_corners(corners, ids)
 
         # 정사각형 변수 초기화
         self.aruco_square_corners = None
@@ -272,13 +308,10 @@ class DiceMonitor:
             if len(ids) == 3:
                 # 3개 마커로 직각삼각형 만들고 정사각형 생성
                 self.aruco_square_corners = create_square_from_three_markers(centers)
-                # if self.aruco_square_corners:
-                #     print("[INFO] 3개 마커로 정사각형 생성 (직각삼각형 이용)")
 
             elif len(ids) >= 4:
                 # 4개 이상 마커로 정사각형 생성 (처음 4개만 사용)
                 self.aruco_square_corners = create_square_from_four_markers(centers[:4])
-                # print("[INFO] 4개 마커로 정사각형 생성")
 
             # 원근 변환 행렬 계산
             if self.aruco_square_corners is not None:
@@ -287,13 +320,16 @@ class DiceMonitor:
                 self.perspective_matrix = cv2.getPerspectiveTransform(np.array(self.aruco_square_corners, dtype=np.float32), dst_pts)
                 self.inverse_perspective_matrix = cv2.getPerspectiveTransform(dst_pts, np.array(self.aruco_square_corners, dtype=np.float32))
 
-
         # 주사위 인식 (정사각형 영역이 검출된 경우에만)
-        dice_values, dice_coords, detections = self._detect_dice_in_frame(frame)
+        dice_values, dice_coords, detections = self._detect_dice_in_frame(processed_frame)
+        
+        # 칼만 필터 적용 (추가)
+        if dice_values is not None and dice_coords is not None:
+            dice_values, dice_coords = self.apply_kalman_filter_to_dice(dice_values, dice_coords)
 
         # 미리보기 창 표시
         if self.show_preview:
-            self._show_preview(display_frame, dice_values, detections, corners, ids) # ArUco 정보 추가
+            self._show_preview(display_frame, dice_values, detections, corners, ids)
 
         # 각 게임에 대해 처리
         for game_id, monitor in self.game_monitors.items():
@@ -331,6 +367,84 @@ class DiceMonitor:
 
                         # 콜백을 실행한 후에는 플래그를 False로 설정하여 중복 전송 방지
                         monitor["waiting_for_roll"] = False
+
+    def preprocess_image_for_detection(self, frame):
+        """이미지 전처리"""
+        # 그레이스케일 변환
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # 히스토그램 평활화
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        equalized = clahe.apply(gray)
+        
+        # 노이즈 제거를 위한 가우시안 블러
+        blurred = cv2.GaussianBlur(equalized, (5, 5), 0)
+        
+        # 다시 BGR로 변환
+        processed = cv2.cvtColor(blurred, cv2.COLOR_GRAY2BGR)
+        
+        return processed
+
+    def stabilize_marker_corners(self, corners, ids, history_length=5):
+        """마커 코너 안정화"""
+        if not hasattr(self, 'marker_history'):
+            self.marker_history = {}
+        
+        current_time = time.time()
+        result_corners = []
+        result_ids = []
+        
+        if ids is not None:
+            for i, marker_id in enumerate(ids.flatten()):
+                marker_key = int(marker_id)
+                if marker_key not in self.marker_history:
+                    self.marker_history[marker_key] = deque(maxlen=history_length)
+                
+                self.marker_history[marker_key].append({
+                    'corner': corners[i],
+                    'timestamp': current_time
+                })
+                
+                # 3프레임 이상 누적되었을 때 평균 계산
+                if len(self.marker_history[marker_key]) >= 3:
+                    avg_corner = np.mean([item['corner'] for item in self.marker_history[marker_key]], axis=0)
+                    result_corners.append(avg_corner)
+                    result_ids.append(marker_key)
+        
+        return result_corners, np.array(result_ids).reshape(-1, 1) if result_ids else None
+
+    def apply_kalman_filter_to_dice(self, dice_values, dice_coords):
+        """주사위 좌표에 칼만 필터 적용"""
+        if dice_values is None or dice_coords is None:
+            return None, None
+        
+        filtered_coords = []
+        
+        for i, (value, coord) in enumerate(zip(dice_values, dice_coords)):
+            dice_id = f"dice_{i}"
+            
+            if dice_id not in self.dice_kalman_filters:
+                # 새 칼만 필터 초기화 (상태: x, y, dx, dy)
+                kf = cv2.KalmanFilter(4, 2)
+                kf.measurementMatrix = np.array([[1, 0, 0, 0], [0, 1, 0, 0]], np.float32)
+                kf.transitionMatrix = np.array([[1, 0, 1, 0], [0, 1, 0, 1], [0, 0, 1, 0], [0, 0, 0, 1]], np.float32)
+                kf.processNoiseCov = np.array([[1e-5, 0, 0, 0], [0, 1e-5, 0, 0], [0, 0, 1e-4, 0], [0, 0, 0, 1e-4]], np.float32)
+                
+                kf.statePre = np.array([[coord[0]], [coord[1]], [0], [0]], np.float32)
+                self.dice_kalman_filters[dice_id] = kf
+            
+            # 측정값 업데이트
+            kf = self.dice_kalman_filters[dice_id]
+            measurement = np.array([[coord[0]], [coord[1]]], np.float32)
+            
+            # 예측 및 보정
+            kf.correct(measurement)
+            prediction = kf.predict()
+            
+            # 필터링된 좌표
+            filtered_coords.append((float(prediction[0][0]), float(prediction[1][0])))
+        
+        return dice_values, filtered_coords
 
     def _show_preview(self, display_frame, dice_values, detections, aruco_corners, aruco_ids):
         """미리보기 창 표시"""
@@ -380,7 +494,6 @@ class DiceMonitor:
                             0.7, (0, 255, 255), 2)
 
         cv2.imshow('Dice Detection Monitor', display_frame)
-
         # 'q' 키로 종료
         if cv2.waitKey(1) & 0xFF == ord('q'):
             self.show_preview = False
@@ -430,7 +543,6 @@ class DiceMonitor:
                 score = detections['detection_scores'][i]
                 class_id = detections['detection_classes'][i]
                 box = detections['detection_boxes'][i] # normalized coordinates
-
                 if (1 <= class_id <= 9 and score > self.CONFIDENCE_THRESHOLD):  # 클래스 범위 확장 (1-9)
                     # 바운딩 박스 중심점 (픽셀 좌표)
                     ymin, xmin, ymax, xmax = box
@@ -457,7 +569,6 @@ class DiceMonitor:
             valid_detections['detection_classes'] = np.array(valid_detections['detection_classes'])
             valid_detections['detection_scores'] = np.array(valid_detections['detection_scores'])
 
-
             # 2. 신뢰도 순으로 정렬 (유효한 감지 결과 내에서)
             sorted_valid_indices = np.argsort(-valid_detections['detection_scores'])
 
@@ -470,7 +581,6 @@ class DiceMonitor:
 
             # 4. 값과 위치 추출
             dice_results = [] # Store tuples of (value, normalized_x, normalized_y)
-
             for i in top_indices_in_valid:
                 class_id = valid_detections['detection_classes'][i]
                 box = valid_detections['detection_boxes'][i] # normalized coordinates
@@ -552,38 +662,76 @@ class DiceMonitor:
         return stable_results
 
     def _check_normal_stability(self, history: deque) -> Optional[List[tuple[int, tuple[float, float]]]]:
-        """주사위 값과 좌표가 안정적인지 확인"""
+        """주사위 값과 좌표가 안정적인지 확인 (허용 오차 적용)"""
         if len(history) < 5:  # 최소 5프레임 필요
             return None
-
+        
         current_time = time.time()
-        stable_results = None
-
-        # 최근 프레임들 확인
+        stable_values = None
+        stable_coords = None
+        
+        # 좌표 허용 오차 설정
+        POSITION_TOLERANCE = self.POSITION_TOLERANCE  # 5% 오차 허용
+        
         for i in range(len(history) - 1, -1, -1):
             frame_data = history[i]
-            # 시간 체크
             if current_time - frame_data["timestamp"] > self.STABILITY_THRESHOLD:
                 break
-
-            # 주사위 결과가 없으면 스킵
+                
             if frame_data["values"] is None or frame_data["coords"] is None:
                 return None
-
-            # 첫 번째 유효한 결과 저장
-            if stable_results is None:
-                # Combine values and coords into a list of tuples (value, (x, y))
-                stable_results = list(zip(frame_data["values"], frame_data["coords"]))
-            # 결과가 다르면 불안정
-            elif list(zip(frame_data["values"], frame_data["coords"])) != stable_results:
-                return None
-
+                
+            if stable_values is None:
+                stable_values = frame_data["values"]
+                stable_coords = frame_data["coords"]
+            else:
+                # 값이 다르면 불안정
+                if frame_data["values"] != stable_values:
+                    return None
+                    
+                # 좌표가 허용 오차 범위를 벗어나면 불안정
+                for j, (x1, y1) in enumerate(stable_coords):
+                    x2, y2 = frame_data["coords"][j]
+                    if abs(x1 - x2) > POSITION_TOLERANCE or abs(y1 - y2) > POSITION_TOLERANCE:
+                        return None
+        
         # 충분한 시간 동안 안정적이었는지 확인
         oldest_timestamp = history[0]["timestamp"]
         if current_time - oldest_timestamp >= self.STABILITY_THRESHOLD:
-            return stable_results
-
+            return list(zip(stable_values, stable_coords))
+        
         return None
+
+    def _get_stable_dice_results(self, history: deque) -> Optional[List[tuple[int, tuple[float, float]]]]:
+        """여러 프레임에서 검출된 주사위 값의 평균값 계산"""
+        # 최근 N개 프레임에서 같은 주사위 값을 가진 프레임만 선택
+        recent_frames = []
+        current_time = time.time()
+        
+        for frame_data in list(history)[-5:]:
+            if frame_data["values"] is not None and current_time - frame_data["timestamp"] <= self.STABILITY_THRESHOLD:
+                recent_frames.append(frame_data)
+        
+        if len(recent_frames) < 3:  # 최소 3개 프레임 필요
+            return None
+        
+        # 첫 번째 프레임의 값을 기준으로 함
+        reference_values = recent_frames[0]["values"]
+        
+        # 같은 값을 가진 프레임만 필터링
+        matching_frames = [frame for frame in recent_frames if frame["values"] == reference_values]
+        
+        if len(matching_frames) < 3:  # 최소 3개 일치 프레임 필요
+            return None
+        
+        # 좌표 평균 계산
+        avg_coords = []
+        for i in range(len(reference_values)):
+            x_sum = sum(frame["coords"][i][0] for frame in matching_frames)
+            y_sum = sum(frame["coords"][i][1] for frame in matching_frames)
+            avg_coords.append((x_sum / len(matching_frames), y_sum / len(matching_frames)))
+        
+        return list(zip(reference_values, avg_coords))
 
     def get_current_values(self, game_id: str) -> Optional[List[tuple[int, tuple[float, float]]]]:
         """현재 안정적인 주사위 값과 좌표 반환"""
@@ -591,6 +739,61 @@ class DiceMonitor:
             return self.game_monitors[game_id]["last_stable_values"]
         return None
 
+    def wait_for_dice_roll(self, game_id: str, timeout: float = 10.0) -> None:
+        """주사위 굴림 대기 시작"""
+        if game_id in self.game_monitors:
+            monitor = self.game_monitors[game_id]
+            monitor["waiting_for_roll"] = True
+            
+            # 검출 윈도우 설정
+            monitor["detection_window"] = {
+                "active": True,
+                "start_time": time.time(),
+                "duration": timeout,
+                "found_stable": False
+            }
+            
+            print(f"게임 {game_id}: 주사위 굴림 대기 시작 (타임아웃: {timeout}초)")
+
+    def set_camera_exposure(self, camera_id=0):
+        """카메라 노출 고정"""
+        cap = cv2.VideoCapture(camera_id)
+        if cap.isOpened():
+            # 자동 노출 끄기
+            cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # 0.25는 수동 모드
+            # 노출 값 설정
+            cap.set(cv2.CAP_PROP_EXPOSURE, -5)  # 노출 값 (카메라마다 다름)
+            # 초점 고정
+            cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)  # 자동 초점 끄기
+            cap.set(cv2.CAP_PROP_FOCUS, 10)     # 초점 값 설정
+            cap.release()
+            print("카메라 노출 및 초점 고정 완료")
+
+    def apply_ensemble_detection(self, frame):
+        """여러 인식 모델의 결과를 앙상블"""
+        # 여러 방식으로 주사위 검출
+        results1 = self._detect_dice_in_frame(frame)
+        
+        # 다른 파라미터로 검출
+        old_threshold = self.CONFIDENCE_THRESHOLD
+        self.CONFIDENCE_THRESHOLD = self.CONFIDENCE_THRESHOLD - 0.1
+        results2 = self._detect_dice_in_frame(frame)
+        self.CONFIDENCE_THRESHOLD = old_threshold
+        
+        # 결과 앙상블
+        if results1[0] is not None and results2[0] is not None:
+            # 두 결과의 주사위 값이 같으면 신뢰
+            if results1[0] == results2[0]:
+                # 좌표는 평균값 사용
+                avg_coords = []
+                for i in range(len(results1[1])):
+                    avg_x = (results1[1][i][0] + results2[1][i][0]) / 2
+                    avg_y = (results1[1][i][1] + results2[1][i][1]) / 2
+                    avg_coords.append((avg_x, avg_y))
+                return results1[0], avg_coords, results1[2]
+        
+        # 앙상블 실패 시 첫 번째 결과 반환
+        return results1
 
 # 싱글톤 인스턴스
 dice_monitor = DiceMonitor()

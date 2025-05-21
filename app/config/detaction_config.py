@@ -3,7 +3,7 @@ class Settings:
     AUTO_DICE_DETECTION_ENABLED = True  # True로 설정하면 항상 자동 인식 사용
     DICE_CAMERA_INDEX = 0
     # 주사위 검출 시간 초
-    DICE_STABILITY_THRESHOLD = 0.65
+    DICE_STABILITY_THRESHOLD = 0.3
     DICE_CONFIDENCE_THRESHOLD = 0.85
     DICE_SHOW_PREVIEW = True
     # 모델 경로 설정
