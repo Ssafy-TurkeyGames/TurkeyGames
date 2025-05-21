@@ -28,8 +28,9 @@ export interface GameRule {
 
   // 하이라이트 데이터 인터페이스
 export interface HighlightData {
-  local_path: string;
-  minio_path: string;
-  qr_code: string;
-  local_qr_path: string;
+  local_path?: string;
+  minio_path?: string;
+  qr_code?: string;
+  local_qr_path?: string;
+  minio_qr_path?: string;
 }
