@@ -7,6 +7,13 @@ import { getAllGames, getFilteredGames, searchGamesByKeyword, clearGameCache } f
 import { Game } from '../api/types';
 import searchIcon from '../assets/images/search (1).png';
 
+// 게임 ID별 기본 이미지 임포트
+import gameImage1 from '../assets/images/gameimages/1.png';
+import gameImage2 from '../assets/images/gameimages/2.png';
+import gameImage3 from '../assets/images/gameimages/3.png';
+import gameImage4 from '../assets/images/gameimages/4.png';
+import gameImage5 from '../assets/images/gameimages/5.png';
+
 // 필터 버튼 데이터
 const playerFilters = ['2인', '3인', '4인'];
 const levelFilters = ['입문', '초보', '중수', '고수'];
@@ -34,6 +41,32 @@ export default function SearchGame() {
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const isFirstRender = useRef(true);
   
+  // URL 유효성 검사 함수
+  const isValidUrl = (url: string): boolean => {
+    try {
+      return url && (url.startsWith('http://') || url.startsWith('https://'));
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // gameId에 따른 기본 이미지 선택
+  const getDefaultGameImage = (gameId: number): string => {
+    switch (gameId) {
+      case 1:
+        return gameImage1;
+      case 2:
+        return gameImage2;
+      case 3:
+        return gameImage3;
+      case 4:
+        return gameImage4;
+      case 5:
+        return gameImage5;
+      default:
+        return logo; // 기본 로고 이미지
+    }
+  };
 
   // 필터가 적용되었는지 확인
   const isFilterActive = selectedPlayers.length > 0 || selectedLevels.length > 0;
@@ -68,36 +101,36 @@ export default function SearchGame() {
   }, [search]);
   
   // 모든 필터 초기화
-const clearAllFilters = async () => {
-  setSelectedPlayers([]);
-  setSelectedLevels([]);
-  setSearch('');
-  
-  // 캐시 초기화 및 강제 새로고침으로 전체 게임 목록 불러오기
-  setLoading(true);
-  try {
-    // 캐시 초기화
-    clearGameCache();
+  const clearAllFilters = async () => {
+    setSelectedPlayers([]);
+    setSelectedLevels([]);
+    setSearch('');
     
-    // 강제 새로고침으로 전체 게임 목록 불러오기
-    const response = await getAllGames(true);
-    
-    if (response.code === 'SUCCESS') {
-      setGames(response.data || []);
-      setError(null);
-    } else {
-      console.error('❌ API 오류:', response.message);
-      setError(response.message || '게임 목록을 불러오는데 실패했습니다.');
+    // 캐시 초기화 및 강제 새로고침으로 전체 게임 목록 불러오기
+    setLoading(true);
+    try {
+      // 캐시 초기화
+      clearGameCache();
+      
+      // 강제 새로고침으로 전체 게임 목록 불러오기
+      const response = await getAllGames(true);
+      
+      if (response.code === 'SUCCESS') {
+        setGames(response.data || []);
+        setError(null);
+      } else {
+        console.error('❌ API 오류:', response.message);
+        setError(response.message || '게임 목록을 불러오는데 실패했습니다.');
+        setGames([]);
+      }
+    } catch (err) {
+      console.error('❌ 네트워크 오류:', err);
+      setError('서버 연결에 실패했습니다.');
       setGames([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('❌ 네트워크 오류:', err);
-    setError('서버 연결에 실패했습니다.');
-    setGames([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   // 게임 목록 불러오기
   const fetchGames = async (searchTerm = search) => {
@@ -257,11 +290,12 @@ const clearAllFilters = async () => {
             games.map(game => (
               <div key={game.gameId} className={styles.gameCard}>
                 <img
-                  src={game.gameProfilePath || logo}
+                  src={isValidUrl(game.gameProfilePath) ? game.gameProfilePath : getDefaultGameImage(game.gameId)}
                   alt={game.title}
                   className={styles.gameImg}
                   onError={(e) => {
-                    e.currentTarget.src = logo;
+                    e.currentTarget.src = getDefaultGameImage(game.gameId);
+                    e.currentTarget.onerror = null;
                   }}
                 />
                 <div className={styles.gameInfo}>
@@ -286,7 +320,7 @@ const clearAllFilters = async () => {
                   </button>
                   <button
                     className={styles.playBtn}
-                    onClick={() => navigate(`/game-options/`)}
+                    onClick={() => navigate(`/game-options/${game.gameId}`)}
                   >
                     ⚡ 게임 하기
                   </button>

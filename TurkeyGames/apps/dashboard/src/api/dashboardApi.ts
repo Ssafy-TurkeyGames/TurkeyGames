@@ -1,6 +1,11 @@
+//app/dashboard/src/api/dashboardApi.ts
+
 import axios from 'axios';
 import axiosInstance from './axiosInstance';
 import { ApiResponse, Game, GameRule, HighlightData } from './types';
+
+// 소켓 서버 URL 추가
+const SOCKET_SERVER_URL = 'http://localhost:8000';
 
 // 모든 게임 목록 조회
 export const getAllGames = async (forceRefresh = false): Promise<ApiResponse<Game[]>> => {
@@ -103,25 +108,49 @@ export const searchGamesByKeyword = async (keyword: string): Promise<ApiResponse
 // 게임 규칙 조회 API
 export const getGameRule = async (gameId: string | number): Promise<ApiResponse<GameRule>> => {
   const response = await axiosInstance.get<ApiResponse<GameRule>>(`/dashb/detail/${gameId}`);
+    console.log('[API 응답] 규칙 데이터:', response.data);
+
   return response.data;
 };
 
-// 게임 종료 API
-export const endYachtGame = async (gameId: string | number): Promise<any> => {
+
+// 게임 종료 API - 새로운 POST 엔드포인트 사용
+export const endYachtGame = async (gameId: string): Promise<{success: boolean; message: string}> => {
   try {
-    console.log('게임 종료 API 호출 시작');
-    console.log('axiosInstance baseURL:', axiosInstance.defaults.baseURL);
-    console.log('요청 URL:', `${axiosInstance.defaults.baseURL}/yacht/${gameId}`);
-    const SOCKET_SERVER_URL = 'http://localhost:8000';
-    const response = await axios.delete(`${SOCKET_SERVER_URL}/yacht/${gameId}`);
-    console.log('게임 종료 API 응답:', response.data);
+    console.log(`[endYachtGame] 게임 종료 API 호출 시작, gameId: ${gameId}`);
+    
+    // 새로운 POST 엔드포인트 사용
+    const response = await axios.post(`${SOCKET_SERVER_URL}/yacht/end/${gameId}`);
+    
+    console.log(`[endYachtGame] 게임 종료 API 응답:`, response.data);
     return response.data;
   } catch (error) {
-    console.error('게임 종료 오류:', error);
+    console.error('[endYachtGame] 게임 종료 API 호출 오류:', error);
     if (axios.isAxiosError(error)) {
-      console.error('에러 상태 코드:', error.response?.status);
-      console.error('에러 데이터:', error.response?.data);
-      console.error('에러 URL:', error.config?.url);
+      console.error('- 상태 코드:', error.response?.status);
+      console.error('- 응답 데이터:', error.response?.data);
+      console.error('- 요청 URL:', error.config?.url);
+    }
+    throw error;
+  }
+};
+
+// 게임 삭제 API
+export const deleteYachtGame = async (gameId: string): Promise<{success: boolean; message: string}> => {
+  try {
+    console.log(`[deleteYachtGame] 게임 삭제 API 호출 시작, gameId: ${gameId}`);
+    
+    // DELETE API 호출
+    const response = await axios.delete(`${SOCKET_SERVER_URL}/yacht/${gameId}`);
+    
+    console.log(`[deleteYachtGame] 게임 삭제 API 응답:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error('[deleteYachtGame] 게임 삭제 API 호출 오류:', error);
+    if (axios.isAxiosError(error)) {
+      console.error('- 상태 코드:', error.response?.status);
+      console.error('- 응답 데이터:', error.response?.data);
+      console.error('- 요청 URL:', error.config?.url);
     }
     throw error;
   }

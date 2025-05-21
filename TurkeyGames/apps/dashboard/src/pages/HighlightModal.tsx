@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Highlight from '../components/games/Highlight';
-import { getHighlightData, HighlightData } from '../api/dashboardApi';
+import { getHighlightData } from '../api/dashboardApi';
+import { HighlightData } from '../api/types'; // 타입 임포트 수정
 
 const HighlightModal: React.FC = () => {
   const navigate = useNavigate();
@@ -29,7 +30,12 @@ const HighlightModal: React.FC = () => {
         }
         
         const response = await getHighlightData(gameId, playerId);
-        setHighlightData(response.data);
+        if (response.code === 'SUCCESS' && response.data) {
+          setHighlightData(response.data);
+          setError(null);
+        } else {
+          setError(response.message || '하이라이트 데이터를 불러오는데 실패했습니다.');
+        }
         setLoading(false);
       } catch (err) {
         console.error('하이라이트 데이터를 가져오는 중 오류 발생:', err);
@@ -57,7 +63,9 @@ const HighlightModal: React.FC = () => {
   // 백엔드 설정에 맞는 QR 코드 URL 생성 (이전 방식 - API 호출 실패 시 fallback)
   const qrCodeUrl = videoId 
     ? `http://k12e101.p.ssafy.io:9000/download/video/${videoId}`
-    : `http://k12e101.p.ssafy.io:9000/download/video/${gameId}`;
+    : gameId
+      ? `http://k12e101.p.ssafy.io:9000/download/video/${gameId}`
+      : '';
 
   return (
     <Highlight 
@@ -70,6 +78,7 @@ const HighlightModal: React.FC = () => {
       localPath={highlightData?.local_path}
       minioPath={highlightData?.minio_path}
       localQrPath={highlightData?.local_qr_path}
+      minioQrPath={highlightData?.minio_qr_path} // 추가: minio_qr_path 전달
     />
   );
 };

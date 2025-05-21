@@ -5,6 +5,14 @@ import closeIcon from '../assets/images/close (1).png';
 import logo from '../assets/images/logo.png';
 import { getGameRule } from '../api/dashboardApi';
 import { GameRule } from '../api/types';
+import defaultRuleImage from '../assets/images/rule_default.png';
+
+// 게임 ID에 따른 기본 이미지 임포트
+import gameImage1 from '../assets/images/gameimages/1.png';
+import gameImage2 from '../assets/images/gameimages/2.png';
+import gameImage3 from '../assets/images/gameimages/3.png';
+import gameImage4 from '../assets/images/gameimages/4.png';
+import gameImage5 from '../assets/images/gameimages/5.png';
 
 interface RuleProps {
   isModal?: boolean;
@@ -99,6 +107,57 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
 
   const { gameProfilePath, description, imagePath, descriptionVideoPath } = gameRule;
 
+  // URL 유효성 검사 함수
+  const isValidUrl = (url: string): boolean => {
+    try {
+      return url.startsWith('http://') || url.startsWith('https://');
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // 이미지 경로 처리 - 배열인 경우 첫 번째 유효한 URL 사용
+  const getImageUrl = (): string | null => {
+    if (!imagePath) return null;
+    
+    // 배열인 경우
+    if (Array.isArray(imagePath)) {
+      // 배열에서 첫 번째 유효한 URL 찾기
+      for (const url of imagePath) {
+        if (isValidUrl(url)) {
+          return url;
+        }
+      }
+      return null; // 유효한 URL이 없으면 null 반환
+    }
+    
+    // 문자열인 경우 URL 유효성 검사
+    return isValidUrl(imagePath) ? imagePath : null;
+  };
+
+  // gameId에 따른 기본 이미지 선택
+  const getDefaultGameImage = (): string => {
+    const gameIdNum = Number(effectiveGameId);
+    
+    switch (gameIdNum) {
+      case 1:
+        return gameImage1;
+      case 2:
+        return gameImage2;
+      case 3:
+        return gameImage3;
+      case 4:
+        return gameImage4;
+      case 5:
+        return gameImage5;
+      default:
+        return logo; // 기본 로고 이미지
+    }
+  };
+
+  const validImageUrl = getImageUrl();
+  const isValidProfilePath = gameProfilePath && isValidUrl(gameProfilePath);
+
   return (
   <div 
     className={isModal ? styles.modalOverlay : styles.container}
@@ -106,23 +165,25 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
   >
     <div className={isModal ? styles.modalContent : undefined}>
       {isModal && (
-        <button
-          className={styles.closeBtn}
-          onClick={handleClose}
-          aria-label="닫기"
-          type="button"
-        >
-          <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
-        </button>
+        <div className={styles.closeBtnContainer}>
+          <button
+            className={styles.closeBtn}
+            onClick={handleClose}
+            aria-label="닫기"
+            type="button"
+          >
+            <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
+          </button>
+        </div>
       )}
 
       <section className={styles.profileSection}>
         <img
-          src={gameProfilePath || logo}
+          src={isValidProfilePath ? gameProfilePath : getDefaultGameImage()}
           alt="게임 대표 이미지"
           className={styles.profileImage}
           onError={(e) => {
-            e.currentTarget.src = logo;
+            e.currentTarget.src = getDefaultGameImage();
             e.currentTarget.onerror = null;
           }}
         />
@@ -133,19 +194,18 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
         <p className={styles.description}>{description}</p>
       </section>
 
-      {imagePath && (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
-          <img
-            src={imagePath}
-            alt="게임 규칙 이미지"
-            className={styles.ruleImage}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        </section>
-      )}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
+        <img
+          src={validImageUrl || defaultRuleImage}
+          alt="게임 규칙 이미지"
+          className={styles.ruleImage}
+          onError={(e) => {
+            e.currentTarget.src = defaultRuleImage;
+            e.currentTarget.onerror = null;
+          }}
+        />
+      </section>
 
       {descriptionVideoPath && (
         <section className={styles.section}>

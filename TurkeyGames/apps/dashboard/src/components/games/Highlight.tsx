@@ -1,8 +1,8 @@
 // apps/dashboard/src/components/games/Highlight.tsx
-import React from 'react';
+import React, { useCallback } from 'react';
 import styles from './Highlight.module.css';
-import closeIcon from '../../assets/images/close (1).png'; // 닫기 아이콘
-import loadingIcon from '../../assets/images/loading.png'; // 로딩 스피너 이미지 필요
+import closeIcon from '../../assets/images/close (1).png';
+import loadingIcon from '../../assets/images/loading.png';
 
 interface HighlightProps {
   isOpen: boolean;
@@ -14,6 +14,7 @@ interface HighlightProps {
   localPath?: string;
   minioPath?: string;
   localQrPath?: string;
+  minioQrPath?: string; // 추가: 명세서에 있는 minio_qr_path 필드
 }
 
 const Highlight: React.FC<HighlightProps> = ({ 
@@ -25,17 +26,23 @@ const Highlight: React.FC<HighlightProps> = ({
   error = null,
   localPath,
   minioPath,
-  localQrPath
+  localQrPath,
+  minioQrPath
 }) => {
   console.log('[Highlight] 렌더링 시작');
-  console.log('[Highlight] Props:', { isOpen, qrValue, title, loading, error, localPath, minioPath, localQrPath });
+  console.log('[Highlight] Props:', { 
+    isOpen, qrValue, title, loading, error, 
+    localPath, minioPath, localQrPath, minioQrPath 
+  });
   
   if (!isOpen) return null;
 
-  // local_qr_path가 C:/로 시작하지 않으면 앞에 C:/를 추가
-  const formattedQrPath = localQrPath && !localQrPath.startsWith('C:/') 
-    ? `C:/${localQrPath}` 
-    : localQrPath;
+  // local_qr_path 처리 - C:/ 확인 및 추가
+  const formattedQrPath = localQrPath 
+    ? (!localQrPath.startsWith('C:/') && !localQrPath.startsWith('C:\\')) 
+      ? `C:/${localQrPath.replace(/^\/+/, '')}` // 앞에 있는 슬래시 제거 후 C:/ 추가
+      : localQrPath
+    : null;
   
   console.log('[Highlight] 포맷된 QR 경로:', formattedQrPath);
 
@@ -46,9 +53,18 @@ const Highlight: React.FC<HighlightProps> = ({
     }
   };
 
-  // QR 코드 이미지 URL 생성
-  const qrImageUrl = formattedQrPath 
-    ? formattedQrPath 
+  // 모달 오버레이 클릭 핸들러 - 모달 바깥 영역 클릭 시 닫기
+  const handleOverlayClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    // 클릭된 요소가 오버레이 자체인 경우에만 닫기 (내부 콘텐츠 클릭 시 닫히지 않도록)
+    if (e.target === e.currentTarget) {
+      console.log('[Highlight] 오버레이 클릭으로 모달 닫기');
+      onClose();
+    }
+  }, [onClose]);
+
+  // QR 코드 이미지 URL 생성 - minioQrPath를 우선 사용하고, 그 다음 qrValue로 생성
+  const qrImageUrl = minioQrPath 
+    ? minioQrPath 
     : qrValue 
       ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrValue)}` 
       : '';
@@ -56,8 +72,8 @@ const Highlight: React.FC<HighlightProps> = ({
   console.log('[Highlight] QR 이미지 URL:', qrImageUrl);
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalContent}>
+    <div className={styles.modalOverlay} onClick={handleOverlayClick}>
+      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeButton} onClick={onClose}>
           <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
         </button>
@@ -78,7 +94,6 @@ const Highlight: React.FC<HighlightProps> = ({
         ) : (
           <>
             <div className={styles.qrCodeContainer}>
-              {/* QR 코드 표시 - 서버에서 제공한 QR 코드 경로가 있으면 사용, 없으면 API로 생성 */}
               <div className={styles.qrCode}>
                 {qrImageUrl ? (
                   <img 
@@ -86,7 +101,6 @@ const Highlight: React.FC<HighlightProps> = ({
                     alt="QR 코드" 
                     onError={(e) => {
                       console.error('[Highlight] QR 코드 이미지 로드 실패:', e);
-                      // 이미지 로드 실패 시 대체 이미지 또는 메시지 표시
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
                       if (parent) {
@@ -114,7 +128,7 @@ const Highlight: React.FC<HighlightProps> = ({
                 </button>
               )}
               
-              {(localPath || minioPath || formattedQrPath) && (
+              {(localPath || minioPath || formattedQrPath || minioQrPath) && (
                 <div className={styles.pathInfo}>
                   {localPath && (
                     <div className={styles.pathItem}>
@@ -132,6 +146,12 @@ const Highlight: React.FC<HighlightProps> = ({
                     <div className={styles.pathItem}>
                       <span className={styles.pathLabel}>QR 코드 로컬 경로:</span>
                       <span className={styles.pathValue}>{formattedQrPath}</span>
+                    </div>
+                  )}
+                  {minioQrPath && (
+                    <div className={styles.pathItem}>
+                      <span className={styles.pathLabel}>QR 코드 MinIO 경로:</span>
+                      <span className={styles.pathValue}>{minioQrPath}</span>
                     </div>
                   )}
                 </div>

@@ -105,7 +105,9 @@
 .categoryName {
   color: #ffffff;
   font-size: 1.3rem;
-  padding-left: 20px;
+  width: 50%; /* 너비를 고정하여 정렬 영역 확보 */
+  text-align: center; /* 텍스트 가운데 정렬 */
+  padding-left: 0; /* 기존 패딩 제거 */
   box-shadow: 3px #10FFFF;
   text-shadow:
     0 0 5px #10FFFF,
@@ -123,9 +125,9 @@
 }
 
 .divider {
-  width: 2.5px;
+  width: 2px;
   height: 100%;
-  background-color: #A300B2;
+  background-color: #c954d4;
   box-shadow:
     0 0 4px #A300B2,
     0 0 8px #A300B2;
