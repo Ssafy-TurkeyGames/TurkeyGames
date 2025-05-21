@@ -186,32 +186,33 @@ class DiceMonitor:
 
     def start_monitoring(self, game_id: str):
         """특정 게임의 주사위 모니터링 시작"""
-        if game_id not in self.game_monitors:
-            self.game_monitors[game_id] = {
-                "active": True,
-                "last_stable_values": None,
-                "value_history": deque(maxlen=10),
-                "last_update_time": 0,
-                "callback": None,
-                "waiting_for_roll": False,  # 리롤 요청 후 값 전송 대기 상태
-                "detection_window": {
-                    "active": False,
-                    "start_time": 0,
-                    "duration": 0,
-                    "found_stable": False
-                }
+        self.game_monitors[game_id] = {
+            "active": True,
+            "last_stable_values": None,
+            "value_history": deque(maxlen=10),
+            "last_update_time": 0,
+            "callback": None,
+            "waiting_for_roll": False,
+            "detection_window": {
+                "active": False,
+                "start_time": 0,
+                "duration": 0,
+                "found_stable": False
             }
+        }
 
         # 카메라 매니저에 구독
-        if not self.is_monitoring:
-            camera_manager.subscribe("dice_monitor", self._on_frame_received)
-            self.is_monitoring = True
-            print(f"주사위 모니터링 시작: 게임 {game_id}")
+        camera_manager.unsubscribe("dice_monitor")  # 기존 구독 제거
+        camera_manager.subscribe("dice_monitor", self._on_frame_received)  # 새로 구독
+        self.is_monitoring = True
+        print(f"주사위 모니터링 시작: 게임 {game_id}")
 
     def stop_monitoring(self, game_id: str):
         """특정 게임의 모니터링 중지"""
         if game_id in self.game_monitors:
             self.game_monitors[game_id]["active"] = False
+
+            del self.game_monitors[game_id]
 
         # 활성 게임이 없으면 카메라 매니저 구독 해제
         if not any(monitor["active"] for monitor in self.game_monitors.values()):

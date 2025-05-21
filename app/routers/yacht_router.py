@@ -6,7 +6,8 @@ from app.db import crud
 from app.yacht import schema
 from app.yacht.dice import DiceGame
 from app.yacht.dice_monitor import dice_monitor
-from app.websocket.manager import broadcast_scores, game_rooms, sio, on_dice_change, broadcast_end_game
+from app.websocket.manager import broadcast_scores, game_rooms, sio, on_dice_change, broadcast_end_game, \
+    broadcast_delete_game
 from app.config.detaction_config import settings
 
 # 요트 게임 라우터 초기화
@@ -313,6 +314,9 @@ async def end_game(game_id: str, background_tasks: BackgroundTasks):
 
     dice_monitor.stop_monitoring(game_id)
 
+    if game_id in dice_monitor.game_monitors:
+        del dice_monitor.game_monitors[game_id]
+
     # 게임 종료 메시지 브로드캐스트
     background_tasks.add_task(
         broadcast_end_game,
@@ -331,6 +335,9 @@ async def delete_game(game_id: str, background_tasks: BackgroundTasks, db: Sessi
 
     dice_monitor.stop_monitoring(game_id)
 
+    if game_id in dice_monitor.game_monitors:
+        del dice_monitor.game_monitors[game_id]
+
     # DB에서 게임 설정 및 플레이어 점수 삭제
     crud.delete_game(db, game["setting_id"], game["players"])
 
@@ -339,7 +346,7 @@ async def delete_game(game_id: str, background_tasks: BackgroundTasks, db: Sessi
 
     # 게임 종료 메시지 브로드캐스트
     background_tasks.add_task(
-        broadcast_end_game,
+        broadcast_delete_game,
         game_id,
         {"game_id": game_id, "is_finished": True, "message": "게임이 삭제되었습니다"}
     )
