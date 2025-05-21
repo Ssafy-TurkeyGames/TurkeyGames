@@ -48,9 +48,11 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
     const [previewScores, setPreviewScores] = useState<object>({});
 
     const rerollButtonClick = () => {
+        console.log('reroll button click 했음');
         if(props.isGameOver) return;
         setSelectState('');
         setPreviewScores({});
+        props.throwDiceFunction();
         const ai = aiVoices[props.aiVoice - 1];
         const rerollFiles = 
             ai === 'daegil' ? scoreBoardSoundFiles.daegil.reroll :
@@ -61,9 +63,10 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
             audioRef.current.src = randomSound;
 
             // 주사위 리롤 안내 음성 끝난후 주사위 새로 굴리기기
-            audioRef.current.onended = () => {
-                props.throwDiceFunction();
-            };
+            // audioRef.current.onended = () => {
+            //     console.log("dpdpdpdpdpdp");
+            //     props.throwDiceFunction();
+            // };
 
             audioRef.current.play();
         }
@@ -72,6 +75,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
 
     // Score Area
     const selectScoreAreaClick = (category : string) => {
+        console.log('selectScoreAreaClick 버튼 클릭')
         if (usedCategories.includes(category)) return;
 
         if(audioRef.current) {
@@ -170,7 +174,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
 
             <audio ref={audioRef}/>
 
-            <div className={styles.playerInfo} onClick={props.throwDiceFunction}>
+            <div className={styles.playerInfo}>
                 <div>[PLAYER {props.playerId}]</div>
                 <div>SCORE {props.totalScore}</div>
             </div>
@@ -315,7 +319,7 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
                         {
                             usedCategories.includes('large_straight') ? 
                             props.largeStraight : 
-                            Object.keys(previewScores).length !== 0 != 0 && props.myTurn && previewScores.large_straight !== 0 ? previewScores.large_straight : ''
+                            Object.keys(previewScores).length !== 0 && props.myTurn && previewScores.large_straight !== 0 ? previewScores.large_straight : ''
                         }
                     </div>
                 </div>
@@ -336,15 +340,15 @@ export default function TurkeyDiceScoreCardV1(props: propsType) {
 
             <div className={styles.buttons}>
                 <div 
-                    onClick={rerollButtonState ? rerollButtonClick : undefined}
-                    className={!rerollButtonState ? styles.disabled : styles.abled}
+                    onClick={rerollButtonState ? rerollButtonClick : rerollButtonClick}
+                    // className={!rerollButtonState ? styles.disabled : styles.abled}
                 >
                     REROLL
                 </div>
                 {/* <div onClick={props.nextTurnButtonClick}>NEXT TURN</div> */}
                 <div
                     className={selectState === '' ? styles.disabled : styles.abled}
-                    onClick={selectScoreButtonClick}
+                    onClick={() => selectScoreButtonClick()}
                 >
                     NEXT TURN
                 </div>

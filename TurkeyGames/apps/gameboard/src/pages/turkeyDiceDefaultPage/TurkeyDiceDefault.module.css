@@ -116,3 +116,19 @@
     right: 0;
     bottom: 0;
 }
+
+.highlight {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    width: 1080px;
+    height: 1080px;
+    margin-left: -540px;
+    margin-top: -540px;
+}
+
+.highlight > video {
+    width: 1080px;
+    height: 1080px;
+}

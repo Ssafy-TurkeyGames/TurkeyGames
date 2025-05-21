@@ -59,6 +59,7 @@ export interface HighlightResponse {
   minio_path: string;
   qr_code: string;
   local_qr_path: string;
+  minio_qr_path: string;
 }
 
 // 야추 게임 API 서비스

@@ -13,6 +13,7 @@ import { Socket } from 'socket.io-client';
 import { effectMap, GameMode } from '../../components/turkeyDice/turkeyDiceEffect/effectMap';
 import HeartEffectAnimation from '../../components/turkeyDice/turkeyDiceEffect/HeartEffectAnimation';
 import ExplosionEffectAnimation from '../../components/turkeyDice/turkeyDiceEffect/ExplosionEffectAnimation';
+import { useNavigate } from 'react-router-dom';
 
 
 interface propsType {
@@ -23,7 +24,7 @@ interface propsType {
 }
 
 export default function TurkeyDiceDefault(props: propsType) {
-
+  const navigate = useNavigate();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   // 1) 최초 자리 안내 mp3 파일 실행
@@ -73,43 +74,7 @@ export default function TurkeyDiceDefault(props: propsType) {
     }
   }
 
-  useEffect(() => {
-    if (playerCount === props.people && audioRef.current) {
-      const audio = audioRef.current;
-
-      // 첫 번째 사운드 재생
-      audio.src = gameStartFile;
-      audio.play();
-
-      // 첫 번째 사운드가 끝났을 때
-      const handleFirstEnded = () => {
-        // 두 번째 사운드 설정
-        if (props.voice === 1) {
-          audio.src = gameBoardSoundFiles.daegil.start;
-        } else if (props.voice === 2) {
-          audio.src = gameBoardSoundFiles.flower.start;
-        } else if (props.voice === 3) {
-          audio.src = gameBoardSoundFiles.guri.start;
-        }
-
-        audio.play();
-
-        // 두 번째 사운드가 끝났을 때
-        const handleSecondEnded = () => {
-          setGameStartFinished(true); // 최종 작업 실행
-          audio.onended = null; // 이벤트 제거
-        };
-
-        audio.onended = handleSecondEnded; // 두 번째 사운드 끝나면 실행
-      };
-
-      setGameStarted(true);
-      getScores();
-
-      audio.onended = handleFirstEnded;
-      throwDices();
-    }
-  }, [playerCount, props.people, props.voice]);
+  
 
 
   // 3) 게임 진행
@@ -122,6 +87,7 @@ export default function TurkeyDiceDefault(props: propsType) {
 
   const [scoreData, setScoreData] = useState([]);
   const [winnerPlayer, setWinnerPlayer] = useState<number>(0);
+  const [highLightVideo, setHighLightVideo] = useState<string>('');
 
   // 점수 조회 API
   const getScores = async() => {
@@ -173,13 +139,55 @@ export default function TurkeyDiceDefault(props: propsType) {
     try {
       const data = await yachtService.getHighlight(gameId.toString(), playerId.toString());
       console.log(data);
+      setHighLightVideo(data.minio_qr_path);
+
     } catch (error) {
       console.log('에러:', error);
     }
   }
 
+  useEffect(() => {
+    if (playerCount === props.people && audioRef.current) {
+      const audio = audioRef.current;
+
+      // 첫 번째 사운드 재생
+      audio.src = gameStartFile;
+      audio.play();
+
+      // 첫 번째 사운드가 끝났을 때
+      const handleFirstEnded = () => {
+        // 두 번째 사운드 설정
+        if (props.voice === 1) {
+          audio.src = gameBoardSoundFiles.daegil.start;
+        } else if (props.voice === 2) {
+          audio.src = gameBoardSoundFiles.flower.start;
+        } else if (props.voice === 3) {
+          audio.src = gameBoardSoundFiles.guri.start;
+        }
+
+        audio.play();
+
+        // 두 번째 사운드가 끝났을 때
+        const handleSecondEnded = () => {
+          setGameStartFinished(true); // 최종 작업 실행
+          audio.onended = null; // 이벤트 제거
+        };
+
+        audio.onended = handleSecondEnded; // 두 번째 사운드 끝나면 실행
+      };
+
+      setGameStarted(true);
+      // getScores();
+
+      audio.onended = handleFirstEnded;
+      throwDices();
+    }
+    
+  }, [playerCount, props.people, props.voice]);
+
   // 버튼 클릭: 턴 증가 + 다음 플레이어
   const nextTurnButtonClick = () => {
+    console.log('nextTurnButtonClick 버튼 클릭');
     const newTurn = turnCount + 1;
     const newRound = Math.floor(newTurn / playerCount) + 1;
     getScores();
@@ -246,8 +254,6 @@ export default function TurkeyDiceDefault(props: propsType) {
     };
 
     calcWinner(); // 함수 실행
-    
-
   }, [isGameOver]);
 
   useEffect(() => {
@@ -444,9 +450,10 @@ export default function TurkeyDiceDefault(props: propsType) {
         <img src={turkeyDiceDefaultMap} alt="turkeyDice Map" />
         {/* {effectType === 'heart' && <HeartEffectAnimation coords={diceValue.coords}  />} */}
         {effectType === 'explosion' && <ExplosionEffectAnimation coords={diceValue.coords} />}
+        {highLightVideo !== '' ? <div className={styles.highlight}><video autoPlay src={highLightVideo} /></div> : <></>}
       </div>
-
       <div className={styles.rightArea}>
+        
         <div className={styles.cell} onClick={() => handleCellClick(2)}>
           {/* {areaPlayers[2] || 'Area 3'} */}
           {!gameStarted ? (
