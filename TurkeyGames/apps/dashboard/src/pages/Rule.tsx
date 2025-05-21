@@ -7,6 +7,13 @@ import { getGameRule } from '../api/dashboardApi';
 import { GameRule } from '../api/types';
 import defaultRuleImage from '../assets/images/rule_default.png';
 
+// 게임 ID에 따른 기본 이미지 임포트
+import gameImage1 from '../assets/images/gameimages/1.png';
+import gameImage2 from '../assets/images/gameimages/2.png';
+import gameImage3 from '../assets/images/gameimages/3.png';
+import gameImage4 from '../assets/images/gameimages/4.png';
+import gameImage5 from '../assets/images/gameimages/5.png';
+
 interface RuleProps {
   isModal?: boolean;
   modalGameId?: string | number; // 모달로 사용될 때 gameId를 props로 받음
@@ -128,7 +135,28 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
     return isValidUrl(imagePath) ? imagePath : null;
   };
 
+  // gameId에 따른 기본 이미지 선택
+  const getDefaultGameImage = (): string => {
+    const gameIdNum = Number(effectiveGameId);
+    
+    switch (gameIdNum) {
+      case 1:
+        return gameImage1;
+      case 2:
+        return gameImage2;
+      case 3:
+        return gameImage3;
+      case 4:
+        return gameImage4;
+      case 5:
+        return gameImage5;
+      default:
+        return logo; // 기본 로고 이미지
+    }
+  };
+
   const validImageUrl = getImageUrl();
+  const isValidProfilePath = gameProfilePath && isValidUrl(gameProfilePath);
 
   return (
   <div 
@@ -151,11 +179,11 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
 
       <section className={styles.profileSection}>
         <img
-          src={gameProfilePath || logo}
+          src={isValidProfilePath ? gameProfilePath : getDefaultGameImage()}
           alt="게임 대표 이미지"
           className={styles.profileImage}
           onError={(e) => {
-            e.currentTarget.src = logo;
+            e.currentTarget.src = getDefaultGameImage();
             e.currentTarget.onerror = null;
           }}
         />
