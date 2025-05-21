@@ -43,16 +43,20 @@ class CameraManager:
             self.cap = None
         print("카메라 중지됨")
 
-    def subscribe(self, subscriber_id: str, callback: Callable):
-        """프레임 구독"""
-        self.subscribers[subscriber_id] = callback
+    def subscribe(self, subscriber_id, callback):
+        """프레임 업데이트를 위한 콜백 등록"""
+        with self.lock:
+            self.subscribers[subscriber_id] = callback
         print(f"{subscriber_id}가 카메라 프레임 구독")
 
-    def unsubscribe(self, subscriber_id: str):
-        """구독 해제"""
-        if subscriber_id in self.subscribers:
-            del self.subscribers[subscriber_id]
-            print(f"{subscriber_id}가 구독 해제")
+    def unsubscribe(self, subscriber_id):
+        """구독 취소"""
+        with self.lock:
+            if subscriber_id in self.subscribers:
+                del self.subscribers[subscriber_id]
+                print(f"{subscriber_id}가 구독 해제")
+            else:
+                print(f"{subscriber_id}는 등록된 구독자가 아닙니다")
 
     def get_frame(self):
         """현재 프레임 가져오기"""
@@ -68,9 +72,11 @@ class CameraManager:
             if ret:
                 with self.lock:
                     self.frame = frame
+                    # 구독자 딕셔너리의 복사본 생성 (락을 보유한 상태에서)
+                    subscribers_copy = self.subscribers.copy()
 
-                # 모든 구독자에게 프레임 전달
-                for subscriber_id, callback in self.subscribers.items():
+                # 락 밖에서 복사된 구독자 목록을 사용해 프레임 전달
+                for subscriber_id, callback in subscribers_copy.items():
                     try:
                         callback(frame.copy())
                     except Exception as e:
