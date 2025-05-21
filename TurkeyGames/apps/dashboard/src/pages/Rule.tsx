@@ -5,6 +5,7 @@ import closeIcon from '../assets/images/close (1).png';
 import logo from '../assets/images/logo.png';
 import { getGameRule } from '../api/dashboardApi';
 import { GameRule } from '../api/types';
+import defaultRuleImage from '../assets/images/rule_default.png';
 
 interface RuleProps {
   isModal?: boolean;
@@ -99,6 +100,36 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
 
   const { gameProfilePath, description, imagePath, descriptionVideoPath } = gameRule;
 
+  // URL 유효성 검사 함수
+  const isValidUrl = (url: string): boolean => {
+    try {
+      return url.startsWith('http://') || url.startsWith('https://');
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // 이미지 경로 처리 - 배열인 경우 첫 번째 유효한 URL 사용
+  const getImageUrl = (): string | null => {
+    if (!imagePath) return null;
+    
+    // 배열인 경우
+    if (Array.isArray(imagePath)) {
+      // 배열에서 첫 번째 유효한 URL 찾기
+      for (const url of imagePath) {
+        if (isValidUrl(url)) {
+          return url;
+        }
+      }
+      return null; // 유효한 URL이 없으면 null 반환
+    }
+    
+    // 문자열인 경우 URL 유효성 검사
+    return isValidUrl(imagePath) ? imagePath : null;
+  };
+
+  const validImageUrl = getImageUrl();
+
   return (
   <div 
     className={isModal ? styles.modalOverlay : styles.container}
@@ -106,14 +137,16 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
   >
     <div className={isModal ? styles.modalContent : undefined}>
       {isModal && (
-        <button
-          className={styles.closeBtn}
-          onClick={handleClose}
-          aria-label="닫기"
-          type="button"
-        >
-          <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
-        </button>
+        <div className={styles.closeBtnContainer}>
+          <button
+            className={styles.closeBtn}
+            onClick={handleClose}
+            aria-label="닫기"
+            type="button"
+          >
+            <img src={closeIcon} alt="닫기" className={styles.closeIcon} />
+          </button>
+        </div>
       )}
 
       <section className={styles.profileSection}>
@@ -133,19 +166,18 @@ export default function Rule({ isModal = false, modalGameId, onClose, showButton
         <p className={styles.description}>{description}</p>
       </section>
 
-      {imagePath && (
-        <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
-          <img
-            src={imagePath}
-            alt="게임 규칙 이미지"
-            className={styles.ruleImage}
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        </section>
-      )}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>🖼️ 규칙 이미지</h2>
+        <img
+          src={validImageUrl || defaultRuleImage}
+          alt="게임 규칙 이미지"
+          className={styles.ruleImage}
+          onError={(e) => {
+            e.currentTarget.src = defaultRuleImage;
+            e.currentTarget.onerror = null;
+          }}
+        />
+      </section>
 
       {descriptionVideoPath && (
         <section className={styles.section}>

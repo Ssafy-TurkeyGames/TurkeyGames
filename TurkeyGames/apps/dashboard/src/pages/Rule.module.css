@@ -11,11 +11,11 @@
   overscroll-behavior: none; /* 추가: 배경 스크롤 방지 */
 }
   
-  /* 모달 콘텐츠 스타일 */
+ /* 모달 콘텐츠 스타일 */
 .modalContent {
   background: white;
   border-radius: 32px;
-  padding: 40px 32px 32px 32px;
+  padding: 0 32px 32px 32px; /* 상단 패딩 제거 - 닫기 버튼 컨테이너가 처리 */
   width: 90%;
   max-width: 800px;
   max-height: calc(100vh - 80px);
@@ -61,23 +61,34 @@
   box-sizing: border-box;
 }
   
-  /* 닫기 버튼 */
-  .closeBtn {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    z-index: 20;
-    width: 38px;
-    height: 38px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: filter 0.15s;
-  }
+  /* 닫기 버튼 컨테이너 추가 */
+.closeBtnContainer {
+  position: sticky;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 0px;
+  z-index: 100;
+  background: transparent;
+}
+
+/* 닫기 버튼 */
+.closeBtn {
+  background: white;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
   .closeBtn:hover {
     filter: brightness(0.85);
   }
