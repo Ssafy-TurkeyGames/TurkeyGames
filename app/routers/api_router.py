@@ -14,6 +14,7 @@ class HighlightVideoData(BaseModel):
     minio_path: str
     qr_code: str
     local_qr_path: str 
+    minio_qr_path: str
 
 @router.get("/{game_id}/{player_id}", response_model=HighlightVideoData)
 async def get_highlight_video_data(game_id: str, player_id: str):

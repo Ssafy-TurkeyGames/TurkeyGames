@@ -275,7 +275,22 @@ class VideoService:
             qr_filename = f"{base_filename}.png"
             qr_filepath = os.path.join(self.minio_config['qr_output_dir'], qr_filename)
             qr_img.save(qr_filepath)
-            print(f"📱 QR 코드 생성 완료: {qr_filepath} (URL: {download_url})")
+            # MinIO에 업로드
+            
+            minio_qr_object_name = f"qrcode/{qr_filename}"
+            self.minio_client.fput_object(
+                self.minio_config['bucket_name_for_qr'],
+                minio_qr_object_name,
+                qr_filepath,
+                content_type="image/png"
+            )
+
+            # Presigned URL 생성
+            qr_code_url = self.minio_client.presigned_get_object(
+                self.minio_config['bucket_name_for_qr'],
+                minio_qr_object_name
+            )
+            print(f"📱 QR 코드 생성 완료: (URL: {qr_code_url})")
 
             # Store the highlight data in the shared state
             game_id = metadata.get('game_id', 'unknown')
@@ -290,7 +305,8 @@ class VideoService:
                 "minio_path": minio_object_name, 
                 "qr_code": download_url, 
                 # "local_qr_path": qr_filepath 
-                "local_qr_path": normalized_qr
+                "local_qr_path": normalized_qr,
+                "minio_qr_path": qr_code_url
             }
             print(f"✅ 하이라이트 데이터 공유 상태에 저장됨: 키 '{key}', 데이터: {highlight_data_store[key]}")
 
