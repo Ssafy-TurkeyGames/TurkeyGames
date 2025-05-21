@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh; /* height: 100vh에서 변경 */
   padding: 20px;
   background-color: #4e2e31;
   background-image: url('../../../assets/images/dice-bg.png');
@@ -12,8 +12,9 @@
   background-position: center;
   background-repeat: no-repeat;
   color: white;
-  position: relative; /* 추가: 로고 위치 지정을 위해 */
-  overflow: hidden;
+  position: relative;
+  overflow: visible; /* overflow: hidden에서 변경 */
+  box-sizing: border-box; /* 추가: 패딩이 너비/높이에 포함되도록 설정 */
 }
 
 .logoContainer {
@@ -52,7 +53,7 @@
 .title {
   font-size: 3rem;
   font-weight: bold;
-  margin: 70px 0 60px; /* 상단 여백 증가 (로고 공간 확보) */
+  margin: 60px 0 50px; /* 상단 여백 증가 (로고 공간 확보) */
   text-align: center;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -60,7 +61,7 @@
 
 .scoreCardsContainer {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 25px;
   width: 100%;
