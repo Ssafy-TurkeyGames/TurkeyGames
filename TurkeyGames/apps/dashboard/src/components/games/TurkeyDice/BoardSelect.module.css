@@ -1,0 +1,88 @@
+/* components/games/TurkeyDice/BoardSelect.module.css */
+.stepBox {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.playerBadgeRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 38px;
+  justify-content: center;
+}
+
+.iconSmall {
+  width: 38px;
+  height: 38px;
+  margin-right: 10px;
+}
+
+.badge {
+  background: #fff;
+  color: #d97e6b;
+  border-radius: 20px;
+  padding: 7px 28px;
+  font-size: 1.22rem;
+  font-weight: bold;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+
+.boardGrid {
+  display: flex;
+  gap: 48px;
+  justify-content: center;
+  margin-bottom: 44px;
+}
+
+.boardCard {
+  background: #fff;
+  border: 2.5px solid #ffe09a;
+  border-radius: 28px;
+  width: 180px;
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255,184,77,0.10);
+  transition: border 0.15s, box-shadow 0.15s, transform 0.14s;
+  padding: 18px 0 0 0;
+  justify-content: center;
+}
+
+.boardCard img {
+  width: 90px;
+  height: 90px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+  object-fit: cover;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.boardCard span {
+  color: #d97e6b;
+  font-weight: bold;
+  font-size: 1.18rem;
+  letter-spacing: -0.5px;
+}
+
+.boardCard.active, .boardCard:hover {
+  border: 2.5px solid #e58a1f;
+  box-shadow: 0 6px 24px rgba(255,184,77,0.16);
+  transform: scale(1.08);
+}
+
+.navBtns {
+  display: flex;
+  gap: 36px;
+  justify-content: center;
+  margin-top: 16px;
+}

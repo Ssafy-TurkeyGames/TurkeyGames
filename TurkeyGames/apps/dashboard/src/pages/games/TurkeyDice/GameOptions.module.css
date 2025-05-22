@@ -1,0 +1,145 @@
+/* GameOptions.module.css */
+.optionsRoot {
+    min-height: 100vh;
+    width: 100vw;
+    background: url('../../../assets/images/background.png') center/cover no-repeat,
+              linear-gradient(to bottom, #6d3d47 0%, #ffb84d 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .optionsCard {
+    background: #ffc46c; /* 이미지의 카드 주황색 */
+    border-radius: 32px;
+    width: 800px;
+    max-width: 96vw;
+    min-height: 520px;
+    box-shadow: 0 6px 32px rgba(176,90,22,0.13);
+    padding: 32px 32px 32px 32px;
+    margin-top: 55px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .closeBtn {
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    background: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: background 0.15s;
+    box-shadow: 0 2px 8px rgba(176,90,22,0.08);
+  }
+  .closeBtn img {
+    width: 25px;
+    height: 25px;
+  }
+  .closeBtn:hover {
+    background: #ff8018;
+  }
+  
+  .centerWrap {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .finalRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    margin: 46px 0 30px 0;
+  }
+  .finalRow > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .startBtn {
+    width: 240px;
+    font-size: 1.2rem;
+    margin-top: 22px;
+    margin-bottom: 6px;
+    background: #ffb74d;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 13px 0;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(255,183,77,0.13);
+    transition: background 0.13s;
+  }
+  .startBtn:hover {
+    background: #e07b3c;
+  }
+  
+  .stepBox {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .nextBtn {
+    width: 180px;
+    font-size: 1.1rem;
+    background: #ffb74d;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 11px 0;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: background 0.13s;
+    box-shadow: 0 1px 6px rgba(255,183,77,0.10);
+  }
+  .nextBtn:disabled {
+    background: #ffe1b9;
+    color: #fff;
+    cursor: not-allowed;
+  }
+  .nextBtn:not(:disabled):hover {
+    background: #e07b3c;
+  }
+  
+  .iconSmall {
+    width: 110px;
+    height: 110px;
+    margin-right: 7px;
+  }
+  
+  .badge {
+    background: #fff;
+    color: #e07b3c;
+    border-radius: 16px;
+    padding: 10px 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  

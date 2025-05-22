@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    image: busankim/ssafyproject:frontend
+    container_name: frontend-nginx
+    ports:
+      - '3000:80' # 로컬에서는 http://localhost:3000 으로 접근
+    restart: unless-stopped

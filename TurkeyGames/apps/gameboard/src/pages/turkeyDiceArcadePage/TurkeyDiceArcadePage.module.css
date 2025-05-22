@@ -1,0 +1,190 @@
+/* TurkeyDiceAcadePage.module.css */
+.container {
+  display: flex;
+  height: 100vh;
+  background: #000;
+}
+
+/* 좌/우측 카드 컨테이너 */
+.CardContainer {
+  width: 20%;
+  height: 100vh;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 상단 카드 영역 - 컴포넌트는 회전 */
+.upside {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #8a2be2;
+  border-radius: 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 15px #8a2be2;
+  transform: rotate(180deg);
+}
+
+/* 하단 카드 영역 */
+.downside {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #8a2be2;
+  border-radius: 15px;
+  background-color: rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 15px #8a2be2;
+}
+
+/* 중앙 맵 영역 */
+.centerMap {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.centerMap img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 1px solid #00ffff;
+  border-radius: 10px;
+  box-shadow: 0 0 15px #00ffff;
+}
+
+/* 자리 선택 영역 스타일 업데이트 */
+.seat {
+  font-size: 35px;
+  color: #fff;
+  background-color: transparent;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: bold;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 40px #10FFFF;
+}
+
+/* 선택되지 않은 자리 텍스트에만 애니메이션 적용 */
+.emptyArea .seat {
+  animation: neonPulse 1.5s infinite alternate;
+}
+
+/* 네온 텍스트 효과를 위한 애니메이션 */
+@keyframes neonPulse {
+  0%, 100% {
+    text-shadow:
+      0 0 4px #fff,
+      0 0 11px #fff,
+      0 0 19px #fff,
+      0 0 40px #10FFFF;
+  }
+  50% {
+    text-shadow:
+      0 0 2px #fff,
+      0 0 20px #10FFFF,
+      0 0 40px #10FFFF;
+  }
+}
+
+/* 선택되지 않은 영역의 깜빡임 효과 */
+@keyframes areaFlicker {
+  0%, 100% {
+    border-color: #fa5fe2;
+    box-shadow: 0 0 15px #fa5fe2;
+  }
+  50% {
+    border-color: #10FFFF;
+    box-shadow: 0 0 8px #10FFFF;
+  }
+}
+
+/* 빈 영역 스타일 - 자리 선택 안된 카드만 애니메이션 적용 */
+.emptyArea {
+  animation: areaFlicker 2s infinite alternate;
+  border-color: #fa5fe2;
+  box-shadow: 0 0 15px #fa5fe2;
+}
+
+/* 자리 선택된 영역 스타일 - 고정된 스타일 적용 */
+.upside:not(.emptyArea), .downside:not(.emptyArea) {
+  border-color: #8a2be2;
+  box-shadow: 0 0 15px #8a2be2;
+  animation: none;
+}
+
+/* 준비 완료 텍스트 스타일 */
+.ready {
+  color: #F098F3;
+  text-shadow:
+    0 0 4px #fff,
+    0 0 11px #fff,
+    0 0 19px #fff,
+    0 0 40px #F098F3,
+    0 0 80px #F098F3;
+  animation: none; /* 애니메이션 제거 */
+}
+
+/* 라운드 정보 표시 */
+.roundInfo {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  padding: 20px 35px;
+  border-radius: 15px;
+  font-size: 2rem;
+  font-weight: bold;
+  text-shadow: 0 0 5px #10FFFF, 0 0 10px #10FFFF;
+  border: 1px solid #10FFFF;
+  box-shadow: 0 0 15px #10FFFF;
+  z-index: 100;
+}
+
+/* 우승자 효과 애니메이션 */
+@keyframes winner-pulse {
+  0%, 100% {
+    border-color: gold;
+    box-shadow: 0 0 15px gold;
+  }
+  50% {
+    border-color: #ffdf00;
+    box-shadow: 0 0 25px #ffdf00;
+  }
+}
+
+/* 우승자 블록 효과 */
+.winnerblock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  outline: 3px solid transparent;
+  animation: winner-inner-border 1s infinite;
+  z-index: 1;
+}
+
+@keyframes winner-inner-border {
+  0% {
+    outline-color: transparent;
+    box-shadow: inset 0 0 0 0 yellow;
+  }
+  50% {
+    outline-color: yellow;
+    box-shadow: inset 0 0 10px 3px yellow;
+  }
+  100% {
+    outline-color: transparent;
+    box-shadow: inset 0 0 0 0 yellow;
+  }
+}

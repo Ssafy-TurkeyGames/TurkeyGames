@@ -1,0 +1,71 @@
+.container {
+    overflow: hidden;
+    height: 100vh; /* 화면 높이에 맞춤 */
+    width: 100%;
+    position: fixed; /* 고정 위치 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: white;
+    background-color: #4e2e31;
+  }
+  
+  .gameIdBadge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+  }
+  
+
+css
+/* dashboard/src/pages/games/TurkeyDice/TurkeyDiceResult.module.css */
+.loadingContainer, .errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #4e2e31;
+  color: white;
+  text-align: center;
+  padding: 20px;
+}
+
+.loadingMessage, .errorMessage {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.backButton {
+  padding: 10px 20px;
+  background-color: #e9c46a;
+  color: #4e2e31;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.backButton:hover {
+  background-color: #f4d58d;
+  transform: translateY(-2px);
+}
+
+.backButton:active {
+  transform: translateY(1px);
+}

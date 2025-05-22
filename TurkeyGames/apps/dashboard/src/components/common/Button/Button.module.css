@@ -1,0 +1,95 @@
+/* apps/dashboard/src/components/common/Button/Button.module.css */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  padding: 18px 0;
+  width: 210px;
+  border: none;
+  background: #ce5555; /* 더 진한 색상으로 변경 */
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  background: #ab3838; /* 호버 시 더 진한 색상 */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(229,138,31,0.20);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn.primary {
+  background: #ce5555;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(229,138,31,0.15);
+}
+
+.btn.primary:hover {
+  background: #ab3838;
+}
+
+.btn.active {
+  background: #d47b18; /* 활성화 시 더 진한 색상 */
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(229,138,31,0.20);
+}
+
+.btn.outline {
+  background: #dbd0d0;
+  color: #ab5b00;
+  border: 2px solid #ffb84d;
+}
+
+.btn.outline:hover {
+  background: #fff9ef;
+  border-color: #e58a1f;
+}
+
+.btn:disabled {
+  background: #f6e2c5;
+  color: #c3a27f;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.startBtn {
+  width: 240px;
+  font-size: 1.2rem;
+  margin-top: 22px;
+  margin-bottom: 6px;
+  background: #e58a1f; /* 더 진한 색상 */
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 13px 0;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(229,138,31,0.18);
+  transition: all 0.2s;
+}
+
+.startBtn:hover {
+  background: #d47b18;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(229,138,31,0.25);
+}
+
+/* 작은 버튼 스타일 */
+.btn.small {
+  padding: 12px 0;
+  font-size: 1.1rem;
+  width: 160px;
+}

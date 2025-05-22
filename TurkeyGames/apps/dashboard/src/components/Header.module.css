@@ -1,0 +1,101 @@
+/* app/dashboard/src/components/Header.module.css */
+  
+.header {
+  background: #6d3d47;
+  color: #ffb84d;
+  padding: 0 15px 0 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 100px;
+  box-sizing: border-box;
+}
+
+  
+.logoImg {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+  
+  .soundToggleContainer {
+    display: flex;
+    align-items: center;
+    margin-right: 1%;
+    gap: 8px;
+  }
+  
+  .soundIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .soundLabel {
+    color: #fff;
+    font-weight: 600;
+  }
+  
+  .toggleSwitch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+  }
+  
+  .toggleSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+  
+  input:checked + .slider {
+    background-color: #ffb84d;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(26px);
+  }
+  
+  @media (max-width: 480px) {
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .soundButton {
+      margin-left: 0;
+      align-self: flex-end;
+    }
+  }

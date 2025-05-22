@@ -1,0 +1,203 @@
+.modalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  box-sizing: border-box;
+  overscroll-behavior: none; /* 추가: 배경 스크롤 방지 */
+}
+  
+ /* 모달 콘텐츠 스타일 */
+.modalContent {
+  background: white;
+  border-radius: 32px;
+  padding: 0 32px 32px 32px; /* 상단 패딩 제거 - 닫기 버튼 컨테이너가 처리 */
+  width: 90%;
+  max-width: 800px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  position: relative;
+  box-sizing: border-box;
+  
+  /* 스크롤바 스타일 추가 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent; /* Firefox */
+  
+  /* 스크롤바가 콘텐츠 영역 안에 표시되도록 설정 */
+  padding-right: calc(32px - 12px); /* 오른쪽 패딩 조정 (기본 패딩 - 스크롤바 너비) */
+}
+
+/* Webkit 브라우저(Chrome, Safari 등)용 스크롤바 스타일 */
+.modalContent::-webkit-scrollbar {
+  width: 8px; /* 스크롤바 너비 */
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: transparent; /* 스크롤바 트랙 배경색 */
+  margin: 4px; /* 스크롤바 트랙 여백 */
+  border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3); /* 스크롤바 색상 */
+  border-radius: 10px; /* 스크롤바 모서리 둥글게 */
+  border: 2px solid white; /* 스크롤바 테두리 */
+}
+
+/* 모달 내부 섹션 스타일 수정 - 모달 안에서만 적용되도록 */
+.modalContent .section {
+  margin: 30px 0;
+  padding: 20px 40px; /* 좌우 패딩 약간 줄임 */
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  width: calc(100% - 10px); /* 스크롤바 공간 확보 */
+  box-sizing: border-box;
+}
+  
+  /* 닫기 버튼 컨테이너 추가 */
+.closeBtnContainer {
+  position: sticky;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: 15px 0px;
+  z-index: 100;
+  background: transparent;
+}
+
+/* 닫기 버튼 */
+.closeBtn {
+  background: white;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+  .closeBtn:hover {
+    filter: brightness(0.85);
+  }
+  .closeIcon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    display: block;
+  }
+  
+  /* 나머지 기존 스타일 그대로 */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    min-height: 100vh;
+    background: #fff9f0;
+  }
+  .loading {
+    text-align: center;
+    padding: 100px 0;
+    font-size: 1.5rem;
+    color: #6d3d47;
+  }
+  .error {
+    color: #d32f2f;
+    text-align: center;
+    margin: 100px 0;
+    font-size: 1.5rem;
+  }
+  .profileSection {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  .profileImage {
+    width: 30%;
+    max-width: 200px;
+  }
+  .section {
+    margin: 30px 0;
+    padding: 20px 50px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .sectionTitle {
+    color: #d96c4a;
+    font-size: 2rem;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+  }
+  .description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    white-space: pre-line;
+  }
+  .ruleImage {
+    width: 100%;
+    max-width: 800px;
+    border-radius: 16px;
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .videoWrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  .video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+  }
+  .buttonSection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .buttonGroup {
+    text-align: center;
+  }
+  .backButton {
+    display: inline-flex;
+    align-items: center;
+    padding: 14px 35px;
+    background: #ffb84d;
+    color: white;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .backButton:hover {
+    background: #ffa726;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255,184,77,0.3);
+  }
+  

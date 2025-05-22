@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "module": "CommonJS",
+      "outDir": "./dist",
+      "rootDir": "./electron",
+      "noEmit": false,
+      "esModuleInterop": true,       // 필수 추가
+      "allowSyntheticDefaultImports": true // 필수 추가
+    },
+    "include": ["electron/**/*.ts"]
+  }

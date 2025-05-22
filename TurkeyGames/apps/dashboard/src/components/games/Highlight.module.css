@@ -1,0 +1,175 @@
+/* apps/dashboard/src/components/games/Highlight.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: #b44e47; /* 이미지와 유사한 빨간색 배경 */
+  width: 90%;
+  max-width: 500px;
+  padding: 30px 20px;
+  border-radius: 15px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.closeButton {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: background-color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.closeIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.modalTitle {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 10px 15px;
+  border-radius: 50px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 16px;
+  max-width: 100%;
+  font-weight: bold;
+}
+
+.qrCodeContainer {
+  background-color: white;
+  padding: 15px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 280px;
+}
+
+.qrCode {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qrCode img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.videoInfo {
+  color: white;
+  margin-top: 20px;
+  font-size: 16px;
+  opacity: 0.8;
+  width: 100%;
+  text-align: center;
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 30px;
+}
+
+.loadingIcon {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 15px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 15px;
+  border-radius: 10px;
+  color: white;
+  text-align: center;
+  margin: 20px 0;
+  width: 100%;
+}
+
+.errorMessage {
+  font-size: 16px;
+}
+
+.downloadButton {
+  background-color: white;
+  color: #b44e47;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.downloadButton:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    width: 95%;
+    padding: 25px 15px;
+  }
+  
+  .modalTitle {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+  
+  .qrCodeContainer {
+    padding: 10px;
+    max-width: 240px;
+  }
+  
+  .downloadButton {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+}

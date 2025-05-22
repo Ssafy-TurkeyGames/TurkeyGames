@@ -1,0 +1,285 @@
+/* apps/dashboard/src/pages/games/TurkeyDice/ScoreBoard.module.css */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh; /* height: 100vh에서 변경 */
+  padding: 20px;
+  background-color: #4e2e31;
+  background-image: url('../../../assets/images/dice-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  position: relative;
+  overflow: visible; /* overflow: hidden에서 변경 */
+  box-sizing: border-box; /* 추가: 패딩이 너비/높이에 포함되도록 설정 */
+}
+
+.logoContainer {
+  position: absolute; /* 절대 위치로 설정 */
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.logo {
+  width: 120px; /* 헤더 로고와 크기 맞춤 */
+  height: auto;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  user-select: none; /* 텍스트 선택 방지 */
+  -webkit-user-drag: none; /* 드래그 방지 */
+  pointer-events: auto; /* 클릭 이벤트 허용 */
+}
+
+
+/* 포커스 스타일 제거 */
+.logo:focus {
+  outline: none;
+}
+
+/* 포커스 시 테두리 제거 */
+.logo:focus-visible {
+  outline: none;
+}
+
+
+.logo:hover {
+  transform: scale(1.05); /* 추가: 호버 시 약간 확대 */
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: bold;
+  margin: 60px 0 50px; /* 상단 여백 증가 (로고 공간 확보) */
+  text-align: center;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.scoreCardsContainer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.buttonContainer {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.endGameButton {
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 15px 50px;
+  border-radius: 25px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.endGameButton:hover {
+  background-color: #b71c1c;
+  transform: translateY(-2px);
+}
+
+.endGameButton:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.resultButton {
+  background-color: #e76f51;
+  color: white;
+  border: none;
+  padding: 15px 50px;
+  border-radius: 25px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.resultButton:hover {
+  background-color: #f4a261;
+  transform: translateY(-2px);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.gameIdBadge {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+}
+
+/* 반응형 디자인 - 큰 화면 */
+@media (min-width: 1200px) {
+  .logo {
+    width: 150px; /* 큰 화면에서 더 크게 */
+  }
+  
+  /* .title {
+    margin: 50px 0 40px;
+    font-size: 3rem;
+  } */
+  
+  .scoreCardsContainer {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+/* 중간 화면 */
+@media (max-width: 992px) {
+  .logo {
+    width: 100px;
+  }
+  
+  .title {
+    margin: 90px 0 30px;
+    font-size: 2.2rem;
+  }
+}
+
+/* 태블릿 */
+@media (max-width: 768px) {
+  .logo {
+    width: 80px;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin: 80px 0 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 60px; /* 변경: 모바일에서 더 작게 */
+  }
+  
+  .logoContainer {
+    top: 15px;
+    left: 15px;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+    margin: 60px 0 25px; /* 변경: 상단 여백 조정 */
+  }
+  
+  .scoreCardsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* 규칙 버튼 스타일 추가 */
+.rulesButton {
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  padding: 15px 50px;
+  border-radius: 25px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.rulesButton:hover {
+  background-color: #1976d2;
+  transform: translateY(-2px);
+}
+
+/* 모달 오버레이 스타일 */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* 모달 콘텐츠 스타일 */
+.modalContent {
+  background-color: white;
+  border-radius: 32px;
+  padding: 40px 32px 32px 32px;
+  width: 90%;
+  max-width: 800px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  box-sizing: border-box;
+  
+  /* 스크롤바 스타일 */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+/* Webkit 브라우저용 스크롤바 스타일 */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px;
+  border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 2px solid white;
+}
+
+/* 반응형 디자인 - 버튼 컨테이너 */
+@media (max-width: 768px) {
+  .buttonContainer {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .endGameButton,
+  .resultButton,
+  .rulesButton {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+  }
+}
