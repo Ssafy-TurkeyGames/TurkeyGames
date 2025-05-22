@@ -87,7 +87,7 @@ const ScoreBoard: React.FC = () => {
           // 게임이 종료되면 결과 화면으로 이동
           if (newStatus === 'ended') {
             console.log('[ScoreBoard] 게임이 이미 종료됨, 결과 화면으로 이동');
-            navigate(`/games/TurkeyDice/result?gameId=${gameId}`);
+            navigate(`/games/TurkeyDice/result/${gameId}`);
             return;
           }
         }
@@ -144,7 +144,7 @@ const ScoreBoard: React.FC = () => {
       // 게임이 종료되면 결과 화면으로 이동
       if (data.status === 'ended') {
         console.log('✅ [대시보드] 게임 종료 상태 감지, 결과 화면으로 이동');
-        navigate(`/games/TurkeyDice/result?gameId=${gameId}`);
+        navigate(`/games/TurkeyDice/result/${gameId}`);
       }
     }
   });
@@ -162,13 +162,37 @@ const ScoreBoard: React.FC = () => {
   socket.on('end_game', (data) => {
     console.log('✅ [대시보드] end_game 이벤트 수신:', data);
     
-    // 점수 데이터가 있으면 사용, 없으면 현재 상태의 플레이어 데이터 사용
-    const scoreData = data.scores ? formatPlayerData(data.scores) : players;
+    // 점수 데이터가 있으면 사용하여 새로운 플레이어 데이터 생성
+    let updatedPlayers = players;
     
-    // 결과 화면으로 이동
-    navigate(`/games/TurkeyDice/result`, {
-      search: gameId ? `?gameId=${gameId}` : '',
-      state: { scoreData }
+    // 서버에서 받은 최신 점수 데이터가 있으면 사용
+    if (data.scores) {
+      updatedPlayers = formatPlayerData(data.scores);
+    } else {
+      // 최신 점수 데이터를 가져오기 위한 API 호출
+      axios.get(`${SOCKET_SERVER_URL}/yacht/${gameId}/scores`)
+        .then(response => {
+          if (response.data && response.data.scores) {
+            const latestPlayers = formatPlayerData(response.data.scores);
+            // 결과 화면으로 이동 (최신 점수 데이터 전달)
+            navigate(`/games/TurkeyDice/result/${gameId}`, {
+              state: { scoreData: latestPlayers }
+            });
+          }
+        })
+        .catch(error => {
+          console.error('[ScoreBoard] 최종 점수 조회 오류:', error);
+          // 오류 발생 시 현재 상태의 플레이어 데이터 사용
+          navigate(`/games/TurkeyDice/result/${gameId}`, {
+            state: { scoreData: players }
+          });
+        });
+      return; // API 호출 후 함수 종료
+    }
+    
+    // 결과 화면으로 이동 (최신 점수 데이터 전달)
+    navigate(`/games/TurkeyDice/result/${gameId}`, {
+      state: { scoreData: updatedPlayers }
     });
   });
 
@@ -187,10 +211,6 @@ const ScoreBoard: React.FC = () => {
     socket.off('score_update');
     socket.off('end_game');
     socket.offAny(); // 모든 이벤트 리스너 제거
-    
-    // 게임 퇴장
-    // socket.emit('leave_game', { gameId });
-    // console.log('🔄 [대시보드] 게임 퇴장 이벤트 발송, gameId:', gameId);
   };
 }, [socket, isConnected, gameId, navigate, players]);
 
@@ -226,10 +246,25 @@ const formatPlayerData = (scoresData: any[]) => {
 };
 
   // 게임 결과 버튼 클릭 처리
-const handleGameResult = () => {
-  // 현재 점수 데이터를 state로 전달
-  navigate(`/games/TurkeyDice/result`, {
-    search: gameId ? `?gameId=${gameId}` : '',
+const handleGameResult = async () => {
+  // 최신 점수 데이터 가져오기 시도
+  if (gameId) {
+    try {
+      const scoresResponse = await axios.get(`${SOCKET_SERVER_URL}/yacht/${gameId}/scores`);
+      if (scoresResponse.data && scoresResponse.data.scores) {
+        const latestPlayers = formatPlayerData(scoresResponse.data.scores);
+        navigate(`/games/TurkeyDice/result/${gameId}`, {
+          state: { scoreData: latestPlayers }
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('[ScoreBoard] 최종 점수 조회 오류:', error);
+    }
+  }
+  
+  // API 호출 실패 시 현재 상태의 플레이어 데이터 사용
+  navigate(`/games/TurkeyDice/result/${gameId}`, {
     state: { scoreData: players }
   });
 };
@@ -247,17 +282,24 @@ const handleEndGame = async () => {
   console.log('[ScoreBoard] 게임 종료 시작, gameId:', gameId);
   
   try {
-    // 새로운 POST 엔드포인트 사용
+    // 최신 점수 데이터 가져오기
+    const scoresResponse = await axios.get(`${SOCKET_SERVER_URL}/yacht/${gameId}/scores`);
+    let latestPlayers = players;
+    
+    if (scoresResponse.data && scoresResponse.data.scores) {
+      latestPlayers = formatPlayerData(scoresResponse.data.scores);
+    }
+    
+    // 게임 종료 API 호출
     console.log('[ScoreBoard] 게임 종료 API 호출, gameId:', gameId);
     const response = await axios.post(`${SOCKET_SERVER_URL}/yacht/end/${gameId}`);
     console.log('[ScoreBoard] 게임 종료 API 응답:', response.data);
     
-    // 게임 종료 성공 시 결과 화면으로 이동 (점수 데이터 전달)
+    // 게임 종료 성공 시 결과 화면으로 이동 (최신 점수 데이터 전달)
     if (response.data && response.data.success) {
-      alert('게임이 종료되었습니다.');
-      navigate(`/games/TurkeyDice/result`, {
-        search: `?gameId=${gameId}`,
-        state: { scoreData: players }
+      // alert('게임이 종료되었습니다.');
+      navigate(`/games/TurkeyDice/result/${gameId}`, {
+        state: { scoreData: latestPlayers }
       });
     } else {
       alert('게임 종료에 실패했습니다.');
@@ -273,9 +315,8 @@ const handleEndGame = async () => {
     }
     
     // 오류가 발생해도 현재 점수 데이터로 결과 화면으로 이동
-    alert('게임 종료 중 오류가 발생했지만, 결과 화면으로 이동합니다.');
-    navigate(`/games/TurkeyDice/result`, {
-      search: `?gameId=${gameId}`,
+    // alert('게임 종료 중 오류가 발생했지만, 결과 화면으로 이동합니다.');
+    navigate(`/games/TurkeyDice/result/${gameId}`, {
       state: { scoreData: players }
     });
   } finally {
