@@ -1,5 +1,5 @@
 // src/components/games/GameResult.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import styles from './GameResult.module.css';
@@ -33,6 +33,11 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
   const location = useLocation();
   const { socket, isConnected } = useSocket();
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  
+  // 컴포넌트 마운트 시 gameId 확인 (디버깅용)
+  useEffect(() => {
+    console.log('[GameResult] 컴포넌트 마운트, gameId:', gameId);
+  }, [gameId]);
 
   // 방어 코드 추가
   const arrPlayers = Array.isArray(players) ? players : [];
@@ -61,14 +66,22 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
 
   // 게임 삭제 함수
   const deleteGame = async () => {
-    if (!gameId || isDeleting) return;
+    if (!gameId) {
+      console.log('[GameResult] gameId가 없어서 삭제를 진행하지 않습니다. gameId:', gameId);
+      return;
+    }
+    if (isDeleting) {
+      console.log('[GameResult] 이미 삭제 중입니다.');
+      return;
+    }
     
     try {
       setIsDeleting(true);
       console.log('[GameResult] 게임 삭제 요청 시작, gameId:', gameId);
       
       // DELETE API 호출
-      await deleteYachtGame(gameId);
+      const result = await deleteYachtGame(gameId);
+      console.log('[GameResult] 게임 삭제 API 응답:', result);
       
       // 웹소켓 이벤트 발송
       if (socket && isConnected) {
@@ -76,6 +89,7 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
         console.log('[GameResult] delete_game 이벤트 발송, gameId:', gameId);
       }
       
+      return true; // 삭제 성공 시 true 반환
     } catch (error) {
       console.error('[GameResult] 게임 삭제 오류:', error);
       
@@ -85,38 +99,46 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
         console.error('- 응답 데이터:', error.response?.data);
       }
       
-      alert('게임을 삭제하는 중 오류가 발생했습니다.');
+      // alert('게임을 삭제하는 중 오류가 발생했습니다.');
+      return false; // 삭제 실패 시 false 반환
     } finally {
       setIsDeleting(false);
     }
   };
 
   const handleHighlightClick = () => {
-    console.log('[GameResult] 하이라이트 버튼 클릭');
-    navigate('/games/TurkeyDice/highlight', {
-      state: {
-        backgroundLocation: location,
-        qrValue: 'https://example.com/turkey-dice-highlight',
-        title: 'QR코드를 인식하면 최고의 플레이 영상을 보실 수 있어요!'
-      }
-    });
-  };
+  console.log('[GameResult] 하이라이트 버튼 클릭');
+  
+  // 1등 플레이어 찾기 (하이라이트를 위한 playerId로 사용)
+  const winner = rankedPlayers.find(player => player.rank === 1);
+  const playerId = winner ? winner.id.toString() : '1'; // 기본값 제공
+  
+  // 올바른 경로 형식 사용 (/highlight/:gameId/:playerId)
+  navigate(`/highlight/${gameId}/${playerId}`, {
+    state: {
+      backgroundLocation: location,
+      qrValue: 'https://example.com/turkey-dice-highlight',
+      title: 'QR코드를 인식하면 최고의 플레이 영상을 보실 수 있어요!'
+    }
+  });
+};
 
   const handleRetryClick = async () => {
-    console.log('[GameResult] 다시하기 버튼 클릭');
+    console.log('[GameResult] 다시하기 버튼 클릭, gameId:', gameId);
     
     // 게임 삭제 처리
-    await deleteGame();
+    const deleted = await deleteGame();
     
-    // 새 게임 옵션 페이지로 이동
+    // 삭제 성공 여부와 관계없이 새 게임 옵션 페이지로 이동
+    // 실패해도 사용자 경험을 위해 이동
     navigate(`/game-options/`);
   };
 
   const handleBackClick = async () => {
-    console.log('[GameResult] 그만하기 버튼 클릭');
-    
+    console.log('[GameResult] 그만하기 버튼 클릭, gameId:', gameId);
+
     // 게임 삭제 처리
-    await deleteGame();
+    const deleted = await deleteGame();
     
     // 홈으로 이동
     navigate('/');
@@ -162,6 +184,11 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* 게임 ID 표시 (디버깅용, 필요시 주석 처리) */}
+      <div className={styles.gameIdDisplay}>
+        게임 ID: {gameId || '없음'}
       </div>
       
       <div className={styles.buttonContainer}>

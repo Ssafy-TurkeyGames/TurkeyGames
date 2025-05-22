@@ -14,6 +14,7 @@ import { effectMap, GameMode } from '../../components/turkeyDice/turkeyDiceEffec
 import HeartEffectAnimation from '../../components/turkeyDice/turkeyDiceEffect/HeartEffectAnimation';
 import ExplosionEffectAnimation from '../../components/turkeyDice/turkeyDiceEffect/ExplosionEffectAnimation';
 import { useNavigate } from 'react-router-dom';
+import turkeySoundFile from '../../assets/sound/turkey/turkey.mp3';
 
 
 interface propsType {
@@ -73,10 +74,7 @@ export default function TurkeyDiceDefault(props: propsType) {
       audioRef.current.play();
     }
   }
-
   
-
-
   // 3) 게임 진행
   // 순서대로 턴을 관리하는 상태
   const [currentTurnIndex, setCurrentTurnIndex] = useState<number>(0);
@@ -139,12 +137,16 @@ export default function TurkeyDiceDefault(props: propsType) {
     try {
       const data = await yachtService.getHighlight(gameId.toString(), playerId.toString());
       console.log(data);
-      setHighLightVideo(data.minio_qr_path);
+      setHighLightVideo(data.qr_code);
 
     } catch (error) {
       console.log('에러:', error);
     }
   }
+
+  useEffect(() => {
+    console.log(highLightVideo);
+  }, [highLightVideo]);
 
   useEffect(() => {
     if (playerCount === props.people && audioRef.current) {
@@ -224,7 +226,7 @@ export default function TurkeyDiceDefault(props: propsType) {
         return best;
       });
 
-      alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
+      // alert(`🎮 게임 종료! 우승자는 플레이어 ${winner.player_id}`);
       setWinnerPlayer(winner.player_id);
       getHighlight(props.gameId, winner.player_id);
 
@@ -312,6 +314,7 @@ export default function TurkeyDiceDefault(props: propsType) {
       let soundFiles: string | any[] = [];
       if(diceValue.length === 0) return;
       // 주사위 조합(poker, fh, ss, ls, turkey) 확인
+      console.log('checkYachtDice(diceValue.dice_values)', checkYachtDice(diceValue.dice_values));
       switch(checkYachtDice(diceValue.dice_values)) {
         case "poker":
           if (props.voice === 1) {
@@ -360,10 +363,28 @@ export default function TurkeyDiceDefault(props: propsType) {
           break;
       }
 
+      // if (audioRef.current && soundFiles.length > 0 && checkYachtDice(diceValue.dice_values) === 'turkey') {
+      //       // 1. 먼저 재생할 공통 사운드 (예: roll.mp3)
+      //       const preSound = new Audio(`${turkeySoundFile}`);
+      //       preSound.play();
+
+      //       // 2. preSound 재생이 끝난 후 원하는 사운드 재생
+      //       preSound.onended = () => {
+      //         const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
+      //         audioRef.current!.src = randomSound;
+      //         audioRef.current!.play();
+      //         audioRef.current = null;
+      //       };
+      // }
+
       if (audioRef.current) {
         const randomSound = soundFiles[Math.floor(Math.random() * soundFiles.length)];
-        audioRef.current.src = randomSound;
-        audioRef.current.play();
+        // audioRef.current.src = randomSound;
+        // audioRef.current.play();
+              setTimeout(() => {
+          audioRef.current!.src = randomSound;
+          audioRef.current!.play();
+        }, 3000); // 3000ms = 3초
       }
   }, [diceValue])
 
@@ -450,7 +471,7 @@ export default function TurkeyDiceDefault(props: propsType) {
         <img src={turkeyDiceDefaultMap} alt="turkeyDice Map" />
         {/* {effectType === 'heart' && <HeartEffectAnimation coords={diceValue.coords}  />} */}
         {effectType === 'explosion' && <ExplosionEffectAnimation coords={diceValue.coords} />}
-        {highLightVideo !== '' ? <div className={styles.highlight}><video autoPlay src={highLightVideo} /></div> : <></>}
+        {highLightVideo !== '' ? <div className={styles.highlight}><video muted autoPlay src={highLightVideo} /></div> : <></>}
       </div>
       <div className={styles.rightArea}>
         

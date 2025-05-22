@@ -30,7 +30,7 @@ export default function AppRoutes() {
           <Route path="games/TurkeyDice">
             <Route path="score" element={<ScoreBoard />} />
             <Route path="options" element={<TurkeyDiceOptions />} />
-            <Route path="result" element={<TurkeyDiceResult />} />
+            <Route path="result/:gameId" element={<TurkeyDiceResult />} />
             {/* 추가 터키다이스 관련 페이지들 */}
           </Route>
           {/* 새로운 하이라이트 경로 - URL 파라미터 방식 */}
@@ -41,7 +41,7 @@ export default function AppRoutes() {
       {/* 모달 라우트는 별도로 분리 */}
       {state?.backgroundLocation && (
         <Routes>
-          <Route path="/games/TurkeyDice/highlight" element={<HighlightModal />} />
+          <Route path="/highlight/:gameId/:playerId" element={<HighlightModal />} />
           {/* 새 API 방식 하이라이트 경로도 추가 */}
           <Route path="/highlight/:gameId/:playerId" element={<HighlightModal />} />
           {/* 규칙 모달 경로 추가 */}

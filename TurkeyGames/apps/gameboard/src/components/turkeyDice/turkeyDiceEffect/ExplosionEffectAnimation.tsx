@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import effectSoundFile from '../../../assets/sound/explosion/explosion.mp3';
 
 const frameCount = 9;
-const frameDuration = 110;
+const frameDuration = 170;
 
 const framePaths = Array.from(
   { length: frameCount },
@@ -100,6 +100,7 @@ const ExplosionEffectAnimation: React.FC<ExplosionEffectAnimationProps> = ({ coo
         outline: 'none',
         background: 'transparent',
         mixBlendMode: 'screen',
+        overflow: 'hidden'
       });
 
       document.body.appendChild(img);

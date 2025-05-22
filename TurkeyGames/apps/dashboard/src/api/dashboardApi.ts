@@ -145,7 +145,7 @@ export const deleteYachtGame = async (gameId: string): Promise<{success: boolean
     
     console.log(`[deleteYachtGame] 게임 삭제 API 응답:`, response.data);
     return response.data;
-  } catch (error) {
+  } catch (error) { 
     console.error('[deleteYachtGame] 게임 삭제 API 호출 오류:', error);
     if (axios.isAxiosError(error)) {
       console.error('- 상태 코드:', error.response?.status);
@@ -158,11 +158,15 @@ export const deleteYachtGame = async (gameId: string): Promise<{success: boolean
 
 // 하이라이트 데이터 조회 API
 export const getHighlightData = async (gameId: string, playerId: string): Promise<ApiResponse<HighlightData>> => {
-  console.log(`[API 호출] 하이라이트 데이터 요청 - gameId: ${gameId}, playerId: ${playerId}`);
-  console.log(`[API URL] ${axiosInstance.defaults.baseURL}/highlight/${gameId}/${playerId}`);
-  
   try {
-    const response = await axiosInstance.get<ApiResponse<HighlightData>>(`/highlight/${gameId}/${playerId}`);
+    console.log(`[API 호출] 하이라이트 데이터 요청 - gameId: ${gameId}, playerId: ${playerId}`);
+    
+    // SOCKET_SERVER_URL 사용하여 API 호출
+    const url = `${SOCKET_SERVER_URL}/highlight/${gameId}/${playerId}`;
+    console.log(`[API URL] 하이라이트 데이터 요청 URL: ${url}`);
+    
+    const response = await axios.get<ApiResponse<HighlightData>>(url);
+    
     console.log('[API 응답] 하이라이트 데이터:', response.data);
     return response.data;
   } catch (error) {

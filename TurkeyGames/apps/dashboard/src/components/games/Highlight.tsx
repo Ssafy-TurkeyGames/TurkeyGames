@@ -14,7 +14,7 @@ interface HighlightProps {
   localPath?: string;
   minioPath?: string;
   localQrPath?: string;
-  minioQrPath?: string; // 추가: 명세서에 있는 minio_qr_path 필드
+  minioQrPath?: string;
 }
 
 const Highlight: React.FC<HighlightProps> = ({ 
@@ -62,12 +62,8 @@ const Highlight: React.FC<HighlightProps> = ({
     }
   }, [onClose]);
 
-  // QR 코드 이미지 URL 생성 - minioQrPath를 우선 사용하고, 그 다음 qrValue로 생성
-  const qrImageUrl = minioQrPath 
-    ? minioQrPath 
-    : qrValue 
-      ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(qrValue)}` 
-      : '';
+  // QR 코드 이미지 URL - 오직 minioQrPath만 사용
+  const qrImageUrl = minioQrPath || null;
   
   console.log('[Highlight] QR 이미지 URL:', qrImageUrl);
 
@@ -101,6 +97,7 @@ const Highlight: React.FC<HighlightProps> = ({
                     alt="QR 코드" 
                     onError={(e) => {
                       console.error('[Highlight] QR 코드 이미지 로드 실패:', e);
+                      console.error('[Highlight] 실패한 QR 이미지 URL:', qrImageUrl);
                       e.currentTarget.style.display = 'none';
                       const parent = e.currentTarget.parentElement;
                       if (parent) {
@@ -128,7 +125,7 @@ const Highlight: React.FC<HighlightProps> = ({
                 </button>
               )}
               
-              {(localPath || minioPath || formattedQrPath || minioQrPath) && (
+              {/* {(localPath || minioPath || formattedQrPath || minioQrPath) && (
                 <div className={styles.pathInfo}>
                   {localPath && (
                     <div className={styles.pathItem}>
@@ -155,7 +152,7 @@ const Highlight: React.FC<HighlightProps> = ({
                     </div>
                   )}
                 </div>
-              )}
+              )} */}
             </div>
           </>
         )}

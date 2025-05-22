@@ -95,7 +95,7 @@ export default function TurkeyDiceOptions() {
       navigate(`/games/TurkeyDice/score?gameId=${newGameId}`);
     } catch (error) {
       console.error('게임 생성 오류:', error);
-      alert('게임 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
+      // alert('게임 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setIsCreatingGame(false);
     }
