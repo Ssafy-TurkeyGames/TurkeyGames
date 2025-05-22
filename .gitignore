@@ -94,8 +94,8 @@ fabric.properties
 # clips 영상
 *.mp4
 
-# 캡처 이미지
-*.png
+# # 캡처 이미지
+# *.png
 
 # 가상환경
 venv/
