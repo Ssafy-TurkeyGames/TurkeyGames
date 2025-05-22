@@ -1,0 +1,8 @@
+# MinIO 서버 설정 (비민감 정보)
+endpoint: "k12e101.p.ssafy.io:9000"
+bucket_name: "video"
+bucket_name_for_qr: "qrcode"
+secure: false # MinIO 서버가 HTTPS를 사용하면 true로 설정
+qr_code_base_url: "http://localhost:8000/download/video/" # QR 코드 링크의 기본 URL (실제 앱 URL로 업데이트 필요)
+qr_output_dir: "/qr_codes" # 생성된 QR 코드를 저장할 디렉토리
+

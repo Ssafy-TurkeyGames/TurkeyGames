@@ -1,0 +1,34 @@
+camera:
+  index: 0 # 노트북 카메라 장치 번호
+  width: 1280 # 해상도 설정
+  height: 720
+
+buffer:
+  pre_seconds: 13 # 트리거 전 저장 시간
+  post_seconds: 2 # 트리거 후 저장 시간
+  max_frames: 900 # 30fps × 30초
+
+output:
+  dir: "/video_clips" # 저장 폴더 이름
+
+video:
+  codec: "mp4v" # H264 대신 mp4v 시도 (XVID, MJPG 등도 가능)
+  fps: 30.0 # 실제 카메라 FPS와 일치 필요
+
+audio:
+  sample_rate: 44100      # 샘플링 레이트
+  channels: 1             # 오디오 채널 수
+  frames_per_buffer: 1024 # 버퍼 크기
+  wav_dir: "/audio_clips"  # WAV 파일 저장 디렉토리
+
+# server:
+#   host: 0.0.0.0
+#   port: 8000
+
+# triggers:
+#   api:
+#     enabled: true
+#     endpoint: "/video/trigger"
+#   keyboard:
+#     enabled: true
+#     key: "space"

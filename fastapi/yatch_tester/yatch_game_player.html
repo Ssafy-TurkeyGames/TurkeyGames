@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>야추 게임 테스트</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .section {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        margin-top: 0;
+        color: #2c3e50;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+      button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px 0;
+        transition: background-color 0.3s;
+      }
+      button:hover {
+        background-color: #2980b9;
+      }
+      input,
+      select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin: 5px 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      .dice-container {
+        display: flex;
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .dice {
+        width: 50px;
+        height: 50px;
+        background-color: white;
+        border: 2px solid #3498db;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .dice.selected {
+        background-color: #e0f7fa;
+        border-color: #00acc1;
+      }
+      .dice-controls {
+        margin-top: 10px;
+      }
+      #log {
+        height: 200px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        padding: 10px;
+        font-family: monospace;
+        font-size: 12px;
+        margin-top: 10px;
+      }
+      .score-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      .score-table th,
+      .score-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+      }
+      .score-table th {
+        background-color: #f2f2f2;
+      }
+      .status {
+        background-color: #e8f4fd;
+        padding: 10px;
+        border-radius: 4px;
+        margin-top: 10px;
+      }
+      .connection-status {
+        text-align: center;
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+      }
+      .connected {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .disconnected {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>야추 게임 테스트</h1>
+
+    <div id="connection-status" class="connection-status disconnected">
+      서버에 연결되어 있지 않습니다.
+    </div>
+
+    <div class="container">
+      <div class="section">
+        <h2>게임 관리</h2>
+        <div class="form-group">
+          <label for="game-settings-people">플레이어 수:</label>
+          <select id="game-settings-people">
+            <option value="1">1명</option>
+            <option value="2" selected>2명</option>
+            <option value="3">3명</option>
+            <option value="4">4명</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="game-settings-map">맵 설정:</label>
+          <select id="game-settings-map">
+            <option value="0">기본</option>
+            <option value="1">맵 1</option>
+            <option value="2">맵 2</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="game-settings-voice">음성 사용:</label>
+          <select id="game-settings-voice">
+            <option value="0">사용 안함</option>
+            <option value="1">사용</option>
+          </select>
+        </div>
+
+        <button id="start-game-btn">새 게임 시작</button>
+        <button id="get-status-btn" disabled>게임 상태 조회</button>
+        <button id="end-game-btn" disabled>게임 종료</button>
+
+        <div class="form-group" style="margin-top: 20px">
+          <label for="current-game-id">현재 게임 ID:</label>
+          <input type="text" id="current-game-id" readonly />
+        </div>
+
+        <div class="status" id="game-status">게임이 시작되지 않았습니다.</div>
+      </div>
+
+      <div class="section">
+        <h2>플레이어 액션</h2>
+        <div class="form-group">
+          <label for="player-select">플레이어 선택:</label>
+          <select id="player-select" disabled>
+            <option value="0">플레이어 1</option>
+            <option value="1">플레이어 2</option>
+            <option value="2">플레이어 3</option>
+            <option value="3">플레이어 4</option>
+          </select>
+        </div>
+
+        <div class="dice-container" id="dice-container">
+          <div class="dice" data-index="0">0</div>
+          <div class="dice" data-index="1">0</div>
+          <div class="dice" data-index="2">0</div>
+          <div class="dice" data-index="3">0</div>
+          <div class="dice" data-index="4">0</div>
+        </div>
+
+        <div class="dice-controls">
+          <button id="roll-btn" disabled>주사위 굴리기</button>
+          <span id="rolls-left">남은 굴림: 3</span>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px">
+          <label for="score-category">점수 카테고리 선택:</label>
+          <select id="score-category" disabled>
+            <option value="ace">에이스 (1)</option>
+            <option value="dual">듀얼 (2)</option>
+            <option value="triple">트리플 (3)</option>
+            <option value="quad">쿼드 (4)</option>
+            <option value="penta">펜타 (5)</option>
+            <option value="hexa">헥사 (6)</option>
+            <option value="chance">찬스</option>
+            <option value="poker">포커</option>
+            <option value="full_house">풀하우스</option>
+            <option value="small_straight">스몰 스트레이트</option>
+            <option value="large_straight">라지 스트레이트</option>
+            <option value="turkey">터키</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="score-value">점수:</label>
+          <input type="number" id="score-value" value="0" min="0" disabled />
+        </div>
+
+        <button id="select-score-btn" disabled>점수 선택</button>
+        <button id="get-scores-btn" disabled>점수표 조회</button>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top: 20px">
+      <h2>실시간 점수표</h2>
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th>카테고리</th>
+            <!-- 동적으로 플레이어 헤더가 추가됩니다 -->
+          </tr>
+        </thead>
+        <tbody id="score-tbody">
+          <!-- 동적으로 점수 데이터가 추가됩니다 -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section" style="margin-top: 20px">
+      <h2>로그</h2>
+      <div id="log"></div>
+    </div>
+
+    <script>
+      // 기본 설정
+      const API_URL = "http://localhost:8000";
+      let currentGameId = null;
+      let selectedDice = [];
+      let players = [];
+      let currentPlayerIdx = 0;
+      let rollsLeft = 3;
+
+      // DOM 요소
+      const connectionStatus = document.getElementById("connection-status");
+      const currentGameIdInput = document.getElementById("current-game-id");
+      const gameStatus = document.getElementById("game-status");
+      const diceContainer = document.getElementById("dice-container");
+      const diceElements = document.querySelectorAll(".dice");
+      const rollsLeftSpan = document.getElementById("rolls-left");
+      const playerSelect = document.getElementById("player-select");
+      const scoreCategory = document.getElementById("score-category");
+      const scoreValue = document.getElementById("score-value");
+      const scoreTbody = document.getElementById("score-tbody");
+      const logElement = document.getElementById("log");
+
+      // 버튼 요소
+      const startGameBtn = document.getElementById("start-game-btn");
+      const getStatusBtn = document.getElementById("get-status-btn");
+      const endGameBtn = document.getElementById("end-game-btn");
+      const rollBtn = document.getElementById("roll-btn");
+      const selectScoreBtn = document.getElementById("select-score-btn");
+      const getScoresBtn = document.getElementById("get-scores-btn");
+
+      // 설정 요소
+      const gameSettingsPeople = document.getElementById(
+        "game-settings-people"
+      );
+      const gameSettingsMap = document.getElementById("game-settings-map");
+      const gameSettingsVoice = document.getElementById("game-settings-voice");
+
+      // 점수 카테고리 정보
+      const categories = {
+        ace: "에이스 (1)",
+        dual: "듀얼 (2)",
+        triple: "트리플 (3)",
+        quad: "쿼드 (4)",
+        penta: "펜타 (5)",
+        hexa: "헥사 (6)",
+        bonus_available: "보너스",
+        chance: "찬스",
+        poker: "포커",
+        full_house: "풀하우스",
+        small_straight: "스몰 스트레이트",
+        large_straight: "라지 스트레이트",
+        turkey: "터키",
+        total_score: "총점",
+      };
+
+      // 로그 함수
+      function log(message) {
+        const now = new Date();
+        const timestamp = `${now.getHours().toString().padStart(2, "0")}:${now
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+        logElement.innerHTML += `[${timestamp}] ${message}<br>`;
+        logElement.scrollTop = logElement.scrollHeight;
+      }
+
+      // API 요청 함수
+      async function apiRequest(method, endpoint, data = null) {
+        try {
+          const options = {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          };
+
+          if (data && (method === "POST" || method === "PUT")) {
+            options.body = JSON.stringify(data);
+          }
+
+          const response = await fetch(`${API_URL}${endpoint}`, options);
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API 오류 (${response.status}): ${errorText}`);
+          }
+
+          return await response.json();
+        } catch (error) {
+          log(`오류: ${error.message}`);
+          throw error;
+        }
+      }
+
+      // Socket.IO 연결
+      const socket = io(API_URL, {
+        autoConnect: true,
+        reconnection: true,
+        transports: ["websocket", "polling"],
+      });
+
+      // Socket.IO 이벤트 핸들러
+      socket.on("connect", () => {
+        connectionStatus.textContent = "서버에 연결되었습니다.";
+        connectionStatus.className = "connection-status connected";
+        log("Socket.IO 서버에 연결되었습니다.");
+      });
+
+      socket.on("disconnect", () => {
+        connectionStatus.textContent = "서버 연결이 끊어졌습니다.";
+        connectionStatus.className = "connection-status disconnected";
+        log("Socket.IO 서버 연결이 끊어졌습니다.");
+      });
+
+      socket.on("connection_success", (data) => {
+        log(`서버 메시지: ${data.message}`);
+      });
+
+      socket.on("score_update", (data) => {
+        log(`점수 업데이트 수신: ${JSON.stringify(data)}`);
+
+        if (data.is_finished) {
+          gameStatus.textContent = "게임이 종료되었습니다!";
+          disableGameControls();
+          return;
+        }
+
+        if (data.current_player_idx !== undefined) {
+          currentPlayerIdx = data.current_player_idx;
+          gameStatus.textContent = `현재 플레이어: ${
+            currentPlayerIdx + 1
+          }번 플레이어 차례`;
+          playerSelect.value = currentPlayerIdx;
+        }
+
+        if (data.scores) {
+          updateScoreTable(data.scores);
+        }
+      });
+
+      // 주사위 클릭 이벤트
+      diceElements.forEach((dice) => {
+        dice.addEventListener("click", () => {
+          if (rollsLeft < 3 && rollsLeft > 0) {
+            // 첫 굴림 이후, 마지막 굴림 전에만 선택 가능
+            const index = parseInt(dice.dataset.index);
+            dice.classList.toggle("selected");
+
+            if (dice.classList.contains("selected")) {
+              if (!selectedDice.includes(index)) {
+                selectedDice.push(index);
+              }
+            } else {
+              selectedDice = selectedDice.filter((i) => i !== index);
+            }
+
+            log(`선택된 주사위: ${selectedDice.join(", ")}`);
+          }
+        });
+      });
+
+      // 새 게임 시작 버튼
+      startGameBtn.addEventListener("click", async () => {
+        try {
+          const settings = {
+            people: parseInt(gameSettingsPeople.value),
+            map: parseInt(gameSettingsMap.value),
+            voice: parseInt(gameSettingsVoice.value),
+          };
+
+          log(`게임 시작 요청: ${JSON.stringify(settings)}`);
+
+          const response = await apiRequest("POST", "/yacht/start", settings);
+          log(`게임 시작 성공: ${JSON.stringify(response)}`);
+
+          currentGameId = response.id;
+          currentGameIdInput.value = currentGameId;
+          players = response.players;
+          currentPlayerIdx = response.current_player_idx;
+          updateDiceDisplay(response.dice_values);
+          rollsLeft = response.rolls_left;
+          rollsLeftSpan.textContent = `남은 굴림: ${rollsLeft}`;
+
+          // 소켓 연결 및 게임 참여
+          socket.emit("join_game", { game_id: currentGameId }, (result) => {
+            log(`게임 참여 결과: ${JSON.stringify(result)}`);
+          });
+
+          // 플레이어 선택 업데이트
+          playerSelect.innerHTML = "";
+          for (let i = 0; i < settings.people; i++) {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = `플레이어 ${i + 1}`;
+            playerSelect.appendChild(option);
+          }
+          playerSelect.value = currentPlayerIdx;
+
+          // 게임 상태 업데이트
+          gameStatus.textContent = `현재 플레이어: ${
+            currentPlayerIdx + 1
+          }번 플레이어 차례`;
+
+          // 버튼 활성화
+          enableGameControls();
+
+          // 점수표 초기화 및 헤더 생성
+          initScoreTable(settings.people);
+
+          // 점수 조회
+          getScoresBtn.click();
+        } catch (error) {
+          log(`게임 시작 오류: ${error.message}`);
+        }
+      });
+
+      // 게임 상태 조회 버튼
+      getStatusBtn.addEventListener("click", async () => {
+        if (!currentGameId) return;
+
+        try {
+          log(`게임 상태 조회 요청: ${currentGameId}`);
+          const response = await apiRequest(
+            "GET",
+            `/yacht/${currentGameId}/status`
+          );
+          log(`게임 상태: ${JSON.stringify(response)}`);
+
+          currentPlayerIdx = response.current_player_idx;
+          playerSelect.value = currentPlayerIdx;
+          updateDiceDisplay(response.dice_values);
+          rollsLeft = response.rolls_left;
+          rollsLeftSpan.textContent = `남은 굴림: ${rollsLeft}`;
+
+          gameStatus.textContent = `현재 플레이어: ${
+            currentPlayerIdx + 1
+          }번 플레이어 차례`;
+        } catch (error) {
+          log(`게임 상태 조회 오류: ${error.message}`);
+        }
+      });
+
+      // 게임 종료 버튼
+      endGameBtn.addEventListener("click", async () => {
+        if (!currentGameId) return;
+
+        try {
+          log(`게임 종료 요청: ${currentGameId}`);
+          const response = await apiRequest(
+            "DELETE",
+            `/yacht/${currentGameId}`
+          );
+          log(`게임 종료 결과: ${JSON.stringify(response)}`);
+
+          // 소켓 연결 해제
+          socket.emit("leave_game", { game_id: currentGameId }, (result) => {
+            log(`게임 나가기 결과: ${JSON.stringify(result)}`);
+          });
+
+          resetGame();
+        } catch (error) {
+          log(`게임 종료 오류: ${error.message}`);
+        }
+      });
+
+      // 주사위 굴리기 버튼
+      rollBtn.addEventListener("click", async () => {
+        if (!currentGameId || rollsLeft <= 0) return;
+
+        try {
+          log(
+            `주사위 굴리기 요청: 유지할 주사위 ${JSON.stringify(selectedDice)}`
+          );
+          const response = await apiRequest(
+            "POST",
+            `/yacht/${currentGameId}/roll`,
+            {
+              keep_indices: selectedDice,
+            }
+          );
+          log(`주사위 굴림 결과: ${JSON.stringify(response)}`);
+
+          updateDiceDisplay(response.dice_values);
+          rollsLeft = response.rolls_left;
+          rollsLeftSpan.textContent = `남은 굴림: ${rollsLeft}`;
+
+          // 첫 굴림 후에는 모든 주사위 선택 초기화
+          selectedDice = [];
+          diceElements.forEach((dice) => {
+            dice.classList.remove("selected");
+          });
+
+          // 마지막 굴림 후 점수 선택 활성화
+          if (rollsLeft === 0) {
+            scoreCategory.disabled = false;
+            scoreValue.disabled = false;
+            selectScoreBtn.disabled = false;
+
+            // 주사위 값에 따른 예상 점수 계산
+            calculatePossibleScores(response.dice_values);
+          }
+        } catch (error) {
+          log(`주사위 굴리기 오류: ${error.message}`);
+        }
+      });
+
+      // 점수 선택 버튼
+      selectScoreBtn.addEventListener("click", async () => {
+        if (!currentGameId || rollsLeft !== 0) return;
+
+        try {
+          const playerIdx = parseInt(playerSelect.value);
+          const playerId = players[playerIdx];
+          const category = scoreCategory.value;
+          const value = parseInt(scoreValue.value);
+
+          log(
+            `점수 선택 요청: 플레이어=${playerId}, 카테고리=${category}, 점수=${value}`
+          );
+
+          const response = await apiRequest(
+            "POST",
+            `/yacht/${currentGameId}/select`,
+            {
+              player_id: playerId,
+              category: category,
+              value: value,
+            }
+          );
+          log(`점수 선택 결과: ${JSON.stringify(response)}`);
+
+          // 다음 플레이어로 턴 변경
+          currentPlayerIdx = response.next_player;
+          playerSelect.value = currentPlayerIdx;
+          gameStatus.textContent = `현재 플레이어: ${
+            currentPlayerIdx + 1
+          }번 플레이어 차례`;
+
+          // 주사위 및 굴림 초기화
+          updateDiceDisplay([0, 0, 0, 0, 0]);
+          rollsLeft = 3;
+          rollsLeftSpan.textContent = `남은 굴림: ${rollsLeft}`;
+          selectedDice = [];
+
+          // 점수 선택 비활성화
+          scoreCategory.disabled = true;
+          scoreValue.disabled = true;
+          selectScoreBtn.disabled = true;
+
+          // 점수 업데이트
+          getScoresBtn.click();
+        } catch (error) {
+          log(`점수 선택 오류: ${error.message}`);
+        }
+      });
+
+      // 점수표 조회 버튼
+      getScoresBtn.addEventListener("click", async () => {
+        if (!currentGameId) return;
+
+        try {
+          log(`점수표 조회 요청: ${currentGameId}`);
+          const response = await apiRequest(
+            "GET",
+            `/yacht/${currentGameId}/scores`
+          );
+          log(`점수표: ${JSON.stringify(response)}`);
+
+          updateScoreTable(response.scores);
+        } catch (error) {
+          log(`점수표 조회 오류: ${error.message}`);
+        }
+      });
+
+      // 주사위 화면 업데이트
+      function updateDiceDisplay(values) {
+        diceElements.forEach((dice, index) => {
+          dice.textContent = values[index];
+          // 첫 굴림 후에만 주사위 선택 가능하도록 설정
+          dice.classList.remove("selected");
+        });
+      }
+
+      // 점수표 초기화
+      function initScoreTable(playerCount) {
+        // 헤더 초기화
+        const headerRow = document.querySelector(".score-table thead tr");
+        headerRow.innerHTML = "<th>카테고리</th>";
+
+        // 플레이어 헤더 추가
+        for (let i = 0; i < playerCount; i++) {
+          const th = document.createElement("th");
+          th.textContent = `플레이어 ${i + 1}`;
+          headerRow.appendChild(th);
+        }
+
+        // 테이블 본문 초기화
+        scoreTbody.innerHTML = "";
+
+        // 카테고리별로 행 추가
+        for (const [key, label] of Object.entries(categories)) {
+          const tr = document.createElement("tr");
+
+          // 카테고리 열
+          const tdCategory = document.createElement("td");
+          tdCategory.textContent = label;
+          tr.appendChild(tdCategory);
+
+          // 각 플레이어의 점수 열
+          for (let i = 0; i < playerCount; i++) {
+            const td = document.createElement("td");
+            td.textContent = "-";
+            tr.appendChild(td);
+          }
+
+          scoreTbody.appendChild(tr);
+        }
+      }
+
+      // 점수표 업데이트
+      function updateScoreTable(scores) {
+        if (!scores || scores.length === 0) return;
+
+        // 카테고리별로 점수 업데이트
+        for (const [rowIndex, [key, label]] of Object.entries(
+          categories
+        ).entries()) {
+          const row = scoreTbody.rows[rowIndex];
+
+          // 각 플레이어의 점수 업데이트
+          scores.forEach((player, playerIndex) => {
+            const cell = row.cells[playerIndex + 1]; // +1은 카테고리 열 때문
+
+            if (key === "total_score") {
+              cell.textContent = player.total_score || "0";
+            } else {
+              cell.textContent =
+                key === "bonus_available"
+                  ? player.scorecard[key] || "0"
+                  : player.scorecard[key] !== null &&
+                    player.scorecard[key] !== undefined
+                  ? player.scorecard[key]
+                  : "-";
+            }
+          });
+        }
+      }
+
+      // 가능한 점수 계산
+      function calculatePossibleScores(diceValues) {
+        if (diceValues.length !== 5) return;
+
+        // 주사위 카운트
+        const counts = {};
+        diceValues.forEach((value) => {
+          counts[value] = (counts[value] || 0) + 1;
+        });
+
+        // 단일 숫자 점수 (에이스~헥사)
+        const category = scoreCategory.value;
+        let score = 0;
+
+        if (category === "ace") score = calculateSumOfDice(diceValues, 1);
+        else if (category === "dual") score = calculateSumOfDice(diceValues, 2);
+        else if (category === "triple")
+          score = calculateSumOfDice(diceValues, 3);
+        else if (category === "quad") score = calculateSumOfDice(diceValues, 4);
+        else if (category === "penta")
+          score = calculateSumOfDice(diceValues, 5);
+        else if (category === "hexa") score = calculateSumOfDice(diceValues, 6);
+        // 특수 조합 점수
+        else if (category === "chance")
+          score = diceValues.reduce((sum, value) => sum + value, 0);
+        else if (category === "poker")
+          score = checkPoker(counts, diceValues) ? 40 : 0;
+        else if (category === "full_house")
+          score = checkFullHouse(counts, diceValues) ? 30 : 0;
+        else if (category === "small_straight")
+          score = checkSmallStraight(diceValues) ? 15 : 0;
+        else if (category === "large_straight")
+          score = checkLargeStraight(diceValues) ? 30 : 0;
+        else if (category === "turkey")
+          score = checkTurkey(counts, diceValues) ? 50 : 0;
+
+        // 점수 업데이트
+        scoreValue.value = score;
+      }
+
+      // 특정 숫자의 합 계산
+      function calculateSumOfDice(diceValues, targetNumber) {
+        return diceValues
+          .filter((value) => value === targetNumber)
+          .reduce((sum, value) => sum + value, 0);
+      }
+
+      // 포커 확인 (4개 같은 숫자)
+      function checkPoker(counts, diceValues) {
+        return Object.values(counts).some((count) => count >= 4);
+      }
+
+      // 풀하우스 확인 (3개 같은 숫자 + 2개 같은 숫자)
+      function checkFullHouse(counts, diceValues) {
+        const values = Object.values(counts);
+        return values.includes(3) && values.includes(2);
+      }
+
+      // 스몰 스트레이트 확인 (4개 연속 숫자)
+      function checkSmallStraight(diceValues) {
+        const uniqueSorted = [...new Set(diceValues)].sort((a, b) => a - b);
+        if (uniqueSorted.length < 4) return false;
+
+        // 1,2,3,4 또는 2,3,4,5 또는 3,4,5,6 확인
+        for (let i = 0; i < uniqueSorted.length - 3; i++) {
+          if (uniqueSorted[i + 3] - uniqueSorted[i] === 3) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      // 라지 스트레이트 확인 (5개 연속 숫자)
+      function checkLargeStraight(diceValues) {
+        const uniqueSorted = [...new Set(diceValues)].sort((a, b) => a - b);
+        return (
+          uniqueSorted.length === 5 &&
+          uniqueSorted[4] - uniqueSorted[0] === 5 - 1
+        );
+      }
+
+      // 터키 확인 (5개 모두 같은 숫자)
+      function checkTurkey(counts, diceValues) {
+        return Object.values(counts).some((count) => count === 5);
+      }
+
+      // 게임 컨트롤 활성화
+      function enableGameControls() {
+        getStatusBtn.disabled = false;
+        endGameBtn.disabled = false;
+        playerSelect.disabled = false;
+        rollBtn.disabled = false;
+        getScoresBtn.disabled = false;
+      }
+
+      // 게임 컨트롤 비활성화
+      function disableGameControls() {
+        getStatusBtn.disabled = true;
+        endGameBtn.disabled = true;
+        playerSelect.disabled = true;
+        rollBtn.disabled = true;
+        scoreCategory.disabled = true;
+        scoreValue.disabled = true;
+        selectScoreBtn.disabled = true;
+        getScoresBtn.disabled = true;
+      }
+
+      // 게임 리셋
+      function resetGame() {
+        currentGameId = null;
+        currentGameIdInput.value = "";
+        players = [];
+        currentPlayerIdx = 0;
+        rollsLeft = 3;
+        rollsLeftSpan.textContent = `남은 굴림: ${rollsLeft}`;
+        selectedDice = [];
+        updateDiceDisplay([0, 0, 0, 0, 0]);
+        gameStatus.textContent = "게임이 종료되었습니다.";
+        disableGameControls();
+
+        // 테이블 초기화
+        const headerRow = document.querySelector(".score-table thead tr");
+        headerRow.innerHTML = "<th>카테고리</th>";
+        scoreTbody.innerHTML = "";
+      }
+
+      // 페이지 로드 시 초기화
+      log("페이지가 로드되었습니다. 게임을 시작해주세요.");
+    </script>
+  </body>
+</html>
