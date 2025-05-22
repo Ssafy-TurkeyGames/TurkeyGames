@@ -1,5 +1,3 @@
-# readme
-
 # 🍁 Turkey Games!
 
 ---
