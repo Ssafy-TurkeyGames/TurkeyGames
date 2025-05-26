@@ -36,7 +36,13 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
   
   // 컴포넌트 마운트 시 gameId 확인 (디버깅용)
   useEffect(() => {
-    console.log('[GameResult] 컴포넌트 마운트, gameId:', gameId);
+    // 게임 결과 화면 진입 시 스크롤 막기
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      // 화면 벗어날 때 원래대로 복구
+      document.body.style.overflow = originalOverflow;
+    };
   }, [gameId]);
 
   // 방어 코드 추가
@@ -187,9 +193,9 @@ const GameResult: React.FC<GameResultProps> = ({ players, gameId }) => {
       </div>
       
       {/* 게임 ID 표시 (디버깅용, 필요시 주석 처리) */}
-      <div className={styles.gameIdDisplay}>
+      {/* <div className={styles.gameIdDisplay}>
         게임 ID: {gameId || '없음'}
-      </div>
+      </div> */}
       
       <div className={styles.buttonContainer}>
         <button 
