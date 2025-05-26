@@ -48,7 +48,7 @@
   background-color: #3a1f21;
   padding: 15px;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -65,7 +65,7 @@
 
 .playerHeader {
   justify-content: flex-start;
-  padding-left: 110px;
+  padding-left: 140px;
 }
 
 .scoreHeader {

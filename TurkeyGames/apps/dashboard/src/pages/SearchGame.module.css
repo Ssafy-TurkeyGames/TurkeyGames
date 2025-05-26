@@ -1,10 +1,14 @@
 /* apps/dashboard/src/pages/SearchGame.module.css */
+
 .container {
   width: 100%;
   min-height: 100vh;
   padding: 0;
   margin-top: 0;
   position: relative;
+  overflow: auto;         /* 스크롤 동작은 유지 */
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
 }
 
 .container::before {
@@ -359,4 +363,16 @@
 
 .errorContainer {
   color: #f44336;
+}
+
+/* Webkit (Chrome, Safari, Edge) */
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Firefox */
+body, html {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
