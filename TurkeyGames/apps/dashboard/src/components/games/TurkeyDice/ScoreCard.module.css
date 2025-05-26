@@ -42,7 +42,7 @@
 }
 
 .scoreValue {
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: bold;
   color: #f4a261;
   margin-bottom: 10px;
@@ -71,7 +71,7 @@
 
 .scoreTable td {
   padding: 9px 20px;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: #333;
 }
 
@@ -83,6 +83,7 @@
 .itemScore {
   text-align: right;
   font-weight: bold;
+  font-size: 1.2rem;
 }
 
 .completed td {
