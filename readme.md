@@ -10,7 +10,7 @@
 
 ## 프로젝트 기획회의 및 규칙 정리 노션
 
-[노션]([https://www.notion.so/1a46bc9b9c5580b59c19f875fd960071?pvs=21](https://yummy-cheese-e90.notion.site/1d5cf1cfbc0f807c8411ff01ea4b47f1?pvs=4))
+[노션](https://yummy-cheese-e90.notion.site/1d5cf1cfbc0f807c8411ff01ea4b47f1?pvs=4)
 
 ---
 
